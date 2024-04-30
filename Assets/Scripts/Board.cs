@@ -1,5 +1,8 @@
 using Cysharp.Threading.Tasks;
 using ExitGames.Client.Photon.StructWrapping;
+using Photon.Pun;
+using Scripts.Multiplayer;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +41,7 @@ public class Board : MonoBehaviour
 
     private List<Vector2Int> availableMoves = new List<Vector2Int>();
 
-    private bool isWhiteTurn;
+    public bool isWhiteTurn;
     private int itemChances = 5;
     private bool manaTurn = false;
 
@@ -68,7 +71,7 @@ public class Board : MonoBehaviour
     public MonsPiece selectedPiece;
 
 
-
+    bool startGame = false;
     private void Awake()
     {
         instance = this;
@@ -77,15 +80,29 @@ public class Board : MonoBehaviour
     void Start()
     {
         isWhiteTurn = true;
+        //CreateMonsBoard();
         CreateMonsBoard();
-        SpawnAllPiece();
-        PositionAllPiece();
-        CenterBoard();
+        GameplayManager.onJoinedRoom -= OnJoinedRoom;
+        GameplayManager.onJoinedRoom += OnJoinedRoom;
+        //SpawnAllPiece();
+        // PositionAllPiece();
+        //CenterBoard();
     }
-
+    private void OnJoinedRoom()
+    {
+        if (PhotonNetwork.IsConnectedAndReady)
+        {
+            
+            SpawnAllPiece();
+            PositionAllPiece();
+            CenterBoard();
+            startGame = true;
+        }
+     
+    }
     void Update()
     {
-        if(!isGameEnd)
+        if(!isGameEnd && startGame)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit2D info = Physics2D.Raycast(ray.origin, ray.direction, 100, LayerMask.GetMask("Tile", "Hover"));
@@ -266,18 +283,23 @@ public class Board : MonoBehaviour
         monsPiece = new MonsPiece[11,11];
 
         monsPiece[3, 0] = SpawnWhitePiece(MonsPieceType.demon, 0);
+        if (monsPiece[3,0] != null)
         monsPiece[3, 0].resetPos = new Vector2(3, 0);
 
         monsPiece[4, 0] = SpawnWhitePiece(MonsPieceType.angel, 0);
-        monsPiece[4, 0].resetPos = new Vector2(4, 0);
+        if (monsPiece[4, 0] != null)
+            monsPiece[4, 0].resetPos = new Vector2(4, 0);
 
         monsPiece[5, 0] = SpawnWhitePiece(MonsPieceType.drainer, 0);
+        if (monsPiece[5, 0] != null)
         monsPiece[5, 0].resetPos = new Vector2(5, 0);
 
         monsPiece[6, 0] = SpawnWhitePiece(MonsPieceType.spirit, 0);
+        if (monsPiece[6, 0] != null)
         monsPiece[6, 0].resetPos = new Vector2(6, 0);
 
         monsPiece[7, 0] = SpawnWhitePiece(MonsPieceType.mystic, 0);
+        if (monsPiece[7, 0] != null)
         monsPiece[7, 0].resetPos = new Vector2(7, 0);
 
         monsPiece[3, 4] = SpawnWhitePiece(MonsPieceType.mana, 0);
@@ -292,19 +314,24 @@ public class Board : MonoBehaviour
         monsPiece[10, 5] = SpawnBlackPiece(MonsPieceType.bombOrPortion, -1);
 
         monsPiece[3, 10] = SpawnBlackPiece(MonsPieceType.demon, 1);
+        if (monsPiece[3,10] !=null)
         monsPiece[3, 10].resetPos = new Vector2(3, 10);
 
         monsPiece[4, 10] = SpawnBlackPiece(MonsPieceType.angel, 1);
-        monsPiece[4, 10].resetPos = new Vector2(4, 10);
+        if (monsPiece[4, 10] != null)
+            monsPiece[4, 10].resetPos = new Vector2(4, 10);
 
         monsPiece[5, 10] = SpawnBlackPiece(MonsPieceType.drainer, 1);
-        monsPiece[5, 10].resetPos = new Vector2(5, 10);
+        if (monsPiece[5, 10] != null)
+            monsPiece[5, 10].resetPos = new Vector2(5, 10);
 
         monsPiece[6, 10] = SpawnBlackPiece(MonsPieceType.spirit, 1);
-        monsPiece[6, 10].resetPos = new Vector2(6, 10);
+        if (monsPiece[6, 10] != null)
+            monsPiece[6, 10].resetPos = new Vector2(6, 10);
 
         monsPiece[7, 10] = SpawnBlackPiece(MonsPieceType.mystic, 1);
-        monsPiece[7, 10].resetPos = new Vector2(7, 10);
+        if (monsPiece[7, 10] != null)
+            monsPiece[7, 10].resetPos = new Vector2(7, 10);
 
         monsPiece[3, 6] = SpawnBlackPiece(MonsPieceType.mana, 1);
         monsPiece[4, 7] = SpawnBlackPiece(MonsPieceType.mana, 1);
@@ -315,10 +342,16 @@ public class Board : MonoBehaviour
 
     private MonsPiece SpawnWhitePiece(MonsPieceType type, int team)
     {
-        MonsPiece mp = Instantiate(Whiteprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
-        mp.team = team;
-        mp.monsPieceType = type;
-
+        MonsPiece mp = null;
+        object pieceType;
+        PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("PieceType", out pieceType);
+        print("PieceType from photon received: " + (string)pieceType);
+        if ((string)pieceType == "White")
+        {
+            mp = PhotonNetwork.Instantiate(Whiteprefabs[(int)type - 1].name, transform.localPosition, Quaternion.identity).GetComponent<MonsPiece>();
+            mp.team = team;
+            mp.monsPieceType = type;
+        }
         // Adjust spawn position for white pieces
         //mp.transform.position = new Vector3(0, 0, 0); // Adjust as per your design
         return mp;
@@ -326,9 +359,17 @@ public class Board : MonoBehaviour
 
     private MonsPiece SpawnBlackPiece(MonsPieceType type, int team)
     {
-        MonsPiece mp = Instantiate(Blackprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
-        mp.team = team;
-        mp.monsPieceType = type;
+        MonsPiece mp = null;
+        object pieceType;
+        PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("PieceType", out pieceType);
+        print("PieceType from photon received: " + (string)pieceType);
+        if ((string)pieceType == "Black")
+        {
+            mp = PhotonNetwork.Instantiate(Blackprefabs[(int)type - 1].name, transform.localPosition, Quaternion.identity).GetComponent<MonsPiece>();
+            mp.team = team;
+            mp.monsPieceType = type;
+        }
+
 
         // Adjust spawn position for black pieces
         //mp.transform.position = new Vector3(10, 10, 0); // Adjust as per your design
@@ -352,6 +393,7 @@ public class Board : MonoBehaviour
         monsPiece[x, y].currentX = x;
         monsPiece[x, y].currentY = y;
         monsPiece[x, y].SetPosition(new Vector2(x,y),force);
+        print("MONS PIECE Position: " + monsPiece[x, y].team + ": x: " + x +" y: " + y);
 
     }
 
@@ -559,7 +601,8 @@ public class Board : MonoBehaviour
         if (cp.monsPieceType == MonsPieceType.mana)
         {
             manaTurn = false;
-            isWhiteTurn = !isWhiteTurn;
+            UpdatePlayerTurns(!isWhiteTurn);
+            //isWhiteTurn = !isWhiteTurn;
             foreach (MonsPiece piece in monsPiece)
             {
                 if (piece != null)
@@ -595,9 +638,12 @@ public class Board : MonoBehaviour
 
     }
 
-
-
-
+    public Action<bool> onUpdatePlayerTurn;
+    public void UpdatePlayerTurns(bool swapTurn = false)
+    {
+        isWhiteTurn = swapTurn;
+        onUpdatePlayerTurn?.Invoke(isWhiteTurn);
+    }
 
 
     private bool ContainsValidMoves(ref List<Vector2Int> moves,Vector2 pos)
