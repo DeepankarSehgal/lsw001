@@ -22,7 +22,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3530817243170598717
 RectTransform:
   m_ObjectHideFlags: 0
@@ -173,11 +173,15 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 5e8a028cfd331a244939429819758ebc, type: 3}
   - {fileID: 8300000, guid: e1eb49ff065174c34b146b1cba3d7e78, type: 3}
   - {fileID: 8300000, guid: 725ea3faeac7bd24296e9755d00f745e, type: 3}
-  collisionParticlePrefab1: {fileID: 2590820558344168600, guid: 2cce10e3741bd49fa9b5bb07ee6b59fa, type: 3}
-  collisionParticlePrefab2: {fileID: 2590820558344168600, guid: 2cce10e3741bd49fa9b5bb07ee6b59fa, type: 3}
   canvas: {fileID: 0}
-  CoinPrefab: {fileID: 1439126633554615118, guid: 0fd172bd5da8d4774995d688eea4733d, type: 3}
+  CoinPrefab: {fileID: 1439126633554615118, guid: 0fd172bd5da8d4774995d688eea4733d,
+    type: 3}
   coinCount: 0
+  chatInputField: {fileID: 0}
+  groundDist: 0
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!82 &8867051474599642941
 AudioSource:
   m_ObjectHideFlags: 0

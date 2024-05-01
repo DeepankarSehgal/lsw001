@@ -70,7 +70,7 @@ namespace Scripts.Multiplayer
         }
         private void OnQuickMatchButtonClicked()
         {
-            PhotonNetwork.LoadLevel(1);
+            PhotonNetwork.LoadLevel(3);
         }
         #endregion
 

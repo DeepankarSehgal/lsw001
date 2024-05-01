@@ -8,6 +8,7 @@ using TMPro;
 
 public class PhotonChatManager : MonoBehaviour, IChatClientListener
 {
+    public static PhotonChatManager Instance;
     ChatClient chatClient;
     public string appID;
     public string appVersion;
@@ -134,6 +135,7 @@ public class PhotonChatManager : MonoBehaviour, IChatClientListener
         chatClient = new ChatClient(this);
         string nickname = PlayerPrefs.GetString("Nickname");
         chatClient.Connect(appID, appVersion, new AuthenticationValues(nickname));
+        Instance = this;
     }
 
     void Update()

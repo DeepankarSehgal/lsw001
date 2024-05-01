@@ -23,14 +23,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.AutomaticallySyncScene = true;
         characterIndex = PlayerPrefs.GetInt("characterIndex", 0);
-        if (PhotonNetwork.IsConnected)
-        {
-            PhotonNetwork.JoinRandomRoom();
-        }
-        else
-        {
-            PhotonNetwork.ConnectUsingSettings();
-        }
+        PhotonNetwork.ConnectUsingSettings();
     }
 
     public void Connect()
@@ -42,41 +35,33 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnConnected()
     {
         Debug.Log("Connected to Internet");
+        PhotonNetwork.ConnectUsingSettings();
     }
 
     public override void OnConnectedToMaster()
     {
         Debug.Log(PhotonNetwork.LocalPlayer.NickName + "Connected to Server");
-        PhotonNetwork.JoinLobby();
+        PhotonNetwork.JoinRandomOrCreateRoom();
     }
 
     public override void OnJoinedLobby()
     {
-        Debug.Log(PhotonNetwork.LocalPlayer.NickName + " joined the lobby.");
-        //Debug.Log(PhotonNetwork.LocalPlayer.NickName + ":" + PhotonNetwork.LocalPlayer.ActorNumber + "joined the lobby");
-        float randomPositionX = Random.Range(-8.2f, 8.2f);
-        float randomPositionY = Random.Range(-4f, 4f);
-        int characterIndex = PlayerPrefs.GetInt("characterIndex", 0);
-        PhotonNetwork.Instantiate(PlayerPrefabs[characterIndex].name, new Vector3(randomPositionX, randomPositionY, 0), Quaternion.identity);
-        //Debug.Log(PhotonNetwork.IsMasterClient);
-        RockSpawner.instance.RockSpawnerFunction();
+        base.OnJoinedLobby();
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         Debug.Log("Join Random Room Failed " + message + " creating a new one ");
-        PhotonNetwork.CreateRoom("GlobalRoom");
     }
 
     public override void OnJoinedRoom()
     {
         Debug.Log(PhotonNetwork.LocalPlayer.NickName +  ":" + PhotonNetwork.LocalPlayer.ActorNumber + "joined the room");
-        float randomPositionX = Random.Range(-8.2f, 8.2f);
-        float randomPositionY = Random.Range(-4f, 4f);
+        float randomPositionX = Random.Range(-4.5f, 4.2f);
+        float randomPositionY = Random.Range(21f, 40f);
         int characterIndex = PlayerPrefs.GetInt("characterIndex",0);
-        PhotonNetwork.Instantiate(PlayerPrefabs[characterIndex].name, new Vector3(randomPositionX, randomPositionY, 0), Quaternion.identity);
+        PhotonNetwork.Instantiate(PlayerPrefabs[characterIndex].name, new Vector3(randomPositionX, 1, randomPositionY), Quaternion.identity);
         Debug.Log(PhotonNetwork.IsMasterClient);
-        RockSpawner.instance.RockSpawnerFunction();
     }
 
     private IEnumerator WaitForCharacterSelection(float randomPositionX, float randomPositionY)
@@ -91,9 +76,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         int characterIndex = playFabManager.getCharacterIndex();
         PhotonNetwork.Instantiate(PlayerPrefabs[characterIndex].name, new Vector3(randomPositionX, randomPositionY, 0), Quaternion.identity);
         Debug.Log(PhotonNetwork.IsMasterClient);
-
-        // Spawn rocks
-        RockSpawner.instance.RockSpawnerFunction();
     }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)

@@ -4,15 +4,17 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
 using Photon.Pun;
+using Cinemachine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviourPunCallbacks
 {
     public float speed = 5f;
-    public Rigidbody2D rb;
+    public Rigidbody rb;
     public Animator animator;
     private Vector2 targetPosition;
     private bool isMovingToClick = false;
-    Vector2 movement;
+    Vector3 movement;
     private GameObject currentRock;
     private bool canSwing = false;
     private bool coolDown = false;
@@ -25,20 +27,38 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     private bool inputFieldSelected = false;
     bool movingTowardsrock = false;
     bool closeTorock = false;
-    private PlayFabManager playFabManager;
+    public float groundDist;
+    private PhotonView photonView;
+    public CinemachineVirtualCamera virtualCamera;
+    public GameObject MonsCanvas;
+    private GameObject otherCollided;
+
+    public LayerMask groundLayer;
+    // private PlayFabManager playFabManager;
 
 
 
     private void Start()
     {
+        photonView = GetComponent<PhotonView>();
         canvas = PhotonManager.instance.canvas;
-        playFabManager = FindObjectOfType<PlayFabManager>();
-        playFabManager.RetrieveCoins();
+
+        if (photonView.IsMine)
+        {
+            GetComponent<PlayerMovement>().enabled = true;
+            virtualCamera.enabled = true;
+        }
+        else
+        {
+            GetComponent<PlayerMovement>().enabled = false;
+            virtualCamera.enabled = false;
+        }
+        //playFabManager = FindObjectOfType<PlayFabManager>();
+        //  playFabManager.RetrieveCoins();
     }
     void Update()
     {
-        inputFieldSelected = EventSystem.current.currentSelectedGameObject != null;
-        if (inputFieldSelected || GameManager.instance.chatField.GetComponent<TMP_InputField>().isFocused)
+        if (PhotonChatManager.Instance.chatField.GetComponent<TMP_InputField>().isFocused)
         {
             return;
         }
@@ -47,6 +67,19 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         mousePosition.z = 0;
         RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
 
+        RaycastHit hit2;
+
+        Vector3 castpos = transform.position;
+        castpos.y += 1;
+        if (Physics.Raycast(castpos, -transform.up, out hit2, Mathf.Infinity, groundLayer))
+        {
+            if (hit2.collider != null)
+            {
+                Vector3 movePos = transform.position;
+                movePos.y = hit.point.y + groundDist;
+                transform.position = movePos;
+            }
+        }
         if (Input.GetMouseButtonDown(0))
         {
             if (hit.collider != null && hit.collider.CompareTag("Rock"))
@@ -54,8 +87,8 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
                 movingTowardsrock = true;
                 currentRock = hit.collider.gameObject; // Set currentRock to the clicked rock
                 targetPosition = currentRock.transform.position;
-                
-                if(Vector2.Distance(transform.position, currentRock.transform.position) > 1f)
+
+                if (Vector2.Distance(transform.position, currentRock.transform.position) > 1f)
                 {
                     isMovingToClick = true; // Move towards the clicked rock
                 }
@@ -67,26 +100,20 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
             }
         }
 
-        if(movingTowardsrock)
+        if (movingTowardsrock)
         {
             if (Vector2.Distance(transform.position, currentRock.transform.position) < 1f)
             {
                 closeTorock = true;
             }
 
-            if(closeTorock)
+            if (closeTorock)
             {
-                RockCollision();
+                // RockCollision();
                 movingTowardsrock = false;
                 closeTorock = false;
             }
-                
-                
-                
         }
-
-
-
 
         // Check for keyboard input to override click-to-move
         if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
@@ -101,7 +128,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
             {
                 isMovingToClick = false;
                 movement = Vector2.zero; // Stop movement when the target is reached
-                //if(hit.collider.CompareTag("Rock")) RockCollision();
+                                         //if(hit.collider.CompareTag("Rock")) RockCollision();
             }
         }
         else
@@ -114,15 +141,26 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         animator.SetFloat("Vertical", movement.y);
         animator.SetFloat("Speed", movement.sqrMagnitude);
 
-        if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) && canSwing && !coolDown)
+
+        if (otherCollided != null && otherCollided.transform.GetChild(0).gameObject.activeInHierarchy)
         {
-            RockCollision();
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                MonsCanvas.SetActive(true);
+            }
         }
+        //if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) && canSwing && !coolDown)
+        //{
+        //    RockCollision();
+        //}  
     }
 
     void FixedUpdate()
     {
-        rb.MovePosition(rb.position + movement * speed * Time.fixedDeltaTime);
+        float x = Input.GetAxis("Horizontal");
+        float y = Input.GetAxis("Vertical");
+        Vector3 moveDir = new Vector3(x, 0, y);
+        rb.velocity = moveDir * speed;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -135,15 +173,33 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("Player"))
+        {
+            otherCollided = collision.gameObject;
+            collision.transform.GetChild(0).gameObject.SetActive(true);
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.collider.CompareTag("Player"))
+        {
+            otherCollided = null;
+            collision.transform.GetChild(0).gameObject.SetActive(true);
+        }
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.gameObject.CompareTag("Coin"))
+        if (collision.gameObject.CompareTag("Coin"))
         {
             audioSource.PlayOneShot(audioClips[3]);
             Destroy(collision.gameObject);
-            coinCount = playFabManager.getCoins();
+            //  coinCount = playFabManager.getCoins();
             coinCount++;
-            playFabManager.SaveCoins(coinCount);
+            //  playFabManager.SaveCoins(coinCount);
             Debug.Log(coinCount);
             //PlayerPrefs.SetInt("coins", coinCount);
         }
@@ -151,7 +207,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if(collision.gameObject == currentRock)
+        if (collision.gameObject == currentRock)
         {
             canSwing = false;
         }
@@ -186,7 +242,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         audioSource.PlayOneShot(audioClips[1]);
         int rockViewID = rock.GetComponent<PhotonView>().ViewID;
         int collisionCount = rockComponent.collisionCount;
-        photonView.RPC("PlayCollisionParticleEffect", RpcTarget.All, rockViewID,collisionCount > 0);
+        photonView.RPC("PlayCollisionParticleEffect", RpcTarget.All, rockViewID, collisionCount > 0);
         rockComponent.collisionCount--;
 
         if (rockComponent.collisionCount <= 0)
@@ -255,5 +311,10 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     {
         animator.SetBool("Right Swing", false);
         coolDown = false;
+    }
+
+    public void LoadScene()
+    {
+        SceneManager.LoadScene(2);
     }
 }

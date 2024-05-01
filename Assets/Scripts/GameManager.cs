@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
 
     public void EnterWorld()
     {
+        PlayerPrefs.SetString("Nickname", chatField.text);
         //CheckIfUserUpdatedNickname();
         SceneManager.LoadScene(1);
     }
@@ -29,6 +30,7 @@ public class GameManager : MonoBehaviour
     {
         if (PlayFabManager.instance.nicknameInputField.text != null)
         {
+            
             PlayFabManager.instance.GetNicknameFromUser();
         }
     }

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Avro;
 using TMPro;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class ChatSystem : MonoBehaviour
@@ -15,7 +14,7 @@ public class ChatSystem : MonoBehaviour
 
     public void InstantiateMessage(Message message)
     {
-        var newMessage = Instantiate(chatPrefab, transform.position, quaternion.identity);
+        var newMessage = Instantiate(chatPrefab, transform.position, Quaternion.identity);
         newMessage.transform.SetParent(chatContainer);
         newMessage.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message.sender + ": ";
         newMessage.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = message.text;

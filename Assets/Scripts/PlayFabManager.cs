@@ -7,6 +7,7 @@ using TMPro;
 
 public class PlayFabManager : MonoBehaviour
 {
+
     public static PlayFabManager instance;
     public TMP_InputField nicknameInputField;
     public static string PublicKey;
@@ -15,11 +16,9 @@ public class PlayFabManager : MonoBehaviour
     public int characterIndex;
     public bool characterSelectionDataRetrieved { get; private set; }
 
-    // Start is called before the first frame update
-    void Awake()
+    public void Awake()
     {
         instance = this;
-        DontDestroyOnLoad(gameObject); // Keep the PlayFabManager alive between scenes
     }
 
     void Start()
@@ -98,61 +97,6 @@ public class PlayFabManager : MonoBehaviour
     {
         Debug.Log("PlayFab Error: " + error.GenerateErrorReport());
     }
-
-    public void SaveCoins(int coins)
-    {
-        var request = new UpdateUserDataRequest
-        {
-            Data = new Dictionary<string, string>
-            {
-                {"Coins", coins.ToString()}
-            }
-        };
-
-        PlayFabClientAPI.UpdateUserData(request, OnSaveCoinsSuccess, OnSaveCoinsFailure);
-    }
-
-    public void RetrieveCoins()
-    {
-        PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnRetrieveCoinsSuccess, OnRetrieveCoinsFailure);
-    }
-
-    private void OnSaveCoinsSuccess(UpdateUserDataResult result)
-    {
-        Debug.Log("Coins saved successfully");
-    }
-
-    private void OnSaveCoinsFailure(PlayFabError error)
-    {
-        Debug.LogError("Failed to save coins: " + error.GenerateErrorReport());
-    }
-
-    private void OnRetrieveCoinsSuccess(GetUserDataResult result)
-    {
-        if (result.Data.TryGetValue("Coins", out UserDataRecord coinsData))
-        {
-            string coinsValue = coinsData.Value;
-            coins = int.Parse(coinsValue);
-            Debug.Log("Coins retrieved successfully: " + coins);
-            // Do something with the retrieved coins value
-            getCoins();
-        }
-        else
-        {
-            Debug.Log("Coins not found in user data");
-        }
-    }
-
-    public int getCoins()
-    {
-        return coins;
-    }
-
-    private void OnRetrieveCoinsFailure(PlayFabError error)
-    {
-        Debug.LogError("Failed to retrieve coins: " + error.GenerateErrorReport());
-    }
-
     public void SaveCharacterSelection(int characterIndex)
     {
         var request = new UpdateUserDataRequest
@@ -202,7 +146,7 @@ public class PlayFabManager : MonoBehaviour
         characterSelectionDataRetrieved = true;
     }
 
-    
+
 
     private void OnRetrieveCharacterFailure(PlayFabError error)
     {
@@ -213,6 +157,8 @@ public class PlayFabManager : MonoBehaviour
     {
         return characterIndex;
     }
+
+
 
     public void GetNicknameFromUser()
     {
@@ -225,4 +171,5 @@ public class PlayFabManager : MonoBehaviour
         string last4characters = publicKey.Substring(publicKey.Length - 4);
         return last4characters;
     }
+
 }

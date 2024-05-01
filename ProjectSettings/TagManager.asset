@@ -4,18 +4,16 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Rock
   - Coin
-  - Highlighted
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Tile
   - Water
   - UI
-  - Tile
   - Hover
+  - 
   - 
   - 
   - 
