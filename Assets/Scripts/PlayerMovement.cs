@@ -146,7 +146,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         {
             if (Input.GetKeyDown(KeyCode.E))
             {
-                MonsCanvas.SetActive(true);
+                MonsCanvas.SetActive(photonView.IsMine);
             }
         }
         //if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) && canSwing && !coolDown)
@@ -315,6 +315,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
     public void LoadScene()
     {
-        SceneManager.LoadScene(2);
+        PhotonNetwork.LoadLevel(2);
+
     }
 }

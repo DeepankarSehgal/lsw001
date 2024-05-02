@@ -82,21 +82,28 @@ public class Board : MonoBehaviour
         isWhiteTurn = true;
         //CreateMonsBoard();
         CreateMonsBoard();
-        GameplayManager.onJoinedRoom -= OnJoinedRoom;
-        GameplayManager.onJoinedRoom += OnJoinedRoom;
+       //OnJoinedRoom();
         //SpawnAllPiece();
         // PositionAllPiece();
         //CenterBoard();
     }
+    private void OnEnable()
+    {
+        GameplayManager.onJoinedRoom -= OnJoinedRoom;
+        GameplayManager.onJoinedRoom += OnJoinedRoom;
+    }
     private void OnJoinedRoom()
     {
+      
         if (PhotonNetwork.IsConnectedAndReady)
         {
-            
+            print("On Joined room of board get called!");
             SpawnAllPiece();
+            //Invoke(nameof(PositionAllPiece), 10f);
             PositionAllPiece();
             CenterBoard();
             startGame = true;
+            //GameplayManager.startSynch?.Invoke();
         }
      
     }
@@ -270,7 +277,7 @@ public class Board : MonoBehaviour
         }
     }
 
-    void CenterBoard()
+    public void CenterBoard()
     {
         Vector3 boardOffset = new Vector3(-(boardSize - 1) / 2f, -(boardSize - 1) / 2f, 0);
         //transform.position = new Vector3(-2.76f, -1.7f, 0);
@@ -278,7 +285,7 @@ public class Board : MonoBehaviour
     }
 
 
-    void SpawnAllPiece()
+    public void SpawnAllPiece()
     {
         monsPiece = new MonsPiece[11,11];
 

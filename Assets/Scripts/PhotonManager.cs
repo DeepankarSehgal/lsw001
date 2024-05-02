@@ -41,9 +41,19 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Debug.Log(PhotonNetwork.LocalPlayer.NickName + "Connected to Server");
-        PhotonNetwork.JoinRandomOrCreateRoom();
+        PhotonNetwork.JoinRandomRoom();
     }
-
+    private void CreateAndJoinRoom()
+    {
+        string randomRoomName = "RoomLobby";
+        RoomOptions roomOptions = new RoomOptions();
+        roomOptions.IsOpen = true;
+        roomOptions.IsVisible = true;
+        roomOptions.MaxPlayers = 0;
+        //playerCustomProperties.Add("PieceType", "White");
+        //PhotonNetwork.LocalPlayer.CustomProperties = (playerCustomProperties);
+        PhotonNetwork.CreateRoom(randomRoomName, roomOptions, TypedLobby.Default);
+    }
     public override void OnJoinedLobby()
     {
         base.OnJoinedLobby();
@@ -52,6 +62,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         Debug.Log("Join Random Room Failed " + message + " creating a new one ");
+        CreateAndJoinRoom();
     }
 
     public override void OnJoinedRoom()
@@ -88,19 +99,19 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Player " + otherPlayer.ActorNumber + " left the room");
 
-        // Check if the leaving player was the master client
-        if (PhotonNetwork.IsMasterClient && otherPlayer.IsMasterClient)
-        {
-            // Get the list of remaining players
-            Photon.Realtime.Player[] remainingPlayers = PhotonNetwork.PlayerListOthers;
+        //// Check if the leaving player was the master client
+        //if (PhotonNetwork.IsMasterClient && otherPlayer.IsMasterClient)
+        //{
+        //    // Get the list of remaining players
+        //    Photon.Realtime.Player[] remainingPlayers = PhotonNetwork.PlayerListOthers;
 
-            // If there are remaining players, transfer hosting responsibilities to the first player in the list
-            if (remainingPlayers.Length > 0)
-            {
-                PhotonNetwork.SetMasterClient(remainingPlayers[0]);
-                Debug.Log("Transferred master client role to Player " + remainingPlayers[0].ActorNumber);
-            }
-        }
+        //    // If there are remaining players, transfer hosting responsibilities to the first player in the list
+        //    if (remainingPlayers.Length > 0)
+        //    {
+        //        PhotonNetwork.SetMasterClient(remainingPlayers[0]);
+        //        Debug.Log("Transferred master client role to Player " + remainingPlayers[0].ActorNumber);
+        //    }
+        //}
     }
 
 

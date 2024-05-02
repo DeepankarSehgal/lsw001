@@ -13,6 +13,8 @@ namespace Scripts.Multiplayer
         private PhotonView photonView;
         private Vector3 networkedPosition;
         bool networkWhiteTurn;
+        private Board boardInstance => Board.instance;
+        private bool startSynching = false;
         //private Quaternion networkedRotation;
         #region Unity Methods
         private void Start()
@@ -20,9 +22,27 @@ namespace Scripts.Multiplayer
             photonView = GetComponent<PhotonView>();
             networkedPosition = new Vector3();
             networkWhiteTurn = true;
-            Board.instance.onUpdatePlayerTurn += OnUpdatePlayerTurn;
+            if(boardInstance != null )
+            {
+                Board.instance.onUpdatePlayerTurn -= OnUpdatePlayerTurn;
+                Board.instance.onUpdatePlayerTurn += OnUpdatePlayerTurn;
+            }
+            //DontDestroyOnLoad(this);
+          
             //networkedRotation = new Quaternion();
         }
+
+        private void OnEnable()
+        {
+            GameplayManager.startSynch -= StartSynching;
+            GameplayManager.startSynch += StartSynching;
+        }
+        private void StartSynching()
+        {
+            startSynching = true;
+        }
+
+
         private void OnUpdatePlayerTurn(bool canSwapTurn)
         {
             photonView.RPC(nameof(UpdatePlayerTurn), RpcTarget.All,canSwapTurn);
@@ -36,28 +56,29 @@ namespace Scripts.Multiplayer
         }
         private void Update()
         {
-            if(!photonView.IsMine)
+            if(!photonView.IsMine && PhotonNetwork.IsConnectedAndReady)
             {
                 //transform.localPosition = Vector3.MoveTowards(transform.localPosition, networkedPosition, Time.deltaTime);
                 transform.localPosition = networkedPosition;
             }
         }
-        #endregion
+
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
         {
             if (stream.IsWriting)//Owner/Local player
             {
                 stream.SendNext(transform.localPosition);
-                stream.SendNext(Board.instance.isWhiteTurn);
             }
             else
             {
                 //the owner in the remote player area
-                networkedPosition =(Vector3) stream.ReceiveNext();
-                networkWhiteTurn = (bool) stream.ReceiveNext();
+                networkedPosition = (Vector3)stream.ReceiveNext();
+                print("On PhotonSerializeView called!" + networkedPosition);
                 //networkedRotation =(Quaternion) stream.ReceiveNext();
             }
         }
+        #endregion
+
 
     }
 }
