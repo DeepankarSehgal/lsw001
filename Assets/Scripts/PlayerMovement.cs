@@ -31,7 +31,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     private PhotonView photonView;
     public CinemachineVirtualCamera virtualCamera;
     public GameObject MonsCanvas;
-    private GameObject otherCollided;
+    [SerializeField]private GameObject otherCollided;
 
     public LayerMask groundLayer;
     // private PlayFabManager playFabManager;
@@ -147,6 +147,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
             if (Input.GetKeyDown(KeyCode.E))
             {
                 MonsCanvas.SetActive(photonView.IsMine);
+                //photonView.RPC(nameof(ShowChallengeUI), RpcTarget.Others, otherCollided.name);
             }
         }
         //if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) && canSwing && !coolDown)
@@ -177,7 +178,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     {
         if (collision.collider.CompareTag("Player"))
         {
-            otherCollided = collision.gameObject;
+            otherCollided = gameObject;
             collision.transform.GetChild(0).gameObject.SetActive(true);
         }
     }
@@ -186,8 +187,8 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     {
         if (collision.collider.CompareTag("Player"))
         {
-            otherCollided = null;
-            collision.transform.GetChild(0).gameObject.SetActive(true);
+            //otherCollided = null;
+            //collision.transform.GetChild(0).gameObject.SetActive(false);
         }
     }
 
@@ -312,10 +313,26 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         animator.SetBool("Right Swing", false);
         coolDown = false;
     }
-
+    public override void OnLeftRoom()
+    {
+        base.OnLeftRoom();
+  
+    }
     public void LoadScene()
     {
-        PhotonNetwork.LoadLevel(2);
-
+        if (photonView.IsMine)
+        {
+            PhotonNetwork.LoadLevel(2);
+            //PhotonManager.instance.DisconnectFromCurrentRoom();
+        }
+      
+        //SceneManager.LoadScene(2);
+    }
+    [PunRPC]
+    public void ShowChallengeUI(string playerName)
+    {
+        print("Show Challenge ui is getting called " + playerName + gameObject.name);
+        //if(playerName == gameObject.name)
+       // MonsCanvas.SetActive(true);
     }
 }

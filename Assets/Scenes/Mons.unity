@@ -406,7 +406,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &102860828
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2016,6 +2016,7 @@ MonoBehaviour:
   - {fileID: 7722477160570536614, guid: bea17c77a7d72604183aa29a2decc61a, type: 3}
   - {fileID: 7722477160570536614, guid: 17e2f9cfc3cd5ea4595aa2c5606f85d1, type: 3}
   selectedPiece: {fileID: 0}
+  startGameWhenAllReady: 1
 --- !u!4 &1828202016
 Transform:
   m_ObjectHideFlags: 0

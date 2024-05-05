@@ -15,22 +15,58 @@ namespace Scripts.Multiplayer
         private ExitGames.Client.Photon.Hashtable playerCustomProperties = new ExitGames.Client.Photon.Hashtable();
         public static Action onJoinedRoom;
         public static Action startSynch;
+        private string currentRoomName;
         #region Unity Methods
+        //private void Start()
+        //{
+        //    OnJoinedRoom();
+        //    //JoinRandomRoom();
+        //}
+
         private void Start()
         {
-            OnJoinedRoom();
-            //JoinRandomRoom();
+            if (PhotonNetwork.IsConnected)
+            {
+                print("Player is connected!");
+                currentRoomName = PhotonNetwork.CurrentRoom.Name;
+                PhotonNetwork.LeaveRoom(false);
+               // OnJoinedRoom();
+            }
         }
-  
         #endregion
+
+
+
         #region UI Callbacks
         private void JoinRandomRoom()
         {
-            PhotonNetwork.JoinRandomRoom();
+            PhotonNetwork.JoinRandomRoom(null,2);
         }
         #endregion
 
         #region Photon Callback Methods
+
+        #region Photon Callback Methods
+
+        public override void OnLeftRoom()
+        {
+            playerRoomInfoText.text = "On room getting left " + currentRoomName;
+            print("On Left room getting called " + currentRoomName);
+        }
+        public override void OnConnected()
+        {
+            print($"Connected to the internet!");
+            
+        }
+        public override void OnConnectedToMaster()
+        {
+            print($"{PhotonNetwork.LocalPlayer.NickName} is connected to the photon server!");
+            
+            JoinRandomRoom();
+        }
+        #endregion
+
+
         //This is called when there is no room and player want's to join.
         public override void OnJoinRandomFailed(short returnCode, string message)
         {

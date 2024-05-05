@@ -26,9 +26,18 @@ namespace Scripts.Multiplayer
             {
                 Board.instance.onUpdatePlayerTurn -= OnUpdatePlayerTurn;
                 Board.instance.onUpdatePlayerTurn += OnUpdatePlayerTurn;
+                if (boardInstance.startGameWhenAllReady && PhotonNetwork.CurrentRoom.PlayerCount >=2)
+                {
+
+                    //photonView.RPC(nameof(StartTheGameWhenAllPlayerAreReady), RpcTarget.All);
+
+                }
+
             }
+
+         
             //DontDestroyOnLoad(this);
-          
+
             //networkedRotation = new Quaternion();
         }
 
@@ -53,6 +62,12 @@ namespace Scripts.Multiplayer
             networkWhiteTurn = updatePlayerTurn;
             Board.instance.isWhiteTurn = networkWhiteTurn;
             print("Player turn swapped "+ networkWhiteTurn);
+        }
+        [PunRPC]
+        private void StartTheGameWhenAllPlayerAreReady()
+        {
+            //boardInstance.OnJoinedRoom();
+            boardInstance.startGameWhenAllReady = false;
         }
         private void Update()
         {

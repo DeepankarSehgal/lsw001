@@ -71,6 +71,8 @@ namespace Scripts.Multiplayer
         private void OnQuickMatchButtonClicked()
         {
             PhotonNetwork.LoadLevel(3);
+            //PhotonManager.instance.DisconnectFromCurrentRoom();
+            //SceneManager.LoadScene(3);
         }
         #endregion
 

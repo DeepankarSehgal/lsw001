@@ -17,11 +17,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public void Awake()
     {
         instance = this;
+        DontDestroyOnLoad(instance);
     }
 
     void Start()
     {
-        PhotonNetwork.AutomaticallySyncScene = true;
+        //PhotonNetwork.AutomaticallySyncScene = true;
         characterIndex = PlayerPrefs.GetInt("characterIndex", 0);
         PhotonNetwork.ConnectUsingSettings();
     }
@@ -100,20 +101,23 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("Player " + otherPlayer.ActorNumber + " left the room");
 
         //// Check if the leaving player was the master client
-        //if (PhotonNetwork.IsMasterClient && otherPlayer.IsMasterClient)
-        //{
-        //    // Get the list of remaining players
-        //    Photon.Realtime.Player[] remainingPlayers = PhotonNetwork.PlayerListOthers;
+        if (PhotonNetwork.IsMasterClient && otherPlayer.IsMasterClient)
+        {
+            //Get the list of remaining players
+            Photon.Realtime.Player[] remainingPlayers = PhotonNetwork.PlayerListOthers;
 
-        //    // If there are remaining players, transfer hosting responsibilities to the first player in the list
-        //    if (remainingPlayers.Length > 0)
-        //    {
-        //        PhotonNetwork.SetMasterClient(remainingPlayers[0]);
-        //        Debug.Log("Transferred master client role to Player " + remainingPlayers[0].ActorNumber);
-        //    }
-        //}
+            //If there are remaining players, transfer hosting responsibilities to the first player in the list
+            if (remainingPlayers.Length > 0)
+            {
+                PhotonNetwork.SetMasterClient(remainingPlayers[0]);
+                Debug.Log("Transferred master client role to Player " + remainingPlayers[0].ActorNumber);
+            }
+        }
     }
-
+    public void DisconnectFromCurrentRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
 
     #endregion
 

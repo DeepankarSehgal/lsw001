@@ -14,11 +14,6 @@ public class GameManager : MonoBehaviour
     {
         instance = this;
     }
-    public void Start()
-    {
-
-    }
-
     public void EnterWorld()
     {
         PlayerPrefs.SetString("Nickname", chatField.text);
@@ -30,7 +25,6 @@ public class GameManager : MonoBehaviour
     {
         if (PlayFabManager.instance.nicknameInputField.text != null)
         {
-            
             PlayFabManager.instance.GetNicknameFromUser();
         }
     }

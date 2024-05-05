@@ -70,11 +70,12 @@ public class Board : MonoBehaviour
 
     public MonsPiece selectedPiece;
 
-
+    public bool startGameWhenAllReady = true;
     bool startGame = false;
     private void Awake()
     {
         instance = this;
+        startGameWhenAllReady = true;
     }
 
     void Start()
@@ -82,7 +83,7 @@ public class Board : MonoBehaviour
         isWhiteTurn = true;
         //CreateMonsBoard();
         CreateMonsBoard();
-       //OnJoinedRoom();
+      // OnJoinedRoom();
         //SpawnAllPiece();
         // PositionAllPiece();
         //CenterBoard();
@@ -92,7 +93,7 @@ public class Board : MonoBehaviour
         GameplayManager.onJoinedRoom -= OnJoinedRoom;
         GameplayManager.onJoinedRoom += OnJoinedRoom;
     }
-    private void OnJoinedRoom()
+    public void OnJoinedRoom()
     {
       
         if (PhotonNetwork.IsConnectedAndReady)
