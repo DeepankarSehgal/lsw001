@@ -83,7 +83,7 @@ public class Board : MonoBehaviour
         isWhiteTurn = true;
         //CreateMonsBoard();
         CreateMonsBoard();
-      // OnJoinedRoom();
+       OnJoinedRoom();
         //SpawnAllPiece();
         // PositionAllPiece();
         //CenterBoard();
@@ -96,7 +96,7 @@ public class Board : MonoBehaviour
     public void OnJoinedRoom()
     {
       
-        if (PhotonNetwork.IsConnectedAndReady)
+        if (PhotonNetwork.IsConnectedAndReady || true)
         {
             print("On Joined room of board get called!");
             SpawnAllPiece();
@@ -131,7 +131,7 @@ public class Board : MonoBehaviour
                     cells[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
                 }
 
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButton(0) && currentlyDraggingPiece==null)
                 {
                     if (monsPiece[hitPosition.x, hitPosition.y] != null && !monsPiece[hitPosition.x, hitPosition.y].isFainted)
                     {
@@ -146,11 +146,15 @@ public class Board : MonoBehaviour
                                     manaTurn = true;
                                     availableMoves = currentlyDraggingPiece.GetAvailableMoves(ref monsPiece, boardSize);
                                     HighLightTiles();
+                                    //spawnMovesHiglighter = false;
+
                                 }
                                 else
                                 {
                                     availableMoves = currentlyDraggingPiece.GetAvailableMoves(ref monsPiece, boardSize);
                                     HighLightTiles();
+                                   // spawnMovesHiglighter = false;
+
                                 }
                             }
                             else
@@ -184,11 +188,11 @@ public class Board : MonoBehaviour
 
                     }
                 }
-                if (currentlyDraggingPiece != null && Input.GetMouseButtonUp(0))
+                if (currentlyDraggingPiece != null && Input.GetMouseButtonDown(0))
                 {
                    
                         Vector2Int previousPosition = new Vector2Int(currentlyDraggingPiece.currentX, currentlyDraggingPiece.currentY);
-                        //if (availableMoves.Contains(hitPosition))
+                        if (availableMoves.Contains(hitPosition))
                         {
                             bool validMove = MoveTo(currentlyDraggingPiece, hitPosition.x, hitPosition.y);
                             if (!validMove)
@@ -211,10 +215,15 @@ public class Board : MonoBehaviour
                             }
                         }
                     
-                    currentlyDraggingPiece = null;
+                   
                     ClearHighLight();
+                    //spawnMovesHiglighter = false;
+                    currentlyDraggingPiece = null;
                 }
-
+                if (Input.GetMouseButtonUp(0))
+                {
+                   // spawnMovesHiglighter = true;
+                }
             }
             else
             {
@@ -360,6 +369,14 @@ public class Board : MonoBehaviour
             mp.team = team;
             mp.monsPieceType = type;
         }
+        else
+        {
+            //Local testing..
+            mp = Instantiate(Whiteprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
+            mp.team = team;
+            mp.monsPieceType = type;
+
+        }
         // Adjust spawn position for white pieces
         //mp.transform.position = new Vector3(0, 0, 0); // Adjust as per your design
         return mp;
@@ -374,6 +391,12 @@ public class Board : MonoBehaviour
         if ((string)pieceType == "Black")
         {
             mp = PhotonNetwork.Instantiate(Blackprefabs[(int)type - 1].name, transform.localPosition, Quaternion.identity).GetComponent<MonsPiece>();
+            mp.team = team;
+            mp.monsPieceType = type;
+        }
+        else
+        {
+            mp = Instantiate(Blackprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
             mp.team = team;
             mp.monsPieceType = type;
         }
@@ -666,6 +689,10 @@ public class Board : MonoBehaviour
         return false;
     }
 
+    public void SxoreSynch()
+    {
+        
+    }
     private void FaintOpponentPiece(MonsPiece target)
     {
 

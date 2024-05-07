@@ -26,12 +26,6 @@ namespace Scripts.Multiplayer
             {
                 Board.instance.onUpdatePlayerTurn -= OnUpdatePlayerTurn;
                 Board.instance.onUpdatePlayerTurn += OnUpdatePlayerTurn;
-                if (boardInstance.startGameWhenAllReady && PhotonNetwork.CurrentRoom.PlayerCount >=2)
-                {
-
-                    //photonView.RPC(nameof(StartTheGameWhenAllPlayerAreReady), RpcTarget.All);
-
-                }
 
             }
 
