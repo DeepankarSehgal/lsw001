@@ -116,6 +116,7 @@ public class Board : MonoBehaviour
             RaycastHit2D info = Physics2D.Raycast(ray.origin, ray.direction, 100, LayerMask.GetMask("Tile", "Hover"));
             if (info)
             {
+                print("Rayhit info object: " + info.transform.name); 
                 Vector2Int hitPosition = LookUpTileIndex(info.transform.gameObject);
 
                 if (currentHover == -Vector2Int.one)
@@ -151,6 +152,7 @@ public class Board : MonoBehaviour
                                 }
                                 else
                                 {
+                                    //FYI: here are the moves for players type..
                                     availableMoves = currentlyDraggingPiece.GetAvailableMoves(ref monsPiece, boardSize);
                                     HighLightTiles();
                                    // spawnMovesHiglighter = false;
@@ -206,7 +208,8 @@ public class Board : MonoBehaviour
                                         monsPiece[hitPosition.x, hitPosition.y].team != currentlyDraggingPiece.team &&
                                         monsPiece[hitPosition.x, hitPosition.y].monsPieceType != MonsPieceType.mana)
                                     {
-                                        // Faint the opponent piece
+                                    // Faint the opponent piece
+                                        print("Fainting the opponent piece by " + currentlyDraggingPiece);
                                         FaintOpponentPiece(monsPiece[hitPosition.x, hitPosition.y]);
                                         currentlyDraggingPiece.isCarryingBomb = false;
                                     }
@@ -457,6 +460,7 @@ public class Board : MonoBehaviour
             Destroy(HighlightHolder.transform.GetChild(i).gameObject);  
         }
     }
+    private bool isMysticAttackingTheOpponentPlayer = false;
     private bool MoveTo(MonsPiece cp, int x, int y)
     {
         if(!ContainsValidMoves(ref availableMoves , new Vector2(x,y))) return false;
@@ -467,7 +471,7 @@ public class Board : MonoBehaviour
 
         if (monsPiece[x, y] != null)
         {
-            Debug.Log(monsPiece[x, y].gameObject.name);
+            Debug.Log(monsPiece[x, y].gameObject.name);//hit pieces player name
             MonsPiece ocp = monsPiece[x, y];
 
 
@@ -537,8 +541,14 @@ public class Board : MonoBehaviour
                     }
                     else
                     {
+                        if(cp.monsPieceType == MonsPieceType.mystic)
+                        {
+                            isMysticAttackingTheOpponentPlayer = true;
+                            
+                        }
                         deadBlacks.Add(cp);
                         ocp.FaintForTurns(2);
+                        if(!isMysticAttackingTheOpponentPlayer)
                         cp.SetPosition(cp.resetPos);
                         monsPiece[(int)ocp.resetPos.x, (int)ocp.resetPos.y] = ocp;
                         PositionSinglePiece((int)ocp.resetPos.x, (int)ocp.resetPos.y);
@@ -558,7 +568,15 @@ public class Board : MonoBehaviour
         
         monsPiece[previousPosition.x, previousPosition.y] = null;
 
-        PositionSinglePiece(x, y);
+        if(!isMysticAttackingTheOpponentPlayer)
+        {
+            PositionSinglePiece(x, y);
+        }
+        else
+        {
+            isMysticAttackingTheOpponentPlayer = false;
+        }
+       
 
 
         if (cp.monsPieceType == MonsPieceType.drainer && cp.GetComponent<Drainer>().isCarryingMana == true)
@@ -632,8 +650,8 @@ public class Board : MonoBehaviour
         if (cp.monsPieceType == MonsPieceType.mana)
         {
             manaTurn = false;
-            UpdatePlayerTurns(!isWhiteTurn);
-            //isWhiteTurn = !isWhiteTurn;
+            //UpdatePlayerTurns(!isWhiteTurn);
+            isWhiteTurn = !isWhiteTurn;
             foreach (MonsPiece piece in monsPiece)
             {
                 if (piece != null)

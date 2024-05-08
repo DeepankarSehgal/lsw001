@@ -58,7 +58,7 @@ public class MonsPiece : MonoBehaviour
     {
         desiredPos = position;
         if(force)
-            transform.position = desiredPos;
+            transform.localPosition = desiredPos;
     }
 
 
