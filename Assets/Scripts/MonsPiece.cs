@@ -38,6 +38,7 @@ public class MonsPiece : MonoBehaviour
     public bool isCarryingSuperMana = false;
     public bool isCarryingBomb = false;
     public bool isCarryingPortion = false;
+    public bool isHitBySpirit = false;
 
     private void Update()
     {

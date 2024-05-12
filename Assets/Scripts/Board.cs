@@ -17,6 +17,7 @@ public class Board : MonoBehaviour
     public GameObject[,] cells;
 
     public MonsPiece currentlyDraggingPiece;
+    public MonsPiece previousDraggingPiece;
 
     public GameObject[] Whiteprefabs;
     public GameObject[] Blackprefabs;
@@ -42,7 +43,7 @@ public class Board : MonoBehaviour
     private List<Vector2Int> availableMoves = new List<Vector2Int>();
 
     public bool isWhiteTurn;
-    private int itemChances = 5;
+    [SerializeField]private int itemChances = 5;
     private bool manaTurn = false;
 
     public TMP_Text whiteScoreText;
@@ -108,6 +109,7 @@ public class Board : MonoBehaviour
         }
      
     }
+    int tapCount = 0;
     void Update()
     {
         if(!isGameEnd && startGame)
@@ -116,7 +118,7 @@ public class Board : MonoBehaviour
             RaycastHit2D info = Physics2D.Raycast(ray.origin, ray.direction, 100, LayerMask.GetMask("Tile", "Hover"));
             if (info)
             {
-                print("Rayhit info object: " + info.transform.name); 
+                //print("Rayhit info object: " + info.transform.name); 
                 Vector2Int hitPosition = LookUpTileIndex(info.transform.gameObject);
 
                 if (currentHover == -Vector2Int.one)
@@ -136,10 +138,13 @@ public class Board : MonoBehaviour
                 {
                     if (monsPiece[hitPosition.x, hitPosition.y] != null && !monsPiece[hitPosition.x, hitPosition.y].isFainted)
                     {
-                        if ((monsPiece[hitPosition.x, hitPosition.y].team == 0 && isWhiteTurn) || (monsPiece[hitPosition.x, hitPosition.y].team == 1 && !isWhiteTurn))
+                        if ((monsPiece[hitPosition.x, hitPosition.y].team == 0 && (isWhiteTurn || previousDraggingPiece.monsPieceType == MonsPieceType.spirit)) || (monsPiece[hitPosition.x, hitPosition.y].team == 1 && (!isWhiteTurn || previousDraggingPiece.monsPieceType == MonsPieceType.spirit)))
                         {
+                            print("Previous piece " + previousDraggingPiece);
+                            tapCount += 1;
                             currentlyDraggingPiece = monsPiece[hitPosition.x, hitPosition.y];
-
+                          
+                            //print("Previous piece 1" + currentlyDraggingPiece);
                             if (itemChances > 0)
                             {
                                 if (currentlyDraggingPiece.monsPieceType == MonsPieceType.mana)
@@ -154,6 +159,7 @@ public class Board : MonoBehaviour
                                 {
                                     //FYI: here are the moves for players type..
                                     availableMoves = currentlyDraggingPiece.GetAvailableMoves(ref monsPiece, boardSize);
+
                                     HighLightTiles();
                                    // spawnMovesHiglighter = false;
 
@@ -194,7 +200,7 @@ public class Board : MonoBehaviour
                 {
                    
                         Vector2Int previousPosition = new Vector2Int(currentlyDraggingPiece.currentX, currentlyDraggingPiece.currentY);
-                        if (availableMoves.Contains(hitPosition))
+                        if (availableMoves!=null &&  availableMoves.Contains(hitPosition))
                         {
                             bool validMove = MoveTo(currentlyDraggingPiece, hitPosition.x, hitPosition.y);
                             if (!validMove)
@@ -215,17 +221,26 @@ public class Board : MonoBehaviour
                                     }
                                 }
                                 currentlyDraggingPiece.SetPosition(previousPosition);
+                               
                             }
-                        }
+                        tapCount = 0;
+                        //ClearHighLight();
+
+                    }
                     
                    
                     ClearHighLight();
                     //spawnMovesHiglighter = false;
+      
+                    //if(currentlyDraggingPiece != previousDraggingPiece /*&& tapCount <= 1*/)
+                    //{
+                    //    previousDraggingPiece = currentlyDraggingPiece;
+                    //    tapCount = 0;
+                    //}
+                    
                     currentlyDraggingPiece = null;
-                }
-                if (Input.GetMouseButtonUp(0))
-                {
-                   // spawnMovesHiglighter = true;
+                    
+
                 }
             }
             else
@@ -445,9 +460,16 @@ public class Board : MonoBehaviour
 
     private void HighLightTiles()
     {
+        if (availableMoves == null) return;
+        Color highlightColor = Color.green;
         for (int i = 0; i < availableMoves.Count; i++)
         {
+            if (currentlyDraggingPiece.isHitBySpirit) 
+                {
+                 highlightColor = Color.red;
+                } 
             GameObject go = Instantiate(HighlightPrefab, new Vector3(availableMoves[i].x, availableMoves[i].y, 0),Quaternion.identity);
+            go.GetComponent<SpriteRenderer>().color = highlightColor;   
             go.transform.SetParent(HighlightHolder.transform, false);
         }
 
@@ -468,13 +490,14 @@ public class Board : MonoBehaviour
         Vector2Int previousPosition = new Vector2Int(cp.currentX, cp.currentY);
 
 
-
+        MonsPiece ocp = null;
         if (monsPiece[x, y] != null)
         {
-            Debug.Log(monsPiece[x, y].gameObject.name);//hit pieces player name
-            MonsPiece ocp = monsPiece[x, y];
-
-
+            Debug.Log(monsPiece[x, y].gameObject.name + "Hitted by " + cp.name);//hit pieces player name
+            ocp = monsPiece[x, y];
+            previousDraggingPiece = cp;
+            bool isHitBySpirit= SpiritPushOtherPlayersLogic(ref cp,ref ocp);
+            if (isHitBySpirit) return true;
             if (cp.team == ocp.team)
             {
                 if(cp.monsPieceType == MonsPieceType.drainer  && ocp.monsPieceType == MonsPieceType.mana)
@@ -503,7 +526,7 @@ public class Board : MonoBehaviour
             }
             else
             {
-                if ((cp.monsPieceType == MonsPieceType.drainer || cp.monsPieceType == MonsPieceType.mystic || cp.monsPieceType == MonsPieceType.spirit || cp.monsPieceType == MonsPieceType.demon) && ocp.monsPieceType == MonsPieceType.bombOrPortion)
+                if ((cp.monsPieceType == MonsPieceType.drainer || cp.monsPieceType == MonsPieceType.mystic || cp.monsPieceType == MonsPieceType.spirit || cp.monsPieceType == MonsPieceType.demon || cp.monsPieceType == MonsPieceType.angel) && ocp.monsPieceType == MonsPieceType.bombOrPortion)
                 {
                      monsPiece[x, y] = null;
                      selectedPiece = cp;
@@ -530,18 +553,25 @@ public class Board : MonoBehaviour
                         return false;
                     }
 
-                    if (ocp.team == 0)
+                    if (ocp.team == 0) //white team
                     {
+                        if (cp.monsPieceType == MonsPieceType.mystic || cp.isCarryingBomb)
+                        {
+                            isMysticAttackingTheOpponentPlayer = true;
+
+                        }
                         deadWhites.Add(ocp);
                         ocp.FaintForTurns(2);
-                        ocp.SetPosition(ocp.resetPos);
+                        if (!isMysticAttackingTheOpponentPlayer)
+                            cp.SetPosition(ocp.resetPos);
                         monsPiece[(int)ocp.resetPos.x, (int)ocp.resetPos.y] = ocp;
                         PositionSinglePiece((int)ocp.resetPos.x, (int)ocp.resetPos.y);
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
                     }
                     else
                     {
-                        if(cp.monsPieceType == MonsPieceType.mystic)
+                        //black team
+                        if(cp.monsPieceType == MonsPieceType.mystic || cp.isCarryingBomb)
                         {
                             isMysticAttackingTheOpponentPlayer = true;
                             
@@ -564,11 +594,12 @@ public class Board : MonoBehaviour
             
         }
 
+        //resetting here at last
         monsPiece[x, y] = cp;
-        
+
         monsPiece[previousPosition.x, previousPosition.y] = null;
 
-        if(!isMysticAttackingTheOpponentPlayer)
+        if (!isMysticAttackingTheOpponentPlayer)
         {
             PositionSinglePiece(x, y);
         }
@@ -649,6 +680,15 @@ public class Board : MonoBehaviour
 
         if (cp.monsPieceType == MonsPieceType.mana)
         {
+            if (cp.isHitBySpirit)//spirit move logic
+            {
+                cp.isHitBySpirit = false;
+                if(cp.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
+                {
+                    previousDraggingPiece = cp;
+                }
+                return true;
+            }
             manaTurn = false;
             //UpdatePlayerTurns(!isWhiteTurn);
             isWhiteTurn = !isWhiteTurn;
@@ -659,18 +699,33 @@ public class Board : MonoBehaviour
                     piece.UpdateFaintedTurns();
                 }
             }
+            previousDraggingPiece = cp;
             itemChances = 5;
         }else
         {
-            if ((cp.monsPieceType == MonsPieceType.drainer || cp.monsPieceType == MonsPieceType.demon || cp.monsPieceType == MonsPieceType.mystic || cp.monsPieceType == MonsPieceType.spirit) && cp.isCarryingPortion)
+            if ((cp.monsPieceType == MonsPieceType.drainer || cp.monsPieceType == MonsPieceType.demon || cp.monsPieceType == MonsPieceType.mystic || cp.monsPieceType == MonsPieceType.spirit) && cp.isCarryingPortion && ocp!=null)
             {
                 itemChances++;
                 cp.isCarryingPortion = false;
             }
+            if(cp.isHitBySpirit)//spirit move logic
+            {
+                itemChances++;
+                cp.isHitBySpirit = false;
+                if (cp.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
+                {
+                    previousDraggingPiece = cp;
+                }
+
+            }
+            previousDraggingPiece = cp;
             itemChances--;
         }
 
-
+        if (itemChances <= 0)
+        {
+            cp.isCarryingPortion = false;
+        }
 
         if (whiteScore >= 5 || blackScore >= 5)
         {
@@ -683,8 +738,23 @@ public class Board : MonoBehaviour
 
         }
 
+
+      
         return true;
 
+    }
+
+
+    private bool SpiritPushOtherPlayersLogic(ref MonsPiece cp, ref MonsPiece ocp) 
+    { 
+      if(cp.monsPieceType == MonsPieceType.spirit && ocp.monsPieceType!=MonsPieceType.bombOrPortion && !cp.isCarryingBomb)
+        {
+            //spirit logic 
+            ocp.isHitBySpirit = true;
+            return true;
+        }
+
+        return false;
     }
 
     public Action<bool> onUpdatePlayerTurn;

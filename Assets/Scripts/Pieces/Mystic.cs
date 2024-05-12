@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Mystic : MonsPiece
 {
+    int tileDistance = 2;
     public bool CanCollectBomb(ref MonsPiece[,] board, int x, int y)
     {
 
@@ -20,7 +21,14 @@ public class Mystic : MonsPiece
     {
         List<Vector2Int> r = new List<Vector2Int>();
         int direction = (team == 0) ? 1 : -1;
-
+        if (isCarryingBomb)
+        {
+            tileDistance = 3;
+        }
+        else
+        {
+            tileDistance = 2;
+        }
 
         //Calculating the movable position in 1 tile space
         for (int dx = -1; dx <= 1; dx++)
@@ -48,62 +56,62 @@ public class Mystic : MonsPiece
         }
 
 
-        if (0 <= currentX + direction * 2 && currentX + direction * 2 < tileCount 
-            && 0 <= currentY + direction * 2 && currentY + direction * 2 < tileCount
-            && board[currentX + direction * 2, currentY + direction * 2] != null 
-            && board[currentX + direction * 2, currentY + direction * 2].team != team
-            && board[currentX + direction * 2, currentY + direction * 2].monsPieceType!=MonsPieceType.bombOrPortion
-            //&& checkAngel(ref board,currentX +  direction * 2, currentY + direction * 2)
+        if (0 <= currentX + direction * tileDistance && currentX + direction * tileDistance < tileCount 
+            && 0 <= currentY + direction * tileDistance && currentY + direction * tileDistance < tileCount
+            && board[currentX + direction * tileDistance, currentY + direction * tileDistance] != null 
+            && board[currentX + direction * tileDistance, currentY + direction * tileDistance].team != team
+            && board[currentX + direction * tileDistance, currentY + direction * tileDistance].monsPieceType!=MonsPieceType.bombOrPortion
+            && !checkAngel(ref board,currentX +  direction * tileDistance, currentY + direction * tileDistance)
             )
         {
-            if (board[currentX + direction * 2, currentY + direction * 2].monsPieceType != MonsPieceType.mana)
-                r.Add(new Vector2Int(currentX + direction * 2, currentY + direction * 2));
-            print("Available moves for mystic: " + new Vector2Int(currentX + direction * 2, currentY + direction * 2));//here right diagonal gap
+            if (board[currentX + direction * tileDistance, currentY + direction * tileDistance].monsPieceType != MonsPieceType.mana)
+                r.Add(new Vector2Int(currentX + direction * tileDistance, currentY + direction * tileDistance));
+            print("Available moves for mystic: " + new Vector2Int(currentX + direction * tileDistance, currentY + direction * tileDistance));//here right diagonal gap
 
         }
 
         //2 tiles gap logic
-        if (0 <= currentX + direction * 2 && currentX + direction * 2 < tileCount
-            && 0 <= currentY - direction * 2 && currentY - direction * 2 < tileCount
-            && board[currentX + direction * 2, currentY - direction * 2] != null
-            && board[currentX + direction * 2, currentY - direction * 2].team != team
-            && board[currentX + direction * 2, currentY - direction * 2].monsPieceType != MonsPieceType.bombOrPortion
-             //&& checkAngel(ref board, currentX + direction * 2, currentY - direction * 2)
+        if (0 <= currentX + direction * tileDistance && currentX + direction * tileDistance < tileCount
+            && 0 <= currentY - direction * tileDistance && currentY - direction * tileDistance < tileCount
+            && board[currentX + direction * tileDistance, currentY - direction * tileDistance] != null
+            && board[currentX + direction * tileDistance, currentY - direction * tileDistance].team != team
+            && board[currentX + direction * tileDistance, currentY - direction * tileDistance].monsPieceType != MonsPieceType.bombOrPortion
+             && !checkAngel(ref board, currentX + direction * tileDistance, currentY - direction * tileDistance)
              )
         {
-            if (board[currentX + direction * 2, currentY - direction * 2].monsPieceType != MonsPieceType.mana)
-            r.Add(new Vector2Int(currentX + direction * 2, currentY - direction * 2));
-            print("Available moves for mystic: " + new Vector2Int(currentX + direction * 2, currentY - direction * 2));
+            if (board[currentX + direction * tileDistance, currentY - direction * tileDistance].monsPieceType != MonsPieceType.mana)
+            r.Add(new Vector2Int(currentX + direction * tileDistance, currentY - direction * tileDistance));
+            print("Available moves for mystic: " + new Vector2Int(currentX + direction * tileDistance, currentY - direction * tileDistance));
         }
 
 
-        if (0 <= currentX - direction * 2 && currentX - direction * 2 < tileCount
-            && 0 <= currentY + direction * 2 && currentY + direction * 2 < tileCount
-            && board[currentX - direction * 2, currentY + direction * 2] != null
-            && board[currentX - direction * 2, currentY + direction * 2].team != team
-            && board[currentX - direction * 2, currentY + direction * 2].monsPieceType != MonsPieceType.bombOrPortion
-             //&& checkAngel(ref board, currentX - direction * 2, currentY + direction * 2)
+        if (0 <= currentX - direction * tileDistance && currentX - direction * tileDistance < tileCount
+            && 0 <= currentY + direction * tileDistance && currentY + direction * tileDistance < tileCount
+            && board[currentX - direction * tileDistance, currentY + direction * tileDistance] != null
+            && board[currentX - direction * tileDistance, currentY + direction * tileDistance].team != team
+            && board[currentX - direction * tileDistance, currentY + direction * tileDistance].monsPieceType != MonsPieceType.bombOrPortion
+             && !checkAngel(ref board, currentX - direction * tileDistance, currentY + direction * tileDistance)
              )
         {
-            if (board[currentX - direction * 2, currentY + direction * 2].monsPieceType != MonsPieceType.mana)
-            r.Add(new Vector2Int(currentX - direction * 2, currentY + direction * 2));
-            print("Available moves for mystic: " + new Vector2Int(currentX - direction * 2, currentY + direction * 2));//bottom right diagonal tile gap/ top left diagonal
+            if (board[currentX - direction * tileDistance, currentY + direction * tileDistance].monsPieceType != MonsPieceType.mana)
+            r.Add(new Vector2Int(currentX - direction * tileDistance, currentY + direction * tileDistance));
+            print("Available moves for mystic: " + new Vector2Int(currentX - direction * tileDistance, currentY + direction * tileDistance));//bottom right diagonal tile gap/ top left diagonal
 
         }
 
 
-        if (0 <= currentX -  direction * 2 && currentX - direction * 2 < tileCount
-            && 0 <= currentY - direction * 2 && currentY - direction * 2 < tileCount
-            && board[currentX - direction * 2, currentY - direction * 2] != null
-            && board[currentX - direction * 2, currentY - direction * 2].team != team
-            && board[currentX - direction * 2, currentY - direction * 2].monsPieceType != MonsPieceType.bombOrPortion
-            && board[currentX - direction * 2, currentY - direction * 2].monsPieceType != MonsPieceType.bombOrPortion
-             //&& checkAngel(ref board, currentX - direction * 2, currentY - direction * 2)
+        if (0 <= currentX -  direction * tileDistance && currentX - direction * tileDistance < tileCount
+            && 0 <= currentY - direction * tileDistance && currentY - direction * tileDistance < tileCount
+            && board[currentX - direction * tileDistance, currentY - direction * tileDistance] != null
+            && board[currentX - direction * tileDistance, currentY - direction * tileDistance].team != team
+            && board[currentX - direction * tileDistance, currentY - direction * tileDistance].monsPieceType != MonsPieceType.bombOrPortion
+            && board[currentX - direction * tileDistance, currentY - direction * tileDistance].monsPieceType != MonsPieceType.bombOrPortion
+             && !checkAngel(ref board, currentX - direction * tileDistance, currentY - direction * tileDistance)
              )
         {
-            if (board[currentX - direction * 2, currentY - direction * 2].monsPieceType != MonsPieceType.mana)
-                r.Add(new Vector2Int(currentX - direction * 2, currentY - direction * 2));
-                print("Available moves for mystic: " + new Vector2Int(currentX - direction * 2, currentY - direction * 2));
+            if (board[currentX - direction * tileDistance, currentY - direction * tileDistance].monsPieceType != MonsPieceType.mana)
+                r.Add(new Vector2Int(currentX - direction * tileDistance, currentY - direction * tileDistance));
+                print("Available moves for mystic: " + new Vector2Int(currentX - direction * tileDistance, currentY - direction * tileDistance) + "check angel " + checkAngel(ref board, currentX - direction * tileDistance, currentY - direction * tileDistance));
 
         }
         return r;

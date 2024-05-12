@@ -7,6 +7,7 @@ public class Drainer : MonsPiece
 {
 
     public bool isCarryingMana = false;
+    int tileDistance = 1;
     public bool CanCollectBomb(ref MonsPiece[,] board, int x, int y)
     {
 
@@ -22,10 +23,17 @@ public class Drainer : MonsPiece
         List<Vector2Int> r = new List<Vector2Int>();
         int direction = (team == 0) ? 1 : -1;
 
-
-        for (int dx = -1; dx <= 1; dx++)
+        if (isCarryingBomb)
         {
-            for (int dy = -1; dy <= 1; dy++)
+            tileDistance = 3;
+        }
+        else
+        {
+            tileDistance = 1;
+        }
+        for (int dx = -tileDistance; dx <= tileDistance; dx++)
+        {
+            for (int dy = -tileDistance; dy <= tileDistance; dy++)
             {
                 // Skip the case where both dx and dy are 0 (no movement)
                 if (dx == 0 && dy == 0)
@@ -34,14 +42,15 @@ public class Drainer : MonsPiece
                 int newX = currentX + dx * direction;
                 int newY = currentY + dy * direction;
 
-               
 
+                bool isNotCarryingAnything = (!isCarryingMana && !isCarryingSuperMana && !isCarryingOppMana);
                 // Check if the new position is within bounds and empty
                 if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount  && (board[newX, newY] == null 
-                                                                                        || board[newX, newY].monsPieceType == MonsPieceType.mana 
-                                                                                        || board[newX, newY].monsPieceType == MonsPieceType.supermana
+                                                                                        || isNotCarryingAnything &&  board[newX, newY].monsPieceType == MonsPieceType.mana 
+                                                                                        || isNotCarryingAnything && board[newX, newY].monsPieceType == MonsPieceType.supermana
                                                                                         || CanCollectBomb(ref board, newX, newY)))
                 {
+                    
                     r.Add(new Vector2Int(newX, newY));
                 }
             }

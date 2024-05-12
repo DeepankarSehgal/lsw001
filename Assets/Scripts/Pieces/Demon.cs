@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Demon : MonsPiece
 {
-
+    int tileDistance = 1;
     public bool CanCollectBomb(ref MonsPiece[,] board, int x, int y)
     {
 
@@ -21,7 +21,14 @@ public class Demon : MonsPiece
 
 
         List<Vector2Int> r = new List<Vector2Int>();
-
+        if (isCarryingBomb)
+        {
+            tileDistance = 3;
+        }
+        else
+        {
+            tileDistance = 2;
+        }
             int direction = (team == 0) ? 1 : -1;
         for (int dx = -1; dx <= 1; dx++)
         {
@@ -64,24 +71,24 @@ public class Demon : MonsPiece
 
 
 
-        if (0 <= currentY + direction * 2 && currentY + direction * 2 < tileCount && board[currentX, currentY + direction * 2] != null && board[currentX, currentY + direction * 2].team != team && board[currentX, currentY + direction * 2].monsPieceType != MonsPieceType.mana && !checkAngel(ref board, currentX, currentY + direction * 2))
+        if (0 <= currentY + direction * tileDistance && currentY + direction * tileDistance < tileCount && board[currentX, currentY + direction * tileDistance] != null && board[currentX, currentY + direction * tileDistance].team != team && board[currentX, currentY + direction * tileDistance].monsPieceType != MonsPieceType.mana && !checkAngel(ref board, currentX, currentY + direction * tileDistance))
         {
-            r.Add(new Vector2Int(currentX, currentY + direction * 2));
+            r.Add(new Vector2Int(currentX, currentY + direction * tileDistance));
         }
 
-        if (0 <= currentX + direction * 2 && currentX + direction * 2 < tileCount && board[currentX + direction * 2, currentY] != null && board[currentX + direction * 2, currentY].team != team && board[currentX + direction * 2, currentY].monsPieceType != MonsPieceType.mana && !checkAngel(ref board, currentX + direction * 2, currentY))
+        if (0 <= currentX + direction * tileDistance && currentX + direction * tileDistance < tileCount && board[currentX + direction * tileDistance, currentY] != null && board[currentX + direction * tileDistance, currentY].team != team && board[currentX + direction * tileDistance, currentY].monsPieceType != MonsPieceType.mana && !checkAngel(ref board, currentX + direction * tileDistance, currentY))
         {
-            r.Add(new Vector2Int(currentX + direction * 2, currentY));
+            r.Add(new Vector2Int(currentX + direction * tileDistance, currentY));
         }
 
-        if (0 <= currentX - direction * 2 && currentX - direction * 2 < tileCount && board[currentX - direction * 2, currentY] != null && board[currentX - direction * 2, currentY].team != team && board[currentX - direction * 2, currentY].monsPieceType != MonsPieceType.mana && !checkAngel(ref board, currentX - direction * 2, currentY))
+        if (0 <= currentX - direction * tileDistance && currentX - direction * tileDistance < tileCount && board[currentX - direction * tileDistance, currentY] != null && board[currentX - direction * tileDistance, currentY].team != team && board[currentX - direction * tileDistance, currentY].monsPieceType != MonsPieceType.mana && !checkAngel(ref board, currentX - direction * tileDistance, currentY))
         {
-            r.Add(new Vector2Int(currentX - direction * 2, currentY));
+            r.Add(new Vector2Int(currentX - direction * tileDistance, currentY));
         }
 
-        if (0 <= currentY - direction * 2 && currentY - direction * 2 < tileCount && board[currentX, currentY - direction * 2] != null && board[currentX, currentY - direction * 2].team != team && board[currentX, currentY - direction * 2].monsPieceType != MonsPieceType.mana && !checkAngel(ref board, currentX, currentY - direction * 2))
+        if (0 <= currentY - direction * tileDistance && currentY - direction * tileDistance < tileCount && board[currentX, currentY - direction * tileDistance] != null && board[currentX, currentY - direction * tileDistance].team != team && board[currentX, currentY - direction * tileDistance].monsPieceType != MonsPieceType.mana && !checkAngel(ref board, currentX, currentY - direction * tileDistance))
         {
-            r.Add(new Vector2Int(currentX, currentY - direction * 2));
+            r.Add(new Vector2Int(currentX, currentY - direction * tileDistance));
         }
 
 
