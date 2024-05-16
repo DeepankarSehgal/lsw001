@@ -5,7 +5,6 @@ using UnityEngine;
 public class Spirit : MonsPiece
 {
     int tileDistance=2;
-
     public bool CanCollectBomb(ref MonsPiece[,] board, int x, int y)
     {
 
@@ -32,7 +31,7 @@ public class Spirit : MonsPiece
             tileDistance = 2;
         }
         // Check if Spirit is in reset position
-        if (!isSpiritInResetPosition)
+        if (!isSpiritInResetPosition && !mySpecialAbilityUsed)
         {
             // Check for nearby pieces within 2 spaces
             for (int dx = -tileDistance; dx <= tileDistance; dx++)

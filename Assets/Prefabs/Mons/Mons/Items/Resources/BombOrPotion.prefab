@@ -111,6 +111,7 @@ MonoBehaviour:
   isCarryingSuperMana: 0
   isCarryingBomb: 0
   isCarryingPortion: 0
+  isHitBySpirit: 0
 --- !u!114 &529249064555261574
 MonoBehaviour:
   m_ObjectHideFlags: 0

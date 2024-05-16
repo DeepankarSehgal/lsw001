@@ -39,7 +39,9 @@ public class MonsPiece : MonoBehaviour
     public bool isCarryingBomb = false;
     public bool isCarryingPortion = false;
     public bool isHitBySpirit = false;
-
+    public int whiteFaintGaps = 0;
+    public int blackFaintGaps = 0;
+    public bool mySpecialAbilityUsed = false;
     private void Update()
     {
         transform.position = Vector2.Lerp(transform.position,desiredPos, Time.deltaTime*10);

@@ -112,6 +112,7 @@ MonoBehaviour:
   isCarryingSuperMana: 0
   isCarryingBomb: 0
   isCarryingPortion: 0
+  isHitBySpirit: 0
 --- !u!61 &-2071308583478157968
 BoxCollider2D:
   m_ObjectHideFlags: 0
