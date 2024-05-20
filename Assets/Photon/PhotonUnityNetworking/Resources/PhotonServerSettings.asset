@@ -41,6 +41,7 @@ MonoBehaviour:
   - UpdatePlayerTurn
   - StartTheGameWhenAllPlayerAreReady
   - ShowChallengeUI
+  - UpdatePlayerState
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

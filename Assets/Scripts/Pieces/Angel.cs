@@ -9,9 +9,9 @@ public class Angel : MonsPiece
     {
         List<Vector2Int> r = new List<Vector2Int>();
 
-        int direction = (team == 0) ? 1 : -1;
+        int direction = (monsPieceDataType.team == 0) ? 1 : -1;
 
-        if (isCarryingBomb)
+        if (monsPieceDataType.isCarryingBomb)
         {
             tileDistance = 3;
         }
@@ -30,14 +30,14 @@ public class Angel : MonsPiece
                 if (dx == 0 && dy == 0)
                     continue;
 
-                int newX = currentX + dx * direction;
-                int newY = currentY + dy * direction;
+                int newX = monsPieceDataType.currentX + dx * direction;
+                int newY = monsPieceDataType.currentY + dy * direction;
 
                 if (newX == 5 && newY == 5)
                     continue;
 
                 // Check if the new position is within bounds and empty
-                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null || board[newX, newY] != null && board[newX, newY].monsPieceType == MonsPieceType.bombOrPortion))
+                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null || board[newX, newY] != null && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion))
                 {
                     r.Add(new Vector2Int(newX, newY));
                 }
@@ -52,14 +52,14 @@ public class Angel : MonsPiece
                 if (dx == 0 && dy == 0)
                     continue;
 
-                int newX = currentX + dx * direction;
-                int newY = currentY + dy * direction;
+                int newX = monsPieceDataType.currentX + dx * direction;
+                int newY = monsPieceDataType.currentY + dy * direction;
 
                 if (newX == 5 && newY == 5)
                     continue;
 
                 // Check if the new position is within bounds and empty
-                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (/*!isCarryingBomb && board[newX, newY] == null ||*/ /*board[newX,newY]!=null && board[newX, newY].monsPieceType==MonsPieceType.bombOrPortion || */(isCarryingBomb && board[newX, newY]!=null && board[newX, newY].team!=team && board[newX,newY].monsPieceType!=MonsPieceType.mana && board[newX, newY].monsPieceType != MonsPieceType.supermana)))
+                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (/*!isCarryingBomb && board[newX, newY] == null ||*/ /*board[newX,newY]!=null && board[newX, newY].monsPieceType==MonsPieceType.bombOrPortion || */(monsPieceDataType.isCarryingBomb && board[newX, newY]!=null && board[newX, newY].monsPieceDataType.team!=monsPieceDataType.team && board[newX, newY].monsPieceDataType.monsPieceType!=MonsPieceType.mana && board[newX, newY].monsPieceDataType.monsPieceType != MonsPieceType.supermana)))
                 {
                     r.Add(new Vector2Int(newX, newY));
                 }

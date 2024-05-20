@@ -7,7 +7,7 @@ public class Mana : MonsPiece
     public override List<Vector2Int> GetAvailableMoves(ref MonsPiece[,] board, int tileCount)
     {
         List<Vector2Int> r = new List<Vector2Int>();
-        int direction = (team == 0) ? 1 : -1;
+        int direction = (monsPieceDataType.team == 0) ? 1 : -1;
 
         for (int dx = -1; dx <= 1; dx++)
         {
@@ -16,8 +16,8 @@ public class Mana : MonsPiece
                 if (dx == 0 && dy == 0)
                     continue;
 
-                int newX = currentX + dx * direction;
-                int newY = currentY + dy * direction;
+                int newX = monsPieceDataType.currentX + dx * direction;
+                int newY = monsPieceDataType.currentY + dy * direction;
 
                  if(newX == 5 && newY == 5)
                     continue;

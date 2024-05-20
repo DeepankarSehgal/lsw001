@@ -11,7 +11,7 @@ public class Drainer : MonsPiece
     public bool CanCollectBomb(ref MonsPiece[,] board, int x, int y)
     {
 
-        if (board[x, y].monsPieceType == MonsPieceType.bombOrPortion)
+        if (board[x, y].monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)
         {
             return true;
         }
@@ -21,9 +21,9 @@ public class Drainer : MonsPiece
     public override List<Vector2Int> GetAvailableMoves(ref MonsPiece[,] board, int tileCount)
     {
         List<Vector2Int> r = new List<Vector2Int>();
-        int direction = (team == 0) ? 1 : -1;
+        int direction = (monsPieceDataType.team == 0) ? 1 : -1;
 
-        if (isCarryingBomb)
+        if (monsPieceDataType.isCarryingBomb)
         {
             tileDistance = 3;
         }
@@ -39,15 +39,15 @@ public class Drainer : MonsPiece
                 if (dx == 0 && dy == 0)
                     continue;
 
-                int newX = currentX + dx * direction;
-                int newY = currentY + dy * direction;
+                int newX = monsPieceDataType.currentX + dx * direction;
+                int newY = monsPieceDataType.currentY + dy * direction;
 
 
-                bool isNotCarryingAnything = (!isCarryingMana && !isCarryingSuperMana && !isCarryingOppMana);
+                bool isNotCarryingAnything = (!isCarryingMana && !monsPieceDataType.isCarryingSuperMana && !monsPieceDataType.isCarryingOppMana);
                 // Check if the new position is within bounds and empty
                 if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount  && (board[newX, newY] == null 
-                                                                                        || isNotCarryingAnything &&  board[newX, newY].monsPieceType == MonsPieceType.mana 
-                                                                                        || isNotCarryingAnything && board[newX, newY].monsPieceType == MonsPieceType.supermana
+                                                                                        || isNotCarryingAnything &&  board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.mana 
+                                                                                        || isNotCarryingAnything && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.supermana
                                                                                         || CanCollectBomb(ref board, newX, newY)))
                 {
                     

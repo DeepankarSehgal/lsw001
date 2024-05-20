@@ -1,4 +1,6 @@
+using ExitGames.Client.Photon;
 using Photon.Pun;
+using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,11 +24,14 @@ namespace Scripts.Multiplayer
             photonView = GetComponent<PhotonView>();
             networkedPosition = new Vector3();
             networkWhiteTurn = true;
-            if(boardInstance != null )
+            if(boardInstance != null)
             {
                 Board.instance.onUpdatePlayerTurn -= OnUpdatePlayerTurn;
                 Board.instance.onUpdatePlayerTurn += OnUpdatePlayerTurn;
 
+                ////State
+                //Board.instance.onUpdatePlayerState -= OnUpdatePlayerState;
+                //Board.instance.onUpdatePlayerState += OnUpdatePlayerState;
             }
 
          
@@ -39,6 +44,7 @@ namespace Scripts.Multiplayer
         {
             GameplayManager.startSynch -= StartSynching;
             GameplayManager.startSynch += StartSynching;
+
         }
         private void StartSynching()
         {
@@ -50,7 +56,20 @@ namespace Scripts.Multiplayer
         {
             photonView.RPC(nameof(UpdatePlayerTurn), RpcTarget.All,canSwapTurn);
         }
+
+        private void OnUpdatePlayerState(MonsPieceDataType monsPieceData)
+        {
+            //photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All);
+            //SendCustomType(monsPieceData);
+        }
+
         [PunRPC]
+        private void UpdatePlayerState(MonsPieceDataType playerData)
+        {
+           // Board.instance.UpdateRemainingMove(playerData);
+
+        }
+            [PunRPC]
         private void UpdatePlayerTurn(bool updatePlayerTurn)
         {
             networkWhiteTurn = updatePlayerTurn;
@@ -63,6 +82,14 @@ namespace Scripts.Multiplayer
             //boardInstance.OnJoinedRoom();
             boardInstance.startGameWhenAllReady = false;
         }
+
+
+     
+
+
+
+
+
         private void Update()
         {
             if(!photonView.IsMine && PhotonNetwork.IsConnectedAndReady)

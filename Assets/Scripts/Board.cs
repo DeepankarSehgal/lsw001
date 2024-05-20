@@ -1,6 +1,8 @@
 using Cysharp.Threading.Tasks;
+using ExitGames.Client.Photon;
 using ExitGames.Client.Photon.StructWrapping;
 using Photon.Pun;
+using Photon.Realtime;
 using Scripts.Multiplayer;
 using System;
 using System.Collections;
@@ -80,6 +82,7 @@ public class Board : MonoBehaviour
     {
         instance = this;
         startGameWhenAllReady = true;
+        MonsPieceDataType.Register();
     }
 
     void Start()
@@ -87,9 +90,9 @@ public class Board : MonoBehaviour
         isWhiteTurn = true;
         //CreateMonsBoard();
         CreateMonsBoard();
-#if UNITY_EDITOR
-        OnJoinedRoom();
-#endif
+//#if UNITY_EDITOR
+//        OnJoinedRoom();
+//#endif
         //SpawnAllPiece();
         // PositionAllPiece();
         //CenterBoard();
@@ -98,6 +101,9 @@ public class Board : MonoBehaviour
     {
         GameplayManager.onJoinedRoom -= OnJoinedRoom;
         GameplayManager.onJoinedRoom += OnJoinedRoom;
+
+        PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+        PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
     }
     public void OnJoinedRoom()
     {
@@ -141,9 +147,9 @@ public class Board : MonoBehaviour
                 print("Hit position : " + hitPosition);
                 if (Input.GetMouseButton(0) && currentlyDraggingPiece == null)
                 {
-                    if (monsPiece[hitPosition.x, hitPosition.y] != null && !monsPiece[hitPosition.x, hitPosition.y].isFainted)
+                    if (monsPiece[hitPosition.x, hitPosition.y] != null && !monsPiece[hitPosition.x, hitPosition.y].monsPieceDataType.isFainted)
                     {
-                        if ((monsPiece[hitPosition.x, hitPosition.y].team == 0 && (isWhiteTurn || previousDraggingPiece != null && previousDraggingPiece.monsPieceType == MonsPieceType.spirit)) || (monsPiece[hitPosition.x, hitPosition.y].team == 1 && (!isWhiteTurn || previousDraggingPiece != null && previousDraggingPiece.monsPieceType == MonsPieceType.spirit)))
+                        if ((monsPiece[hitPosition.x, hitPosition.y].monsPieceDataType.team == 0 && (isWhiteTurn || previousDraggingPiece != null && previousDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.spirit)) || (monsPiece[hitPosition.x, hitPosition.y].monsPieceDataType.team == 1 && (!isWhiteTurn || previousDraggingPiece != null && previousDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.spirit)))
                         {
                             print("Previous piece " + previousDraggingPiece);
                             tapCount += 1;
@@ -152,7 +158,7 @@ public class Board : MonoBehaviour
                             //print("Previous piece 1" + currentlyDraggingPiece);
                             if (itemChances > 0)
                             {
-                                if (currentlyDraggingPiece.monsPieceType == MonsPieceType.mana)
+                                if (currentlyDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana)
                                 {
                                     manaTurn = true;
                                     availableMoves = currentlyDraggingPiece.GetAvailableMoves(ref monsPiece, boardSize);
@@ -174,7 +180,7 @@ public class Board : MonoBehaviour
                             {
                                 if (manaTurn == false)
                                 {
-                                    if (currentlyDraggingPiece.monsPieceType == MonsPieceType.mana)
+                                    if (currentlyDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana)
                                     {
                                         availableMoves = currentlyDraggingPiece.GetAvailableMoves(ref monsPiece, boardSize);
                                         HighLightTiles();
@@ -204,35 +210,35 @@ public class Board : MonoBehaviour
                 if (currentlyDraggingPiece != null && Input.GetMouseButtonDown(0))
                 {
 
-                    Vector2Int previousPosition = new Vector2Int(currentlyDraggingPiece.currentX, currentlyDraggingPiece.currentY);
+                    Vector2Int previousPosition = new Vector2Int(currentlyDraggingPiece.monsPieceDataType.currentX, currentlyDraggingPiece.monsPieceDataType.currentY);
                     if (availableMoves != null && availableMoves.Contains(hitPosition))
                         {
-                        if (currentlyDraggingPiece.monsPieceType!=MonsPieceType.mana && itemChances<=0)//To avoid glitch movess
+                        if (currentlyDraggingPiece.monsPieceDataType.monsPieceType!=MonsPieceType.mana && itemChances<=0)//To avoid glitch movess
                         {
                             return;
                         }
                         bool validMove = MoveTo(currentlyDraggingPiece, hitPosition.x, hitPosition.y);
                         if (!validMove)
                         {
-                            if (currentlyDraggingPiece.monsPieceType == MonsPieceType.drainer && currentlyDraggingPiece.isCarryingBomb)
+                            if (currentlyDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.drainer && currentlyDraggingPiece.monsPieceDataType.isCarryingBomb)
                             {
                                 // Check if the clicked position is within 3 spaces and there's an opponent piece
-                                if (Mathf.Abs(hitPosition.x - currentlyDraggingPiece.currentX) <= 3 &&
-                                    Mathf.Abs(hitPosition.y - currentlyDraggingPiece.currentY) <= 3 &&
+                                if (Mathf.Abs(hitPosition.x - currentlyDraggingPiece.monsPieceDataType.currentX) <= 3 &&
+                                    Mathf.Abs(hitPosition.y - currentlyDraggingPiece.monsPieceDataType.currentY) <= 3 &&
                                     monsPiece[hitPosition.x, hitPosition.y] != null &&
-                                    monsPiece[hitPosition.x, hitPosition.y].team != currentlyDraggingPiece.team &&
-                                    monsPiece[hitPosition.x, hitPosition.y].monsPieceType != MonsPieceType.mana)
+                                    monsPiece[hitPosition.x, hitPosition.y].monsPieceDataType.team != currentlyDraggingPiece.monsPieceDataType.team &&
+                                    monsPiece[hitPosition.x, hitPosition.y].monsPieceDataType.monsPieceType != MonsPieceType.mana)
                                 {
                                     // Faint the opponent piece
                                     print("Fainting the opponent piece by " + currentlyDraggingPiece);
 
-                                    currentlyDraggingPiece.isCarryingBomb = false;
+                                    currentlyDraggingPiece.monsPieceDataType.isCarryingBomb = false;
                                     GameObject bomb = currentlyDraggingPiece.transform.GetChild(0).gameObject;
                                     bomb.transform.SetParent(null);
                                     bomb.SetActive(false);
 
                                     FaintOpponentPiece(monsPiece[hitPosition.x, hitPosition.y]);
-                                    currentlyDraggingPiece.isCarryingBomb = false;
+                                    currentlyDraggingPiece.monsPieceDataType.isCarryingBomb = false;
                                 }
                             }
                             currentlyDraggingPiece.SetPosition(previousPosition);
@@ -268,7 +274,7 @@ public class Board : MonoBehaviour
 
                 if (currentlyDraggingPiece && Input.GetMouseButtonUp(0))
                 {
-                    currentlyDraggingPiece.SetPosition(new Vector2(currentlyDraggingPiece.currentX, currentlyDraggingPiece.currentY));
+                    currentlyDraggingPiece.SetPosition(new Vector2(currentlyDraggingPiece.monsPieceDataType.currentX, currentlyDraggingPiece.monsPieceDataType.currentY));
                     currentlyDraggingPiece = null;
                     ClearHighLight();
                 }
@@ -334,23 +340,23 @@ public class Board : MonoBehaviour
 
         monsPiece[3, 0] = SpawnWhitePiece(MonsPieceType.demon, 0);
         if (monsPiece[3, 0] != null)
-            monsPiece[3, 0].resetPos = new Vector2(3, 0);
+            monsPiece[3, 0].monsPieceDataType.resetPos = new Vector2(3, 0);
 
         monsPiece[4, 0] = SpawnWhitePiece(MonsPieceType.angel, 0);
         if (monsPiece[4, 0] != null)
-            monsPiece[4, 0].resetPos = new Vector2(4, 0);
+            monsPiece[4, 0].monsPieceDataType.resetPos = new Vector2(4, 0);
 
         monsPiece[5, 0] = SpawnWhitePiece(MonsPieceType.drainer, 0);
         if (monsPiece[5, 0] != null)
-            monsPiece[5, 0].resetPos = new Vector2(5, 0);
+            monsPiece[5, 0].monsPieceDataType.resetPos = new Vector2(5, 0);
 
         monsPiece[6, 0] = SpawnWhitePiece(MonsPieceType.spirit, 0);
         if (monsPiece[6, 0] != null)
-            monsPiece[6, 0].resetPos = new Vector2(6, 0);
+            monsPiece[6, 0].monsPieceDataType.resetPos = new Vector2(6, 0);
 
         monsPiece[7, 0] = SpawnWhitePiece(MonsPieceType.mystic, 0);
         if (monsPiece[7, 0] != null)
-            monsPiece[7, 0].resetPos = new Vector2(7, 0);
+            monsPiece[7, 0].monsPieceDataType.resetPos = new Vector2(7, 0);
 
         monsPiece[3, 4] = SpawnWhitePiece(MonsPieceType.mana, 0);
         monsPiece[4, 3] = SpawnWhitePiece(MonsPieceType.mana, 0);
@@ -365,23 +371,23 @@ public class Board : MonoBehaviour
 
         monsPiece[3, 10] = SpawnBlackPiece(MonsPieceType.demon, 1);
         if (monsPiece[3, 10] != null)
-            monsPiece[3, 10].resetPos = new Vector2(3, 10);
+            monsPiece[3, 10]    .monsPieceDataType.resetPos = new Vector2(3, 10);
 
         monsPiece[4, 10] = SpawnBlackPiece(MonsPieceType.angel, 1);
         if (monsPiece[4, 10] != null)
-            monsPiece[4, 10].resetPos = new Vector2(4, 10);
+            monsPiece[4, 10].monsPieceDataType.resetPos = new Vector2(4, 10);
 
         monsPiece[5, 10] = SpawnBlackPiece(MonsPieceType.drainer, 1);
         if (monsPiece[5, 10] != null)
-            monsPiece[5, 10].resetPos = new Vector2(5, 10);
+            monsPiece[5, 10].monsPieceDataType.resetPos = new Vector2(5, 10);
 
         monsPiece[6, 10] = SpawnBlackPiece(MonsPieceType.spirit, 1);
         if (monsPiece[6, 10] != null)
-            monsPiece[6, 10].resetPos = new Vector2(6, 10);
+            monsPiece[6, 10].monsPieceDataType.resetPos = new Vector2(6, 10);
 
         monsPiece[7, 10] = SpawnBlackPiece(MonsPieceType.mystic, 1);
         if (monsPiece[7, 10] != null)
-            monsPiece[7, 10].resetPos = new Vector2(7, 10);
+            monsPiece[7, 10].monsPieceDataType.resetPos = new Vector2(7, 10);
 
         monsPiece[3, 6] = SpawnBlackPiece(MonsPieceType.mana, 1);
         monsPiece[4, 7] = SpawnBlackPiece(MonsPieceType.mana, 1);
@@ -399,17 +405,17 @@ public class Board : MonoBehaviour
         if ((string)pieceType == "White")
         {
             mp = PhotonNetwork.Instantiate(Whiteprefabs[(int)type - 1].name, transform.localPosition, Quaternion.identity).GetComponent<MonsPiece>();
-            mp.team = team;
-            mp.monsPieceType = type;
+            mp.monsPieceDataType.team = team;
+            mp.monsPieceDataType.monsPieceType = type;
         }
         else
         {
             //Local testing..
-#if UNITY_EDITOR
-            mp = Instantiate(Whiteprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
-            mp.team = team;
-            mp.monsPieceType = type;
-#endif
+//#if UNITY_EDITOR
+//            mp = Instantiate(Whiteprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
+//            mp.team = team;
+//            mp.monsPieceType = type;
+//#endif
 
         }
         // Adjust spawn position for white pieces
@@ -426,16 +432,16 @@ public class Board : MonoBehaviour
         if ((string)pieceType == "Black")
         {
             mp = PhotonNetwork.Instantiate(Blackprefabs[(int)type - 1].name, transform.localPosition, Quaternion.identity).GetComponent<MonsPiece>();
-            mp.team = team;
-            mp.monsPieceType = type;
+            mp.monsPieceDataType.team = team;
+            mp.monsPieceDataType.monsPieceType = type;
         }
         else
         {
-#if UNITY_EDITOR
-            mp = Instantiate(Blackprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
-            mp.team = team;
-            mp.monsPieceType = type;
-#endif
+//#if UNITY_EDITOR
+//            mp = Instantiate(Blackprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
+//            mp.team = team;
+//            mp.monsPieceType = type;
+//#endif
         }
 
 
@@ -458,10 +464,10 @@ public class Board : MonoBehaviour
 
     public void PositionSinglePiece(int x, int y, bool force = false)
     {
-        monsPiece[x, y].currentX = x;
-        monsPiece[x, y].currentY = y;
+        monsPiece[x, y].monsPieceDataType.currentX = x;
+        monsPiece[x, y].monsPieceDataType.currentY = y;
         monsPiece[x, y].SetPosition(new Vector2(x, y), force);
-        print("MONS PIECE Position: " + monsPiece[x, y].team + ": x: " + x + " y: " + y);
+        print("MONS PIECE Position: " + monsPiece[x, y].monsPieceDataType.team + ": x: " + x + " y: " + y);
 
     }
 
@@ -483,7 +489,7 @@ public class Board : MonoBehaviour
         Color highlightColor = Color.green;
         for (int i = 0; i < availableMoves.Count; i++)
         {
-            if (currentlyDraggingPiece.isHitBySpirit)
+            if (currentlyDraggingPiece.monsPieceDataType.isHitBySpirit)
             {
                 highlightColor = Color.red;
             }
@@ -506,7 +512,7 @@ public class Board : MonoBehaviour
     {
         if (!ContainsValidMoves(ref availableMoves, new Vector2(x, y))) return false;
 
-        Vector2Int previousPosition = new Vector2Int(cp.currentX, cp.currentY);
+        Vector2Int previousPosition = new Vector2Int(cp.monsPieceDataType.currentX, cp.monsPieceDataType.currentY);
 
 
         MonsPiece ocp = null;
@@ -516,13 +522,13 @@ public class Board : MonoBehaviour
 
             ocp = monsPiece[x, y];
             previousDraggingPiece = cp;
-            cp.mySpecialAbilityUsed = true;
+            cp.monsPieceDataType.mySpecialAbilityUsed = true;
 
             bool isHitBySpirit = SpiritPushOtherPlayersLogic(ref cp, ref ocp);
             if (isHitBySpirit) return true;
-            if (cp.team == ocp.team)
+            if (cp.monsPieceDataType.team == ocp.monsPieceDataType.team)
             {
-                if (cp.monsPieceType == MonsPieceType.drainer && ocp.monsPieceType == MonsPieceType.mana)
+                if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
                 {
                     cp.GetComponent<Drainer>().isCarryingMana = true;
                     //monsPiece[x, y] = cp;
@@ -535,9 +541,9 @@ public class Board : MonoBehaviour
 
 
                 }
-                else if (cp.monsPieceType == MonsPieceType.drainer && ocp.monsPieceType == MonsPieceType.supermana)//confusion
+                else if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.supermana)//confusion
                 {
-                    cp.isCarryingSuperMana = true;
+                    cp.monsPieceDataType.isCarryingSuperMana = true;
                     ocp.gameObject.SetActive(false);
 
                     GameObject childMana = Instantiate(childManaSuperMana[1], cp.transform);
@@ -548,18 +554,18 @@ public class Board : MonoBehaviour
             }
             else
             {
-                if ((cp.monsPieceType == MonsPieceType.drainer || cp.monsPieceType == MonsPieceType.mystic || cp.monsPieceType == MonsPieceType.spirit || cp.monsPieceType == MonsPieceType.demon || cp.monsPieceType == MonsPieceType.angel) && ocp.monsPieceType == MonsPieceType.bombOrPortion)
+                if ((cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer || cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.monsPieceType == MonsPieceType.spirit || cp.monsPieceDataType.monsPieceType == MonsPieceType.demon || cp.monsPieceDataType.monsPieceType == MonsPieceType.angel) && ocp.monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)
                 {
                     monsPiece[x, y] = null;
                     selectedPiece = cp;
                     BombOrPortionChoicePanel.SetActive(true);
                     ocp.gameObject.SetActive(false);
-                    cp.mySpecialAbilityUsed = false;
+                    cp.monsPieceDataType.mySpecialAbilityUsed = false;
                 }
 
-                else if (cp.monsPieceType == MonsPieceType.drainer && ocp.monsPieceType == MonsPieceType.mana)
+                else if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
                 {
-                    cp.isCarryingOppMana = true;
+                    cp.monsPieceDataType.isCarryingOppMana = true;
                     ocp.gameObject.SetActive(false);
                     GameObject childMana = Instantiate(childManaSuperMana[0], cp.transform);
                     childMana.transform.SetParent(cp.transform, false);
@@ -569,16 +575,16 @@ public class Board : MonoBehaviour
                 {
 
 
-                    if (cp.monsPieceType == MonsPieceType.demon && ocp.currentX == ocp.resetPos.x && ocp.currentY == ocp.resetPos.y)
+                    if (cp.monsPieceDataType.monsPieceType == MonsPieceType.demon && ocp.monsPieceDataType.currentX == ocp.monsPieceDataType.resetPos.x && ocp.monsPieceDataType.currentY == ocp.monsPieceDataType.resetPos.y)
                     {
-                        monsPiece[(int)ocp.resetPos.x, (int)ocp.resetPos.y] = ocp;
+                        monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
                         return false;
                     }
 
-                    if (ocp.team == 0) //white team
+                    if (ocp.monsPieceDataType.team == 0) //white team
                     {
-                        if (cp.monsPieceType == MonsPieceType.mystic || cp.isCarryingBomb)
+                        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.isCarryingBomb)
                         {
                             isMysticAttackingTheOpponentPlayer = true;
 
@@ -587,17 +593,17 @@ public class Board : MonoBehaviour
                         ocp.FaintForTurns(2);
                         if (!isMysticAttackingTheOpponentPlayer)
                         {
-                            cp.SetPosition(ocp.resetPos);
-                            monsPiece[(int)ocp.resetPos.x, (int)ocp.resetPos.y] = ocp;
+                            cp.SetPosition(ocp.monsPieceDataType.resetPos);
+                            monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
                         }
 
-                        PositionSinglePiece((int)ocp.resetPos.x, (int)ocp.resetPos.y);
+                        PositionSinglePiece((int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y);
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
                         faintPlayers.Add(ocp);
                         //remove bomb if carrying
-                        if (cp.isCarryingBomb)
+                        if (cp.monsPieceDataType.isCarryingBomb)
                         {
-                            cp.isCarryingBomb = false;
+                            cp.monsPieceDataType.isCarryingBomb = false;
                             GameObject bomb = cp.transform.GetChild(0).gameObject;
                             bomb.transform.SetParent(null);
                             bomb.SetActive(false);
@@ -608,7 +614,7 @@ public class Board : MonoBehaviour
                     else
                     {
                         //black team
-                        if (cp.monsPieceType == MonsPieceType.mystic || cp.isCarryingBomb)
+                        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.isCarryingBomb)
                         {
                             isMysticAttackingTheOpponentPlayer = true;
 
@@ -617,16 +623,16 @@ public class Board : MonoBehaviour
                         ocp.FaintForTurns(2);
                         if (!isMysticAttackingTheOpponentPlayer)
                         {
-                            cp.SetPosition(cp.resetPos);
-                            monsPiece[(int)ocp.resetPos.x, (int)ocp.resetPos.y] = ocp;
+                            cp.SetPosition(cp.monsPieceDataType.resetPos);
+                            monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
                         }
-                        PositionSinglePiece((int)ocp.resetPos.x, (int)ocp.resetPos.y);
+                        PositionSinglePiece((int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y);
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
                         faintPlayers.Add(ocp);
                         //remove bomb if carrying
-                        if (cp.isCarryingBomb)
+                        if (cp.monsPieceDataType.isCarryingBomb)
                         {
-                            cp.isCarryingBomb = false;
+                            cp.monsPieceDataType.isCarryingBomb = false;
                             GameObject bomb = cp.transform.GetChild(0).gameObject;
                             bomb.transform.SetParent(null);
                             bomb.SetActive(false);
@@ -662,7 +668,7 @@ public class Board : MonoBehaviour
 
 
 
-        if (cp.monsPieceType == MonsPieceType.drainer && cp.GetComponent<Drainer>().isCarryingMana == true)
+        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && cp.GetComponent<Drainer>().isCarryingMana == true)
         {
             if ((x == 0 && y == 0) || (x == 0 && y == boardSize - 1) || (x == boardSize - 1 && y == 0) || (x == boardSize - 1 && y == boardSize - 1))
             {
@@ -684,11 +690,11 @@ public class Board : MonoBehaviour
 
         }
 
-        if (cp.monsPieceType == MonsPieceType.drainer && cp.isCarryingOppMana)
+        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && cp.monsPieceDataType.isCarryingOppMana)
         {
             if ((x == 0 && y == 0) || (x == 0 && y == boardSize - 1) || (x == boardSize - 1 && y == 0) || (x == boardSize - 1 && y == boardSize - 1))
             {
-                cp.isCarryingOppMana = false;
+                cp.monsPieceDataType.isCarryingOppMana = false;
 
                 Destroy(cp.gameObject.transform.GetChild(0).gameObject);
 
@@ -707,11 +713,11 @@ public class Board : MonoBehaviour
         }
 
 
-        if (cp.monsPieceType == MonsPieceType.drainer && cp.isCarryingSuperMana)
+        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && cp.monsPieceDataType.isCarryingSuperMana)
         {
             if ((x == 0 && y == 0) || (x == 0 && y == boardSize - 1) || (x == boardSize - 1 && y == 0) || (x == boardSize - 1 && y == boardSize - 1))
             {
-                cp.isCarryingSuperMana = false;
+                cp.monsPieceDataType.isCarryingSuperMana = false;
                 Destroy(cp.gameObject.transform.GetChild(0).gameObject);
                 if (isWhiteTurn)
                 {
@@ -730,21 +736,19 @@ public class Board : MonoBehaviour
 
 
 
-        if (cp.monsPieceType == MonsPieceType.mana)
+        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
         {
-            if (cp.isHitBySpirit)//spirit move logic
+            if (cp.monsPieceDataType.isHitBySpirit)//spirit move logic
             {
-                cp.isHitBySpirit = false;
-                if (cp.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
+                cp.monsPieceDataType.isHitBySpirit = false;
+                if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
                 {
                     previousDraggingPiece = cp;
                 }
                 return true;
             }
             manaTurn = false;
-#if !UNITY_EDITOR
-            UpdatePlayerTurns(!isWhiteTurn);
-#endif
+
             //if (ocp.isFainted)
             //{
             //    cp.isFainted = false;
@@ -754,31 +758,35 @@ public class Board : MonoBehaviour
             {
                 foreach (MonsPiece monsPiece in faintPlayers)
                 {
-                    if (isWhiteTurn && monsPiece.team == 1)
+                    if (isWhiteTurn && monsPiece.monsPieceDataType.team == 1)
                     {
-                        monsPiece.blackFaintGaps++;
+                        monsPiece.monsPieceDataType.blackFaintGaps++;
                     }
                     else
                     {
-                        monsPiece.whiteFaintGaps++;
+                        monsPiece.monsPieceDataType.whiteFaintGaps++;
                     }
-                    if (!isWhiteTurn && monsPiece.team == 0 && monsPiece.isFainted && monsPiece.whiteFaintGaps > 1)//for white faint players
+                    if (!isWhiteTurn && monsPiece.monsPieceDataType.team == 0 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.whiteFaintGaps > 1)//for white faint players
                     {
                         monsPiece.transform.localEulerAngles = Vector3.zero;
-                        monsPiece.isFainted = false;
+                        monsPiece.monsPieceDataType.isFainted = false;
                     }
-                    else if (isWhiteTurn && monsPiece.team == 1 && monsPiece.isFainted && monsPiece.blackFaintGaps > 1)//for black faint players
+                    else if (isWhiteTurn && monsPiece.monsPieceDataType.team == 1 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.blackFaintGaps > 1)//for black faint players
                     {
                         monsPiece.transform.localEulerAngles = Vector3.zero;
-                        monsPiece.isFainted = false;
+                        monsPiece.monsPieceDataType.isFainted = false;
                     }
 
 
 
                 }
             }
-            isWhiteTurn = !isWhiteTurn;
+            UpdatePlayerTurns(!isWhiteTurn);
+            //isWhiteTurn = !isWhiteTurn;
 
+//#if !UNITY_EDITOR
+//            UpdatePlayerTurns(!isWhiteTurn);
+//#endif
 
             //Faint reset logic 
             foreach (MonsPiece piece in monsPiece)
@@ -790,35 +798,40 @@ public class Board : MonoBehaviour
             }
             //Mana score logic 
             ManaScoreLogic(cp);
-            UpdateRemainingMove(cp);
+            //UpdateRemainingMove(cp.monsPieceDataType);
+            SendCustomType(cp.monsPieceDataType);
             previousDraggingPiece = cp;
             itemChances = 5;
+            currentlyDraggingPiece.monsPieceDataType.itemChances = itemChances;
         }
         else
         {
-            if ((cp.monsPieceType == MonsPieceType.drainer || cp.monsPieceType == MonsPieceType.demon || cp.monsPieceType == MonsPieceType.mystic || cp.monsPieceType == MonsPieceType.spirit) && cp.isCarryingPortion && ocp != null)
+            if ((cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer || cp.monsPieceDataType.monsPieceType == MonsPieceType.demon || cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.monsPieceType == MonsPieceType.spirit) && cp.monsPieceDataType.isCarryingPortion && ocp != null)
             {
                 itemChances++;
-                cp.isCarryingPortion = false;
+                cp.monsPieceDataType.isCarryingPortion = false;
             }
-            if (cp.isHitBySpirit)//spirit move logic
+            if (cp.monsPieceDataType.isHitBySpirit)//spirit move logic
             {
                 itemChances++;
-                cp.isHitBySpirit = false;
-                if (cp.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
+                cp.monsPieceDataType.isHitBySpirit = false;
+                if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
                 {
                     previousDraggingPiece = cp;
                 }
 
             }
             previousDraggingPiece = cp;
-            UpdateRemainingMove(cp);
+            //UpdateRemainingMove(cp.monsPieceDataType);
+            SendCustomType(cp.monsPieceDataType);
+
             itemChances--;
+            cp.monsPieceDataType.itemChances = itemChances;
         }
 
         if (itemChances <= 0)
         {
-            cp.isCarryingPortion = false;
+            cp.monsPieceDataType.isCarryingPortion = false;
         }
 
         if (whiteScore >= 5 || blackScore >= 5)
@@ -841,10 +854,10 @@ public class Board : MonoBehaviour
     private void ManaScoreLogic(MonsPiece cp)
     {
         if (cp == null) return;
-        Vector3 desiredPos = cp.desiredPos;
+        Vector3 desiredPos = cp.monsPieceDataType.desiredPos;
         if (desiredPos == new Vector3(0f, 0f, 0f) || desiredPos == new Vector3(0f, 10f, 0f) || desiredPos == new Vector3(10f, 10f, 0f) || desiredPos == new Vector3(10f, 0f, 0f))
         {
-            if (cp.team == 0)//white Mana
+            if (cp.monsPieceDataType.team == 0)//white Mana
             {
                 whiteScore++;
                 whiteScoreText.text = whiteScore.ToString();
@@ -861,11 +874,11 @@ public class Board : MonoBehaviour
 
     private bool SpiritPushOtherPlayersLogic(ref MonsPiece cp, ref MonsPiece ocp)
     {
-        if (cp.monsPieceType == MonsPieceType.spirit && ocp.monsPieceType != MonsPieceType.bombOrPortion && !cp.isCarryingBomb)
+        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.spirit && ocp.monsPieceDataType.monsPieceType != MonsPieceType.bombOrPortion && !cp.monsPieceDataType.isCarryingBomb)
         {
             //spirit logic 
-            ocp.isHitBySpirit = true;
-            cp.mySpecialAbilityUsed = true;
+            ocp.monsPieceDataType.isHitBySpirit = true;
+            cp.monsPieceDataType.mySpecialAbilityUsed = true;
             return true;
         }
 
@@ -873,6 +886,7 @@ public class Board : MonoBehaviour
     }
 
     public Action<bool> onUpdatePlayerTurn;
+    public Action<MonsPieceDataType> onUpdatePlayerState;
     public void UpdatePlayerTurns(bool swapTurn = false)
     {
         isWhiteTurn = swapTurn;
@@ -902,10 +916,10 @@ public class Board : MonoBehaviour
     {
 
         target.FaintForTurns(2);
-        target.SetPosition(target.resetPos);
-        monsPiece[target.currentX, target.currentY] = null;
-        monsPiece[(int)target.resetPos.x, (int)target.resetPos.y] = target;
-        PositionSinglePiece((int)target.resetPos.x, (int)target.resetPos.y);
+        target.SetPosition(target.monsPieceDataType.resetPos);
+        monsPiece[target.monsPieceDataType.currentX, target.monsPieceDataType.currentY] = null;
+        monsPiece[(int)target.monsPieceDataType.resetPos.x, (int)target.monsPieceDataType.resetPos.y] = target;
+        PositionSinglePiece((int)target.monsPieceDataType.resetPos.x, (int)target.monsPieceDataType.resetPos.y);
         target.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
         Debug.Log("fainted");
         faintPlayers.Add(target);
@@ -941,7 +955,7 @@ public class Board : MonoBehaviour
     public void OnButtonBombClick()
     {
         choice = 1;
-        selectedPiece.isCarryingBomb = true;
+        selectedPiece.monsPieceDataType.isCarryingBomb = true;
         GameObject Bomb = Instantiate(BombOrPortionObj[0]);
         Bomb.transform.SetParent(selectedPiece.transform);
         Bomb.transform.localPosition = new Vector3(0.1f, -0.22f);
@@ -953,7 +967,7 @@ public class Board : MonoBehaviour
     public void OnButtonPortionClick()
     {
         choice = 2;
-        selectedPiece.isCarryingPortion = true;
+        selectedPiece.monsPieceDataType.isCarryingPortion = true;
         GameObject Bomb = Instantiate(BombOrPortionObj[1]);
         Bomb.transform.SetParent(selectedPiece.transform);
         Bomb.transform.localPosition = new Vector3(0.1f, -0.22f);
@@ -972,8 +986,7 @@ public class Board : MonoBehaviour
         }
     }
 
-    bool onceAbilityUsed = false;
-    private void UpdateRemainingMove(MonsPiece cp)
+    public void UpdateRemainingMove(MonsPieceDataType cp)
     {
         if (cp.monsPieceType == MonsPieceType.mana)
         {
@@ -994,17 +1007,17 @@ public class Board : MonoBehaviour
         else
         {
             print("Update remaing moves else part" + cp.mySpecialAbilityUsed);
-            if (!cp.mySpecialAbilityUsed || onceAbilityUsed)
+            if (!cp.mySpecialAbilityUsed || cp.onceAbilityUsed)
             {
-                if (itemChances > 5 || itemChances <= 0) return;
+                if (cp.itemChances > 5 || cp.itemChances <= 0) return;
                 if (cp.team == 0)
                 {
                     print("Item Chances index" + itemChances);
-                    RemainingMovesHolder[0].transform.GetChild(itemChances - 1).gameObject.SetActive(false);
+                    RemainingMovesHolder[0].transform.GetChild(cp.itemChances - 1).gameObject.SetActive(false);
                 }
                 else
                 {
-                    RemainingMovesHolder[1].transform.GetChild(itemChances - 1).gameObject.SetActive(false);
+                    RemainingMovesHolder[1].transform.GetChild(cp.itemChances - 1).gameObject.SetActive(false);
                 }
 
             }
@@ -1019,11 +1032,39 @@ public class Board : MonoBehaviour
                     RemainingMovesHolder[1].transform.GetChild(5).gameObject.SetActive(false);
                 }
                 itemChances++;
-                onceAbilityUsed = true;
+                cp.itemChances = itemChances;
+                cp.onceAbilityUsed = true;
             }
+        }
+
+        // onUpdatePlayerState?.Invoke(cp);
+       
+
+    }
+
+
+    //PUN2
+    bool sendCustomData = true;
+    public void SendCustomType(MonsPieceDataType customData)
+    {
+        PhotonNetwork.RaiseEvent(0, customData, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
+    }
+
+    public void OnEvent(EventData photonEvent)
+    {
+        if (photonEvent.Code == 0)
+        {
+            MonsPieceDataType receivedData = (MonsPieceDataType)photonEvent.CustomData;
+            Debug.Log("Received custom data: " + receivedData.team +  " PieceType: " +  receivedData.monsPieceType);
+            UpdateRemainingMove(receivedData);
         }
     }
 
+
+    void OnDisable()
+    {
+        PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+    }
 
 }
 
@@ -1046,4 +1087,7 @@ public class CellHover : MonoBehaviour
     {
         GetComponent<SpriteRenderer>().color = originalColor;
     }
+
+
+   
 }

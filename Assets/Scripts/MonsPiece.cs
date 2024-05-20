@@ -1,5 +1,8 @@
+using ExitGames.Client.Photon;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 
@@ -17,8 +20,8 @@ public enum MonsPieceType
     portion = 9,
     bombOrPortion = 10
 }
-
-public class MonsPiece : MonoBehaviour
+[Serializable]
+public class MonsPieceDataType 
 {
     public int team;
     public int currentX;
@@ -31,7 +34,7 @@ public class MonsPiece : MonoBehaviour
     public Vector2 resetPos;
 
     public bool isFainted;
-    private int faintedTurnsRemaining;
+    public int faintedTurnsRemaining;
 
 
     public bool isCarryingOppMana = false;
@@ -42,9 +45,82 @@ public class MonsPiece : MonoBehaviour
     public int whiteFaintGaps = 0;
     public int blackFaintGaps = 0;
     public bool mySpecialAbilityUsed = false;
+    public bool onceAbilityUsed = false;
+    public int itemChances = 5;
+
+    public static void Register()
+    {
+        PhotonPeer.RegisterType(typeof(MonsPieceDataType), (byte)'M', MyCustomTypeSerializer.Serialize, MyCustomTypeSerializer.Deserialize);
+    }
+}
+public static class MyCustomTypeSerializer
+{
+    public static byte[] Serialize(object customObject)
+    {
+        MonsPieceDataType myCustomType = (MonsPieceDataType)customObject;
+        using (MemoryStream ms = new MemoryStream())
+        {
+            using (BinaryWriter writer = new BinaryWriter(ms))
+            {
+                writer.Write(myCustomType.team);
+                //writer.Write(myCustomType.currentX);
+                //writer.Write(myCustomType.currentY);
+                writer.Write(((int)myCustomType.monsPieceType));
+                writer.Write((myCustomType.mySpecialAbilityUsed));
+                writer.Write((myCustomType.onceAbilityUsed));
+                writer.Write((myCustomType.itemChances));
+            }
+            return ms.ToArray();
+        }
+    }
+
+    public static object Deserialize(byte[] data)
+    {
+        MonsPieceDataType myCustomType = new MonsPieceDataType();
+        using (MemoryStream ms = new MemoryStream(data))
+        {
+            using (BinaryReader reader = new BinaryReader(ms))
+            {
+                myCustomType.team = reader.ReadInt32();
+                myCustomType.monsPieceType = (MonsPieceType)reader.ReadInt32();
+                myCustomType.mySpecialAbilityUsed = reader.ReadBoolean();
+                myCustomType.onceAbilityUsed = reader.ReadBoolean();
+                myCustomType.itemChances = reader.ReadInt32();
+            }
+        }
+        return myCustomType;
+    }
+}
+
+
+public class MonsPiece : MonoBehaviour
+{
+    //public int team;
+    //public int currentX;
+    //public int currentY;
+    //public MonsPieceType monsPieceType;
+
+    //public Vector3 desiredPos;
+    //public Vector3 desiredScale;
+
+    //public Vector2 resetPos;
+
+    //public bool isFainted;
+    //private int faintedTurnsRemaining;
+
+
+    //public bool isCarryingOppMana = false;
+    //public bool isCarryingSuperMana = false;
+    //public bool isCarryingBomb = false;
+    //public bool isCarryingPortion = false;
+    //public bool isHitBySpirit = false;
+    //public int whiteFaintGaps = 0;
+    //public int blackFaintGaps = 0;
+    //public bool mySpecialAbilityUsed = false;
+    public MonsPieceDataType monsPieceDataType;
     private void Update()
     {
-        transform.position = Vector2.Lerp(transform.position,desiredPos, Time.deltaTime*10);
+        transform.position = Vector2.Lerp(transform.position, monsPieceDataType.desiredPos, Time.deltaTime*10);
     }
 
     public virtual List<Vector2Int> GetAvailableMoves(ref MonsPiece[,] board,int tileCount)
@@ -59,26 +135,26 @@ public class MonsPiece : MonoBehaviour
 
     public virtual void SetPosition(Vector2 position, bool force = false)
     {
-        desiredPos = position;
+        monsPieceDataType.desiredPos = position;
         if(force)
-            transform.localPosition = desiredPos;
+            transform.localPosition = monsPieceDataType.desiredPos;
     }
 
 
     public void FaintForTurns(int numTurns)
     {
-        isFainted = true;
-        faintedTurnsRemaining = numTurns;
+        monsPieceDataType.isFainted = true;
+        monsPieceDataType.faintedTurnsRemaining = numTurns;
     }
 
     public void UpdateFaintedTurns()
     {
-        if (isFainted)
+        if (monsPieceDataType.isFainted)
         {
-            faintedTurnsRemaining--;
-            if (faintedTurnsRemaining <= 0)
+            monsPieceDataType.faintedTurnsRemaining--;
+            if (monsPieceDataType.faintedTurnsRemaining <= 0)
             {
-                isFainted = false;
+                monsPieceDataType.isFainted = false;
                 gameObject.transform.rotation = Quaternion.Euler(0, 0, 0);
             }
         }

@@ -100,19 +100,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87cc0b50af5b2494db94289d7ca00eb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 0
-  currentX: 0
-  currentY: 0
-  monsPieceType: 0
-  desiredPos: {x: 0, y: 0, z: 0}
-  desiredScale: {x: 0, y: 0, z: 0}
-  resetPos: {x: 0, y: 0}
-  isFainted: 0
-  isCarryingOppMana: 0
-  isCarryingSuperMana: 0
-  isCarryingBomb: 0
-  isCarryingPortion: 0
-  isHitBySpirit: 0
+  monsPieceDataType:
+    team: 0
+    currentX: 0
+    currentY: 0
+    monsPieceType: 0
+    desiredPos: {x: 0, y: 0, z: 0}
+    desiredScale: {x: 0, y: 0, z: 0}
+    resetPos: {x: 0, y: 0}
+    isFainted: 0
+    faintedTurnsRemaining: 0
+    isCarryingOppMana: 0
+    isCarryingSuperMana: 0
+    isCarryingBomb: 0
+    isCarryingPortion: 0
+    isHitBySpirit: 0
+    whiteFaintGaps: 0
+    blackFaintGaps: 0
+    mySpecialAbilityUsed: 0
+    onceAbilityUsed: 0
+    itemChances: 0
 --- !u!61 &3749080590066851863
 BoxCollider2D:
   m_ObjectHideFlags: 0
