@@ -42,6 +42,7 @@ MonoBehaviour:
   - StartTheGameWhenAllPlayerAreReady
   - ShowChallengeUI
   - UpdatePlayerState
+  - RPC_SynchPlayerData
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

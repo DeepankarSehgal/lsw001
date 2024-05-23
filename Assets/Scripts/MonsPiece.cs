@@ -1,4 +1,5 @@
 using ExitGames.Client.Photon;
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -135,11 +136,14 @@ public class MonsPiece : MonoBehaviour
 
     public virtual void SetPosition(Vector2 position, bool force = false)
     {
-        monsPieceDataType.desiredPos = position;
-        if(force)
-            transform.localPosition = monsPieceDataType.desiredPos;
-    }
+      
 
+        monsPieceDataType.desiredPos = position;
+        print("My rpc synch data desired pos is local: " + position);
+        if (force)
+            transform.localPosition = monsPieceDataType.desiredPos;
+
+    }
 
     public void FaintForTurns(int numTurns)
     {

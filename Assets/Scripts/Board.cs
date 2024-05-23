@@ -89,7 +89,7 @@ public class Board : MonoBehaviour
     {
         isWhiteTurn = true;
         //CreateMonsBoard();
-        CreateMonsBoard();
+       
 //#if UNITY_EDITOR
 //        OnJoinedRoom();
 //#endif
@@ -111,14 +111,22 @@ public class Board : MonoBehaviour
         if (PhotonNetwork.IsConnectedAndReady || true)
         {
             print("On Joined room of board get called!");
+            CreateMonsBoard();
             SpawnAllPiece();
             //Invoke(nameof(PositionAllPiece), 10f);
             PositionAllPiece();
             CenterBoard();
+            //Invoke(nameof(DelayCall), 8f);
             startGame = true;
+            onUpdatePlayerState?.Invoke();
             //GameplayManager.startSynch?.Invoke();
         }
 
+    }
+
+    private void DelayCall()
+    {
+      
     }
     int tapCount = 0;
     void Update()
@@ -244,6 +252,7 @@ public class Board : MonoBehaviour
                             currentlyDraggingPiece.SetPosition(previousPosition);
 
                         }
+                        onUpdatePlayerState?.Invoke();
                         tapCount = 0;
                         //ClearHighLight();
 
@@ -338,6 +347,7 @@ public class Board : MonoBehaviour
     {
         monsPiece = new MonsPiece[11, 11];
 
+        //White Pieces
         monsPiece[3, 0] = SpawnWhitePiece(MonsPieceType.demon, 0);
         if (monsPiece[3, 0] != null)
             monsPiece[3, 0].monsPieceDataType.resetPos = new Vector2(3, 0);
@@ -363,15 +373,15 @@ public class Board : MonoBehaviour
         monsPiece[5, 4] = SpawnWhitePiece(MonsPieceType.mana, 0);
         monsPiece[6, 3] = SpawnWhitePiece(MonsPieceType.mana, 0);
         monsPiece[7, 4] = SpawnWhitePiece(MonsPieceType.mana, 0);
-
         monsPiece[5, 5] = SpawnWhitePiece(MonsPieceType.supermana, 0);
 
+        //Black Pieces
         monsPiece[0, 5] = SpawnBlackPiece(MonsPieceType.bombOrPortion, -1);
         monsPiece[10, 5] = SpawnBlackPiece(MonsPieceType.bombOrPortion, -1);
 
         monsPiece[3, 10] = SpawnBlackPiece(MonsPieceType.demon, 1);
         if (monsPiece[3, 10] != null)
-            monsPiece[3, 10]    .monsPieceDataType.resetPos = new Vector2(3, 10);
+            monsPiece[3, 10].monsPieceDataType.resetPos = new Vector2(3, 10);
 
         monsPiece[4, 10] = SpawnBlackPiece(MonsPieceType.angel, 1);
         if (monsPiece[4, 10] != null)
@@ -886,7 +896,7 @@ public class Board : MonoBehaviour
     }
 
     public Action<bool> onUpdatePlayerTurn;
-    public Action<MonsPieceDataType> onUpdatePlayerState;
+    public Action onUpdatePlayerState;
     public void UpdatePlayerTurns(bool swapTurn = false)
     {
         isWhiteTurn = swapTurn;
@@ -1047,19 +1057,35 @@ public class Board : MonoBehaviour
     bool sendCustomData = true;
     public void SendCustomType(MonsPieceDataType customData)
     {
+        PhotonNetwork.RaiseEvent(1, customData, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
+    }
+    public void SendCustomTypeForBoard(MonsPieceDataType customData)
+    {
         PhotonNetwork.RaiseEvent(0, customData, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
     }
 
     public void OnEvent(EventData photonEvent)
     {
-        if (photonEvent.Code == 0)
+
+        if (photonEvent.Code == 0)//For updating on movement and remaining moving within the room
         {
-            MonsPieceDataType receivedData = (MonsPieceDataType)photonEvent.CustomData;
-            Debug.Log("Received custom data: " + receivedData.team +  " PieceType: " +  receivedData.monsPieceType);
-            UpdateRemainingMove(receivedData);
+            MonsPiece receivedData = (MonsPiece)photonEvent.CustomData;
+            Debug.Log("Received custom data: " + receivedData.monsPieceDataType.team + " PieceType: " + receivedData.monsPieceDataType.monsPieceType);
+            UpdateRemainingMove(receivedData.monsPieceDataType);
         }
+        //if (photonEvent.Code == 1)//For updating Board respective pieces
+        //{
+        //    MonsPieceDataType receivedData = (MonsPieceDataType)photonEvent.CustomData;
+        //    Debug.Log("Received custom data: " + receivedData.team +  " PieceType: " +  receivedData.monsPieceType);
+        //    UpdatePiecePositionRelativeToBoard(receivedData);
+        //}
     }
 
+    private void UpdatePiecePositionRelativeToBoard(MonsPiece piece)
+    {
+        Vector2 currentPos = piece.monsPieceDataType.desiredPos;
+        monsPiece[(int)currentPos.x, (int)currentPos.y] = piece;
+    }
 
     void OnDisable()
     {

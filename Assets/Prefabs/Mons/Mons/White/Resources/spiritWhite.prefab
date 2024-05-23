@@ -120,6 +120,7 @@ MonoBehaviour:
     mySpecialAbilityUsed: 0
     onceAbilityUsed: 0
     itemChances: 0
+  myPhotonView: {fileID: 0}
 --- !u!61 &-3761244175025480264
 BoxCollider2D:
   m_ObjectHideFlags: 0

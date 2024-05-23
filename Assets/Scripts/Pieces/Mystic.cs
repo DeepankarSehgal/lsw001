@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Mystic : MonsPiece
 {
+   
     int tileDistance = 2;
     public bool CanCollectBomb(ref MonsPiece[,] board, int x, int y)
     {

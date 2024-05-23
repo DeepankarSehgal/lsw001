@@ -119,6 +119,7 @@ MonoBehaviour:
     mySpecialAbilityUsed: 0
     onceAbilityUsed: 0
     itemChances: 0
+  myPhotonView: {fileID: 0}
 --- !u!114 &-6392042499707560601
 MonoBehaviour:
   m_ObjectHideFlags: 0

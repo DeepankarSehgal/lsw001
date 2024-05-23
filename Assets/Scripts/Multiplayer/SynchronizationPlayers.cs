@@ -4,6 +4,7 @@ using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -14,24 +15,31 @@ namespace Scripts.Multiplayer
 
         private PhotonView photonView;
         private Vector3 networkedPosition;
+        private Vector3 networkedRotation;
         bool networkWhiteTurn;
         private Board boardInstance => Board.instance;
         private bool startSynching = false;
+
+        MonsPiece monsPiece;
         //private Quaternion networkedRotation;
+
+        private void Awake()
+        {
+            monsPiece = GetComponent<MonsPiece>();
+            photonView = GetComponent<PhotonView>();
+        }
         #region Unity Methods
         private void Start()
         {
-            photonView = GetComponent<PhotonView>();
+            
             networkedPosition = new Vector3();
             networkWhiteTurn = true;
             if(boardInstance != null)
             {
                 Board.instance.onUpdatePlayerTurn -= OnUpdatePlayerTurn;
                 Board.instance.onUpdatePlayerTurn += OnUpdatePlayerTurn;
-
-                ////State
-                //Board.instance.onUpdatePlayerState -= OnUpdatePlayerState;
-                //Board.instance.onUpdatePlayerState += OnUpdatePlayerState;
+             
+              
             }
 
          
@@ -42,8 +50,9 @@ namespace Scripts.Multiplayer
 
         private void OnEnable()
         {
-            GameplayManager.startSynch -= StartSynching;
-            GameplayManager.startSynch += StartSynching;
+            ////State
+            Board.instance.onUpdatePlayerState -= OnUpdatePlayerState;
+            Board.instance.onUpdatePlayerState += OnUpdatePlayerState;
 
         }
         private void StartSynching()
@@ -57,16 +66,21 @@ namespace Scripts.Multiplayer
             photonView.RPC(nameof(UpdatePlayerTurn), RpcTarget.All,canSwapTurn);
         }
 
-        private void OnUpdatePlayerState(MonsPieceDataType monsPieceData)
+        private void OnUpdatePlayerState()
         {
-            //photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All);
-            //SendCustomType(monsPieceData);
+            string monsData = JsonUtility.ToJson(monsPiece.monsPieceDataType);
+            photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All, monsData);
+
         }
 
         [PunRPC]
-        private void UpdatePlayerState(MonsPieceDataType playerData)
+        private void UpdatePlayerState(string monsData)
         {
-           // Board.instance.UpdateRemainingMove(playerData);
+            // Board.instance.UpdateRemainingMove(playerData);
+            monsPiece.monsPieceDataType = JsonUtility.FromJson<MonsPieceDataType>(monsData);
+            MonsPieceDataType monsPieceDataType = monsPiece.monsPieceDataType;
+            boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
+            print("Mons desired pos:" + monsPieceDataType.desiredPos);
 
         }
             [PunRPC]
@@ -83,19 +97,15 @@ namespace Scripts.Multiplayer
             boardInstance.startGameWhenAllReady = false;
         }
 
-
-     
-
-
-
-
-
         private void Update()
         {
             if(!photonView.IsMine && PhotonNetwork.IsConnectedAndReady)
             {
                 //transform.localPosition = Vector3.MoveTowards(transform.localPosition, networkedPosition, Time.deltaTime);
                 transform.localPosition = networkedPosition;
+               // transform.localEulerAngles = networkedRotation;
+
+
             }
         }
 
@@ -104,11 +114,13 @@ namespace Scripts.Multiplayer
             if (stream.IsWriting)//Owner/Local player
             {
                 stream.SendNext(transform.localPosition);
+               // stream.SendNext(transform.localEulerAngles);
             }
             else
             {
                 //the owner in the remote player area
                 networkedPosition = (Vector3)stream.ReceiveNext();
+               // networkedRotation = (Vector3)stream.ReceiveNext();
                 print("On PhotonSerializeView called!" + networkedPosition);
                 //networkedRotation =(Quaternion) stream.ReceiveNext();
             }
