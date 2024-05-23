@@ -252,7 +252,7 @@ public class Board : MonoBehaviour
                             currentlyDraggingPiece.SetPosition(previousPosition);
 
                         }
-                        onUpdatePlayerState?.Invoke();
+                        //onUpdatePlayerState?.Invoke();
                         tapCount = 0;
                         //ClearHighLight();
 
