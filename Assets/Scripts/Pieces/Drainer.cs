@@ -6,7 +6,7 @@ using UnityEngine;
 public class Drainer : MonsPiece
 {
 
-    public bool isCarryingMana = false;
+    
     int tileDistance = 1;
     public bool CanCollectBomb(ref MonsPiece[,] board, int x, int y)
     {
@@ -43,7 +43,7 @@ public class Drainer : MonsPiece
                 int newY = monsPieceDataType.currentY + dy * direction;
 
 
-                bool isNotCarryingAnything = (!isCarryingMana && !monsPieceDataType.isCarryingSuperMana && !monsPieceDataType.isCarryingOppMana);
+                bool isNotCarryingAnything = (!monsPieceDataType.isCarryingMana && !monsPieceDataType.isCarryingSuperMana && !monsPieceDataType.isCarryingOppMana);
                 // Check if the new position is within bounds and empty
                 if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount  && (board[newX, newY] == null 
                                                                                         || isNotCarryingAnything &&  board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.mana 

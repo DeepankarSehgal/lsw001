@@ -120,7 +120,8 @@ MonoBehaviour:
     mySpecialAbilityUsed: 0
     onceAbilityUsed: 0
     itemChances: 0
-  myPhotonView: {fileID: 0}
+    isCarryingMana: 0
+    isCarriedByDrainer: 0
 --- !u!61 &-8024033573288255734
 BoxCollider2D:
   m_ObjectHideFlags: 0

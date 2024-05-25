@@ -48,6 +48,9 @@ public class MonsPieceDataType
     public bool mySpecialAbilityUsed = false;
     public bool onceAbilityUsed = false;
     public int itemChances = 5;
+    public bool isCarryingMana = false;
+    public bool isCarriedByDrainer = false;
+
 
     public static void Register()
     {

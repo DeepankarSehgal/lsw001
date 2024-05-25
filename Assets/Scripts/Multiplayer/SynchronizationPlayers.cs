@@ -66,10 +66,14 @@ namespace Scripts.Multiplayer
             photonView.RPC(nameof(UpdatePlayerTurn), RpcTarget.All,canSwapTurn);
         }
 
-        private void OnUpdatePlayerState()
+        public void OnUpdatePlayerState()
         {
-            string monsData = JsonUtility.ToJson(monsPiece.monsPieceDataType);
-            photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All, monsData);
+            if (monsPiece == null) return;
+                string monsData = JsonUtility.ToJson(monsPiece.monsPieceDataType);
+                photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All, monsData);
+                print("Remote update for " + monsPiece.monsPieceDataType.monsPieceType + " Team: " + monsPiece.monsPieceDataType.team);
+
+          
 
         }
 
@@ -77,7 +81,43 @@ namespace Scripts.Multiplayer
         private void UpdatePlayerState(string monsData)
         {
             // Board.instance.UpdateRemainingMove(playerData);
-            monsPiece.monsPieceDataType = JsonUtility.FromJson<MonsPieceDataType>(monsData);
+           
+                monsPiece.monsPieceDataType = JsonUtility.FromJson<MonsPieceDataType>(monsData);
+            if(monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.drainer)
+            {
+                print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);
+                if (!PhotonNetwork.IsMasterClient)
+                {
+                    if (monsPiece.monsPieceDataType.isCarryingMana && transform.childCount<=0)
+                    {
+                        GameObject childMana = Instantiate(boardInstance.childManaSuperMana[0], transform);
+                        childMana.transform.SetParent(transform, false);
+                    }
+                    else
+                    {
+                        if (transform.childCount > 0)
+                        {
+                            Destroy(transform.GetChild(0).gameObject);
+                        }
+
+                    }
+                   
+                }
+              
+            }
+            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana)
+            {
+                print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);
+                if (monsPiece.monsPieceDataType.isCarriedByDrainer && !PhotonNetwork.IsMasterClient)
+                {
+                    gameObject.SetActive(false);
+                }
+
+            }
+            //if (monsPiece.monsPieceDataType != null && monsPiece.monsPieceDataType.monsPieceType == monsPiece.monsPieceDataType.monsPieceType && monsPieceDataType.team == monsPiece.monsPieceDataType.team || forceInitialize)
+            //{
+
+            //}
             MonsPieceDataType monsPieceDataType = monsPiece.monsPieceDataType;
             boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
             print("Mons desired pos:" + monsPieceDataType.desiredPos);
@@ -97,6 +137,16 @@ namespace Scripts.Multiplayer
             boardInstance.startGameWhenAllReady = false;
         }
 
+      
+        public void UpdateScore(int whiteScore, int blackScore)
+        {
+         photonView.RPC(nameof(SynchScore), RpcTarget.All,whiteScore, blackScore);
+        }
+        [PunRPC]
+        private void SynchScore(int whiteScore, int blackScore)
+        {
+            boardInstance.SynchScore(whiteScore, blackScore);
+        }
         private void Update()
         {
             if(!photonView.IsMine && PhotonNetwork.IsConnectedAndReady)

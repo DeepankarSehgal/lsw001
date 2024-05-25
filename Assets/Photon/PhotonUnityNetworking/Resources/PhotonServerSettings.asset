@@ -43,6 +43,8 @@ MonoBehaviour:
   - ShowChallengeUI
   - UpdatePlayerState
   - RPC_SynchPlayerData
+  - UpdateScore
+  - SynchScore
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

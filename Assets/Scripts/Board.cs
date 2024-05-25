@@ -252,7 +252,7 @@ public class Board : MonoBehaviour
                             currentlyDraggingPiece.SetPosition(previousPosition);
 
                         }
-                        //onUpdatePlayerState?.Invoke();
+                       
                         tapCount = 0;
                         //ClearHighLight();
 
@@ -540,9 +540,11 @@ public class Board : MonoBehaviour
             {
                 if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
                 {
-                    cp.GetComponent<Drainer>().isCarryingMana = true;
+                    cp.monsPieceDataType.isCarryingMana = true;
                     //monsPiece[x, y] = cp;
                     //monsPiece[previousPosition.x, previousPosition.y] = null;
+                    ocp.monsPieceDataType.isCarriedByDrainer = true;
+                    ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
                     ocp.gameObject.SetActive(false);
                     //ocp.gameObject.transform.GetComponent<Transform>().localScale = new Vector3(0.3f,0.3f,0.3f);
 
@@ -577,6 +579,8 @@ public class Board : MonoBehaviour
                 {
                     cp.monsPieceDataType.isCarryingOppMana = true;
                     ocp.gameObject.SetActive(false);
+                    ocp.monsPieceDataType.isCarriedByDrainer = true;
+                    ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
                     GameObject childMana = Instantiate(childManaSuperMana[0], cp.transform);
                     childMana.transform.SetParent(cp.transform, false);
                 }
@@ -658,7 +662,8 @@ public class Board : MonoBehaviour
 
         }
 
-
+        currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+        //onUpdatePlayerState?.Invoke();
         //resetting here at last
 
         if (!isMysticAttackingTheOpponentPlayer)
@@ -678,11 +683,11 @@ public class Board : MonoBehaviour
 
 
 
-        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && cp.GetComponent<Drainer>().isCarryingMana == true)
+        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && cp.monsPieceDataType.isCarryingMana == true)
         {
             if ((x == 0 && y == 0) || (x == 0 && y == boardSize - 1) || (x == boardSize - 1 && y == 0) || (x == boardSize - 1 && y == boardSize - 1))
             {
-                cp.GetComponent<Drainer>().isCarryingMana = false;
+                cp.monsPieceDataType.isCarryingMana = false;
 
                 Destroy(cp.gameObject.transform.GetChild(0).gameObject);
 
@@ -696,6 +701,7 @@ public class Board : MonoBehaviour
                     blackScore++;
                     blackScoreText.text = blackScore.ToString();
                 }
+                cp.GetComponent<SynchronizationPlayers>().UpdateScore(whiteScore,blackScore);
             }
 
         }
@@ -718,6 +724,8 @@ public class Board : MonoBehaviour
                     blackScore = blackScore + 2;
                     blackScoreText.text = blackScore.ToString();
                 }
+                cp.GetComponent<SynchronizationPlayers>().UpdateScore(whiteScore, blackScore);
+
             }
 
         }
@@ -739,6 +747,8 @@ public class Board : MonoBehaviour
                     blackScore = blackScore + 2;
                     blackScoreText.text = blackScore.ToString();
                 }
+                cp.GetComponent<SynchronizationPlayers>().UpdateScore(whiteScore, blackScore);
+
             }
 
         }
@@ -916,9 +926,18 @@ public class Board : MonoBehaviour
         return false;
     }
 
-    public void SxoreSynch()
+    public void SynchScore(int whiteScore, int blackScore)
     {
-
+        if (isWhiteTurn)
+        {
+            this.whiteScore = whiteScore;
+            whiteScoreText.text = whiteScore.ToString();
+        }
+        else
+        {
+            this.blackScore = blackScore;
+            blackScoreText.text = blackScore.ToString();
+        }
     }
     [SerializeField] private List<MonsPiece> faintPlayers = new List<MonsPiece>();
 
@@ -1057,10 +1076,6 @@ public class Board : MonoBehaviour
     bool sendCustomData = true;
     public void SendCustomType(MonsPieceDataType customData)
     {
-        PhotonNetwork.RaiseEvent(1, customData, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
-    }
-    public void SendCustomTypeForBoard(MonsPieceDataType customData)
-    {
         PhotonNetwork.RaiseEvent(0, customData, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
     }
 
@@ -1069,9 +1084,9 @@ public class Board : MonoBehaviour
 
         if (photonEvent.Code == 0)//For updating on movement and remaining moving within the room
         {
-            MonsPiece receivedData = (MonsPiece)photonEvent.CustomData;
-            Debug.Log("Received custom data: " + receivedData.monsPieceDataType.team + " PieceType: " + receivedData.monsPieceDataType.monsPieceType);
-            UpdateRemainingMove(receivedData.monsPieceDataType);
+            MonsPieceDataType receivedData = (MonsPieceDataType)photonEvent.CustomData;
+            Debug.Log("Received custom data: " + receivedData.team + " PieceType: " + receivedData.monsPieceType);
+            UpdateRemainingMove(receivedData);
         }
         //if (photonEvent.Code == 1)//For updating Board respective pieces
         //{
