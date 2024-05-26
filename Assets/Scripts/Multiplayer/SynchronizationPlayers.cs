@@ -13,7 +13,7 @@ namespace Scripts.Multiplayer
     public class SynchronizationPlayers : MonoBehaviour, IPunObservable
     {
 
-        private PhotonView photonView;
+        public PhotonView photonView;
         private Vector3 networkedPosition;
         private Vector3 networkedRotation;
         bool networkWhiteTurn;
@@ -72,11 +72,8 @@ namespace Scripts.Multiplayer
                 string monsData = JsonUtility.ToJson(monsPiece.monsPieceDataType);
                 photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All, monsData);
                 print("Remote update for " + monsPiece.monsPieceDataType.monsPieceType + " Team: " + monsPiece.monsPieceDataType.team);
-
-          
-
         }
-
+        
         [PunRPC]
         private void UpdatePlayerState(string monsData)
         {
@@ -114,13 +111,23 @@ namespace Scripts.Multiplayer
                 }
 
             }
+            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mystic)
+            {
+                print("Mystic remote " + monsPiece.monsPieceDataType.isCarryingMana);
+                if (monsPiece.monsPieceDataType.isFainted && !PhotonNetwork.IsMasterClient)
+                {
+                    gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+                }
+
+            }
             //if (monsPiece.monsPieceDataType != null && monsPiece.monsPieceDataType.monsPieceType == monsPiece.monsPieceDataType.monsPieceType && monsPieceDataType.team == monsPiece.monsPieceDataType.team || forceInitialize)
             //{
 
             //}
             MonsPieceDataType monsPieceDataType = monsPiece.monsPieceDataType;
-            boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
-            print("Mons desired pos:" + monsPieceDataType.desiredPos);
+                boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
+                print("Mons desired pos:" + monsPieceDataType.desiredPos);
+          
 
         }
             [PunRPC]

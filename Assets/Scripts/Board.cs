@@ -162,7 +162,7 @@ public class Board : MonoBehaviour
                             print("Previous piece " + previousDraggingPiece);
                             tapCount += 1;
                             currentlyDraggingPiece = monsPiece[hitPosition.x, hitPosition.y];
-
+                            if (currentlyDraggingPiece != null && !currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().photonView.IsMine) return;
                             //print("Previous piece 1" + currentlyDraggingPiece);
                             if (itemChances > 0)
                             {
@@ -623,7 +623,7 @@ public class Board : MonoBehaviour
                             bomb.SetActive(false);
 
                         }
-
+                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
                     }
                     else
                     {
@@ -635,6 +635,7 @@ public class Board : MonoBehaviour
                         }
                         deadBlacks.Add(cp);
                         ocp.FaintForTurns(2);
+                        
                         if (!isMysticAttackingTheOpponentPlayer)
                         {
                             cp.SetPosition(cp.monsPieceDataType.resetPos);
@@ -651,6 +652,7 @@ public class Board : MonoBehaviour
                             bomb.transform.SetParent(null);
                             bomb.SetActive(false);
                         }
+                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
                     }
                 }
 
@@ -662,7 +664,7 @@ public class Board : MonoBehaviour
 
         }
 
-        currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+      
         //onUpdatePlayerState?.Invoke();
         //resetting here at last
 
@@ -681,7 +683,7 @@ public class Board : MonoBehaviour
             isMysticAttackingTheOpponentPlayer = false;
         }
 
-
+        currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
 
         if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && cp.monsPieceDataType.isCarryingMana == true)
         {
