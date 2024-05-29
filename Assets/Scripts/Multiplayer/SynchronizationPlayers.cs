@@ -124,7 +124,12 @@ namespace Scripts.Multiplayer
             //{
 
             //}
+            
             MonsPieceDataType monsPieceDataType = monsPiece.monsPieceDataType;
+            if(monsPieceDataType.mySpecialAbilityUsed)
+            {
+                monsPieceDataType.mySpecialAbilityUsed = false;
+            }
                 boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
                 print("Mons desired pos:" + monsPieceDataType.desiredPos);
           

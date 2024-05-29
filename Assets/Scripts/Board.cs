@@ -587,9 +587,9 @@ public class Board : MonoBehaviour
 
                 else
                 {
+                    //demon kill , ocp demon and angel and spirit
 
-
-                    if (cp.monsPieceDataType.monsPieceType == MonsPieceType.demon && ocp.monsPieceDataType.currentX == ocp.monsPieceDataType.resetPos.x && ocp.monsPieceDataType.currentY == ocp.monsPieceDataType.resetPos.y)
+                    if (cp.monsPieceDataType.monsPieceType == MonsPieceType.demon && ocp.monsPieceDataType.currentX != ocp.monsPieceDataType.resetPos.x && ocp.monsPieceDataType.currentY != ocp.monsPieceDataType.resetPos.y)
                     {
                         monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
@@ -763,6 +763,7 @@ public class Board : MonoBehaviour
             if (cp.monsPieceDataType.isHitBySpirit)//spirit move logic
             {
                 cp.monsPieceDataType.isHitBySpirit = false;
+                previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = false;
                 if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
                 {
                     previousDraggingPiece = cp;
@@ -1063,8 +1064,10 @@ public class Board : MonoBehaviour
                     RemainingMovesHolder[1].transform.GetChild(5).gameObject.SetActive(false);
                 }
                 itemChances++;
-                cp.itemChances = itemChances;
-                cp.onceAbilityUsed = true;
+                currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+                print("Update remaing moves else part" + cp.mySpecialAbilityUsed + " " + cp.onceAbilityUsed);
+
+
             }
         }
 
