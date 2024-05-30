@@ -587,12 +587,13 @@ public class Board : MonoBehaviour
 
                 else
                 {
-                    //demon kill , ocp demon and angel and spirit
-
+                    //demon kill 
                     if (cp.monsPieceDataType.monsPieceType == MonsPieceType.demon && ocp.monsPieceDataType.currentX != ocp.monsPieceDataType.resetPos.x && ocp.monsPieceDataType.currentY != ocp.monsPieceDataType.resetPos.y)
                     {
                         monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
+                        ocp.SetPosition(ocp.monsPieceDataType.resetPos);
+                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
                         return false;
                     }
 

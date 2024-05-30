@@ -120,11 +120,20 @@ namespace Scripts.Multiplayer
                 }
 
             }
+            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.demon)
+            {
+                print("Mystic remote " + monsPiece.monsPieceDataType.isCarryingMana);
+                if (monsPiece.monsPieceDataType.isFainted && !PhotonNetwork.IsMasterClient)
+                {
+                    gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+                }
+
+            }
             //if (monsPiece.monsPieceDataType != null && monsPiece.monsPieceDataType.monsPieceType == monsPiece.monsPieceDataType.monsPieceType && monsPieceDataType.team == monsPiece.monsPieceDataType.team || forceInitialize)
             //{
 
             //}
-            
+
             MonsPieceDataType monsPieceDataType = monsPiece.monsPieceDataType;
             if(monsPieceDataType.mySpecialAbilityUsed)
             {
