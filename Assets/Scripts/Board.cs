@@ -785,10 +785,14 @@ public class Board : MonoBehaviour
                     if (isWhiteTurn && monsPiece.monsPieceDataType.team == 1)
                     {
                         monsPiece.monsPieceDataType.blackFaintGaps++;
+                        monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+
                     }
                     else
                     {
                         monsPiece.monsPieceDataType.whiteFaintGaps++;
+                        monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+
                     }
                     if (!isWhiteTurn && monsPiece.monsPieceDataType.team == 0 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.whiteFaintGaps > 1)//for white faint players
                     {
@@ -817,7 +821,7 @@ public class Board : MonoBehaviour
             {
                 if (piece != null)
                 {
-                    piece.UpdateFaintedTurns();
+                   // piece.UpdateFaintedTurns();
                 }
             }
             //Mana score logic 

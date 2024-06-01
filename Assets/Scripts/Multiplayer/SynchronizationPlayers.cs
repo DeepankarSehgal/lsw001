@@ -139,7 +139,17 @@ namespace Scripts.Multiplayer
             {
                 monsPieceDataType.mySpecialAbilityUsed = false;
             }
-                boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
+            if (!networkWhiteTurn && monsPiece.monsPieceDataType.team == 0 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.whiteFaintGaps > 1)//for white faint players
+            {
+                monsPiece.transform.localEulerAngles = Vector3.zero;
+                monsPiece.monsPieceDataType.isFainted = false;
+            }
+            else if (networkWhiteTurn && monsPiece.monsPieceDataType.team == 1 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.blackFaintGaps > 1)//for black faint players
+            {
+                monsPiece.transform.localEulerAngles = Vector3.zero;
+                monsPiece.monsPieceDataType.isFainted = false;
+            }
+            boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
                 print("Mons desired pos:" + monsPieceDataType.desiredPos);
           
 
