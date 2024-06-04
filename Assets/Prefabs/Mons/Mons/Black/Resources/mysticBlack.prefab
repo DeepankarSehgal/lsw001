@@ -122,6 +122,7 @@ MonoBehaviour:
     itemChances: 0
     isCarryingMana: 0
     isCarriedByDrainer: 0
+    previousPosition: {x: 0, y: 0}
 --- !u!61 &3749080590066851863
 BoxCollider2D:
   m_ObjectHideFlags: 0

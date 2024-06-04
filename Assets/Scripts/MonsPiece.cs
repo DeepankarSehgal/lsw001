@@ -50,7 +50,7 @@ public class MonsPieceDataType
     public int itemChances = 5;
     public bool isCarryingMana = false;
     public bool isCarriedByDrainer = false;
-
+    public Vector2Int previousPosition = Vector2Int.zero;
 
     public static void Register()
     {

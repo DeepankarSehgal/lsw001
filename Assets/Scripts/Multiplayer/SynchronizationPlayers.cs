@@ -66,16 +66,16 @@ namespace Scripts.Multiplayer
             photonView.RPC(nameof(UpdatePlayerTurn), RpcTarget.All,canSwapTurn);
         }
 
-        public void OnUpdatePlayerState()
+        public void OnUpdatePlayerState(bool canResetPos)
         {
             if (monsPiece == null) return;
                 string monsData = JsonUtility.ToJson(monsPiece.monsPieceDataType);
-                photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All, monsData);
+                photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All, monsData, canResetPos);
                 print("Remote update for " + monsPiece.monsPieceDataType.monsPieceType + " Team: " + monsPiece.monsPieceDataType.team);
         }
         
         [PunRPC]
-        private void UpdatePlayerState(string monsData)
+        private void UpdatePlayerState(string monsData, bool canResetPos)
         {
             // Board.instance.UpdateRemainingMove(playerData);
            
@@ -149,8 +149,14 @@ namespace Scripts.Multiplayer
                 monsPiece.transform.localEulerAngles = Vector3.zero;
                 monsPiece.monsPieceDataType.isFainted = false;
             }
-            boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
-                print("Mons desired pos:" + monsPieceDataType.desiredPos);
+         
+
+                boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
+
+                Vector2Int previousPosition = monsPieceDataType.previousPosition;
+                if (canResetPos)
+                    boardInstance.monsPiece[(int)previousPosition.x, (int)previousPosition.y] = null;
+            print("Mons desired pos:" + monsPieceDataType.desiredPos);
           
 
         }

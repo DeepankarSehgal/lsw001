@@ -121,6 +121,7 @@ MonoBehaviour:
     itemChances: 0
     isCarryingMana: 0
     isCarriedByDrainer: 0
+    previousPosition: {x: 0, y: 0}
 --- !u!114 &-5455349384831359815
 MonoBehaviour:
   m_ObjectHideFlags: 0

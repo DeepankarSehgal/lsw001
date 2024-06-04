@@ -47,6 +47,8 @@ public class Mystic : MonsPiece
                     continue;
 
                 // Check if the new position is within bounds and empty
+                if(0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount)
+                print("Mystic check board place " + board[newX, newY]);
                 if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null || CanCollectBomb(ref board, newX, newY)))
                 {
                     r.Add(new Vector2Int(newX, newY));

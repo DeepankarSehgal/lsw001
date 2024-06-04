@@ -118,7 +118,7 @@ public class Board : MonoBehaviour
             CenterBoard();
             //Invoke(nameof(DelayCall), 8f);
             startGame = true;
-            onUpdatePlayerState?.Invoke();
+            onUpdatePlayerState?.Invoke(false);
             //GameplayManager.startSynch?.Invoke();
         }
 
@@ -219,6 +219,7 @@ public class Board : MonoBehaviour
                 {
 
                     Vector2Int previousPosition = new Vector2Int(currentlyDraggingPiece.monsPieceDataType.currentX, currentlyDraggingPiece.monsPieceDataType.currentY);
+                    currentlyDraggingPiece.monsPieceDataType.previousPosition = previousPosition;
                     if (availableMoves != null && availableMoves.Contains(hitPosition))
                         {
                         if (currentlyDraggingPiece.monsPieceDataType.monsPieceType!=MonsPieceType.mana && itemChances<=0)//To avoid glitch movess
@@ -474,13 +475,13 @@ public class Board : MonoBehaviour
 
     public void PositionSinglePiece(int x, int y, bool force = false)
     {
+        
         monsPiece[x, y].monsPieceDataType.currentX = x;
         monsPiece[x, y].monsPieceDataType.currentY = y;
         monsPiece[x, y].SetPosition(new Vector2(x, y), force);
         print("MONS PIECE Position: " + monsPiece[x, y].monsPieceDataType.team + ": x: " + x + " y: " + y);
 
     }
-
 
     private Vector2Int LookUpTileIndex(GameObject hitInfo)
     {
@@ -512,6 +513,7 @@ public class Board : MonoBehaviour
 
     private void ClearHighLight()
     {
+        print("clear highlight!");
         for (int i = 0; i < HighlightHolder.transform.childCount; i++)
         {
             Destroy(HighlightHolder.transform.GetChild(i).gameObject);
@@ -544,7 +546,7 @@ public class Board : MonoBehaviour
                     //monsPiece[x, y] = cp;
                     //monsPiece[previousPosition.x, previousPosition.y] = null;
                     ocp.monsPieceDataType.isCarriedByDrainer = true;
-                    ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+                    ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     ocp.gameObject.SetActive(false);
                     //ocp.gameObject.transform.GetComponent<Transform>().localScale = new Vector3(0.3f,0.3f,0.3f);
 
@@ -580,7 +582,7 @@ public class Board : MonoBehaviour
                     cp.monsPieceDataType.isCarryingOppMana = true;
                     ocp.gameObject.SetActive(false);
                     ocp.monsPieceDataType.isCarriedByDrainer = true;
-                    ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+                    ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     GameObject childMana = Instantiate(childManaSuperMana[0], cp.transform);
                     childMana.transform.SetParent(cp.transform, false);
                 }
@@ -593,7 +595,7 @@ public class Board : MonoBehaviour
                         monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
                         ocp.SetPosition(ocp.monsPieceDataType.resetPos);
-                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                         return false;
                     }
 
@@ -609,10 +611,12 @@ public class Board : MonoBehaviour
                         if (!isMysticAttackingTheOpponentPlayer)
                         {
                             cp.SetPosition(ocp.monsPieceDataType.resetPos);
-                            monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
+                           
                         }
+                        monsPiece[(int)ocp.monsPieceDataType.desiredPos.x, (int)ocp.monsPieceDataType.desiredPos.y] = null;
+                        //PositionSinglePiece((int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y);
+                        ocp.SetPosition(ocp.monsPieceDataType.resetPos);
 
-                        PositionSinglePiece((int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y);
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
                         faintPlayers.Add(ocp);
                         //remove bomb if carrying
@@ -624,7 +628,7 @@ public class Board : MonoBehaviour
                             bomb.SetActive(false);
 
                         }
-                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     }
                     else
                     {
@@ -640,9 +644,13 @@ public class Board : MonoBehaviour
                         if (!isMysticAttackingTheOpponentPlayer)
                         {
                             cp.SetPosition(cp.monsPieceDataType.resetPos);
-                            monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
+                         
                         }
-                        PositionSinglePiece((int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y);
+                        //monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
+                        monsPiece[(int)ocp.monsPieceDataType.desiredPos.x, (int)ocp.monsPieceDataType.desiredPos.y] = null;
+                        ocp.SetPosition(ocp.monsPieceDataType.resetPos);
+
+                        //PositionSinglePiece((int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y);
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
                         faintPlayers.Add(ocp);
                         //remove bomb if carrying
@@ -653,7 +661,7 @@ public class Board : MonoBehaviour
                             bomb.transform.SetParent(null);
                             bomb.SetActive(false);
                         }
-                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     }
                 }
 
@@ -665,26 +673,32 @@ public class Board : MonoBehaviour
 
         }
 
-      
+
         //onUpdatePlayerState?.Invoke();
         //resetting here at last
+
 
         if (!isMysticAttackingTheOpponentPlayer)
         {
             monsPiece[x, y] = cp;
             monsPiece[previousPosition.x, previousPosition.y] = null;
         }
+           
+
 
         if (!isMysticAttackingTheOpponentPlayer)
         {
             PositionSinglePiece(x, y);
+            currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
         }
         else
         {
             isMysticAttackingTheOpponentPlayer = false;
+            currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+
         }
 
-        currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+
 
         if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && cp.monsPieceDataType.isCarryingMana == true)
         {
@@ -785,13 +799,13 @@ public class Board : MonoBehaviour
                     if (isWhiteTurn && monsPiece.monsPieceDataType.team == 1)
                     {
                         monsPiece.monsPieceDataType.blackFaintGaps++;
-                        monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+                        monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
 
                     }
                     else
                     {
                         monsPiece.monsPieceDataType.whiteFaintGaps++;
-                        monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+                        monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
 
                     }
                     if (!isWhiteTurn && monsPiece.monsPieceDataType.team == 0 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.whiteFaintGaps > 1)//for white faint players
@@ -914,7 +928,7 @@ public class Board : MonoBehaviour
     }
 
     public Action<bool> onUpdatePlayerTurn;
-    public Action onUpdatePlayerState;
+    public Action<bool> onUpdatePlayerState;
     public void UpdatePlayerTurns(bool swapTurn = false)
     {
         isWhiteTurn = swapTurn;
@@ -1069,7 +1083,7 @@ public class Board : MonoBehaviour
                     RemainingMovesHolder[1].transform.GetChild(5).gameObject.SetActive(false);
                 }
                 itemChances++;
-                currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState();
+                currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                 print("Update remaing moves else part" + cp.mySpecialAbilityUsed + " " + cp.onceAbilityUsed);
 
 
