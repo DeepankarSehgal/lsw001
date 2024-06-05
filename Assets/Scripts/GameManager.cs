@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -16,7 +17,7 @@ public class GameManager : MonoBehaviour
     }
     public void EnterWorld()
     {
-        PlayerPrefs.SetString("Nickname", chatField.text);
+        PhotonNetwork.NickName = chatField.text;
         //CheckIfUserUpdatedNickname();
         SceneManager.LoadScene(1);
     }

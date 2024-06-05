@@ -4,14 +4,13 @@ using UnityEngine;
 using TMPro;
 using Photon.Pun;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviourPunCallbacks
 {
     // Start is called before the first frame update
     void Start()
     {
-        string Nickname = PlayerPrefs.GetString("Nickname");
+        string Nickname = photonView.Owner.NickName;
         gameObject.transform.GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>().text = Nickname;
-        PhotonNetwork.NickName = Nickname;
     }
 
     // Update is called once per frame
