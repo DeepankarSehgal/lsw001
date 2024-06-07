@@ -75,7 +75,7 @@ public class Board : MonoBehaviour
 
     [SerializeField] private GameObject[] BombOrPortionObj;
     [SerializeField] private GameObject[] RemainingMovesHolder;
-
+    public Transform PieceHolder;
     public bool startGameWhenAllReady = true;
     bool startGame = false;
     private void Awake()
@@ -105,6 +105,7 @@ public class Board : MonoBehaviour
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
     }
+   
     public void OnJoinedRoom()
     {
 
@@ -116,9 +117,11 @@ public class Board : MonoBehaviour
             //Invoke(nameof(PositionAllPiece), 10f);
             PositionAllPiece();
             CenterBoard();
-            //Invoke(nameof(DelayCall), 8f);
+            Invoke(nameof(DelayCall), 3f);
             startGame = true;
             onUpdatePlayerState?.Invoke(false);
+            
+          
             //GameplayManager.startSynch?.Invoke();
         }
 
@@ -405,6 +408,19 @@ public class Board : MonoBehaviour
         monsPiece[5, 6] = SpawnBlackPiece(MonsPieceType.mana, 1);
         monsPiece[6, 7] = SpawnBlackPiece(MonsPieceType.mana, 1);
         monsPiece[7, 6] = SpawnBlackPiece(MonsPieceType.mana, 1);
+
+        object pieceType;
+        PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("PieceType", out pieceType);
+        print("PieceType from photon received: " + (string)pieceType);
+        if ((string)pieceType == "Black")
+        {
+            Camera.main.transform.localEulerAngles = new Vector3(0f, 0f, -180f);
+
+            PieceHolder.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
+            
+        }
+
+
     }
 
     private MonsPiece SpawnWhitePiece(MonsPieceType type, int team)
@@ -416,6 +432,8 @@ public class Board : MonoBehaviour
         if ((string)pieceType == "White")
         {
             mp = PhotonNetwork.Instantiate(Whiteprefabs[(int)type - 1].name, transform.localPosition, Quaternion.identity).GetComponent<MonsPiece>();
+            mp.tag = "White";
+            mp.transform.parent = PieceHolder;
             mp.monsPieceDataType.team = team;
             mp.monsPieceDataType.monsPieceType = type;
         }
@@ -443,6 +461,8 @@ public class Board : MonoBehaviour
         if ((string)pieceType == "Black")
         {
             mp = PhotonNetwork.Instantiate(Blackprefabs[(int)type - 1].name, transform.localPosition, Quaternion.identity).GetComponent<MonsPiece>();
+            mp.transform.parent = PieceHolder;
+
             mp.monsPieceDataType.team = team;
             mp.monsPieceDataType.monsPieceType = type;
         }
@@ -928,6 +948,7 @@ public class Board : MonoBehaviour
     }
 
     public Action<bool> onUpdatePlayerTurn;
+    public Action<bool> onUpdatePlayerVisuals;
     public Action<bool> onUpdatePlayerState;
     public void UpdatePlayerTurns(bool swapTurn = false)
     {

@@ -24,11 +24,14 @@ public class Menu : MonoBehaviourPunCallbacks
     {
         base.OnJoinedRoom();
         photonView.RPC("UpdateLobbyUI", RpcTarget.All);
+        print("On Joined room: " + PhotonNetwork.NickName);
     }
     [PunRPC]
     void UpdateLobbyUI()
     {
-        player1Name.text = PhotonNetwork.CurrentRoom.GetPlayer(1).NickName;
+        if (photonView.IsMine)
+            player1Name.text = PhotonNetwork.CurrentRoom.GetPlayer(1).NickName;
+        else
         player2Name.text = PhotonNetwork.PlayerList.Length == 2 ? PhotonNetwork.CurrentRoom.GetPlayer(2).NickName : "...";
 
         if (PhotonNetwork.PlayerList.Length == 2)

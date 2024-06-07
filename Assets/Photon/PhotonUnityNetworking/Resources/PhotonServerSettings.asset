@@ -45,6 +45,7 @@ MonoBehaviour:
   - RPC_SynchPlayerData
   - UpdateScore
   - SynchScore
+  - UpdatePlayerVisuals
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

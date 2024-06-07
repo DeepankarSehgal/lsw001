@@ -7,13 +7,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Scripts.Multiplayer
 {
     public class SynchronizationPlayers : MonoBehaviour, IPunObservable
     {
 
-        public PhotonView photonView;
+        public  PhotonView photonView;
         private Vector3 networkedPosition;
         private Vector3 networkedRotation;
         bool networkWhiteTurn;
@@ -28,6 +29,7 @@ namespace Scripts.Multiplayer
             monsPiece = GetComponent<MonsPiece>();
             photonView = GetComponent<PhotonView>();
         }
+
         #region Unity Methods
         private void Start()
         {
@@ -38,8 +40,9 @@ namespace Scripts.Multiplayer
             {
                 Board.instance.onUpdatePlayerTurn -= OnUpdatePlayerTurn;
                 Board.instance.onUpdatePlayerTurn += OnUpdatePlayerTurn;
-             
-              
+                Board.instance.onUpdatePlayerVisuals -= UpdatePlayerVisuals;
+                Board.instance.onUpdatePlayerVisuals += UpdatePlayerVisuals;
+                photonView.RPC(nameof(UpdatePlayerVisuals), RpcTarget.All,true);
             }
 
          
@@ -174,7 +177,20 @@ namespace Scripts.Multiplayer
             boardInstance.startGameWhenAllReady = false;
         }
 
-      
+
+
+        [PunRPC]
+        public void UpdatePlayerVisuals(bool updateVisuals)
+
+        {
+            print("Updating Player Visuals:");
+            if (!photonView.IsMine)
+            {
+                transform.parent = boardInstance.PieceHolder;
+                transform.localEulerAngles = Vector3.zero;
+            }
+        
+        }
         public void UpdateScore(int whiteScore, int blackScore)
         {
          photonView.RPC(nameof(SynchScore), RpcTarget.All,whiteScore, blackScore);
@@ -189,7 +205,7 @@ namespace Scripts.Multiplayer
             if(!photonView.IsMine && PhotonNetwork.IsConnectedAndReady)
             {
                 //transform.localPosition = Vector3.MoveTowards(transform.localPosition, networkedPosition, Time.deltaTime);
-                transform.localPosition = networkedPosition;
+                transform.position = networkedPosition;
                // transform.localEulerAngles = networkedRotation;
 
 
@@ -200,7 +216,7 @@ namespace Scripts.Multiplayer
         {
             if (stream.IsWriting)//Owner/Local player
             {
-                stream.SendNext(transform.localPosition);
+                stream.SendNext(transform.position);
                // stream.SendNext(transform.localEulerAngles);
             }
             else
