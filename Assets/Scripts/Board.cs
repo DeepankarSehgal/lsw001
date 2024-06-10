@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Board : MonoBehaviour
 {
@@ -75,6 +76,8 @@ public class Board : MonoBehaviour
 
     [SerializeField] private GameObject[] BombOrPortionObj;
     [SerializeField] private GameObject[] RemainingMovesHolder;
+    [SerializeField] private Image player1Icon;
+    [SerializeField] private Image player2Icon;
     public Transform PieceHolder;
     public bool startGameWhenAllReady = true;
     bool startGame = false;
@@ -555,7 +558,8 @@ public class Board : MonoBehaviour
             ocp = monsPiece[x, y];
             previousDraggingPiece = cp;
             cp.monsPieceDataType.mySpecialAbilityUsed = true;
-
+            Vector2Int previousPosition1 = new Vector2Int(ocp.monsPieceDataType.currentX, ocp.monsPieceDataType.currentY);
+            ocp.monsPieceDataType.previousPosition = previousPosition1;
             bool isHitBySpirit = SpiritPushOtherPlayersLogic(ref cp, ref ocp);
             if (isHitBySpirit) return true;
             if (cp.monsPieceDataType.team == ocp.monsPieceDataType.team)
@@ -615,7 +619,7 @@ public class Board : MonoBehaviour
                         monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
                         ocp.SetPosition(ocp.monsPieceDataType.resetPos);
-                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
                         return false;
                     }
 
@@ -648,7 +652,7 @@ public class Board : MonoBehaviour
                             bomb.SetActive(false);
 
                         }
-                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
                     }
                     else
                     {
@@ -681,7 +685,7 @@ public class Board : MonoBehaviour
                             bomb.transform.SetParent(null);
                             bomb.SetActive(false);
                         }
-                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                        ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
                     }
                 }
 
@@ -1057,7 +1061,15 @@ public class Board : MonoBehaviour
             RemainingMovesHolder[1].transform.GetChild(i).gameObject.SetActive(true);
         }
     }
+    [PunRPC]
+    public void UpdatePlayerIcon()
+    {
+        if(PhotonNetwork.IsMasterClient)
+        player1Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
+        else
+        player2Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
 
+    }
     public void UpdateRemainingMove(MonsPieceDataType cp)
     {
         if (cp.monsPieceType == MonsPieceType.mana)
@@ -1072,6 +1084,7 @@ public class Board : MonoBehaviour
             {
                 RemainingMovesHolder[1].SetActive(false);
                 RemainingMovesHolder[0].SetActive(true);
+
             }
             ResetRemainingMovesHolder();
 

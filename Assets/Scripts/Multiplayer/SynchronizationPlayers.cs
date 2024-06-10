@@ -1,4 +1,5 @@
 using ExitGames.Client.Photon;
+using Org.BouncyCastle.Asn1.BC;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
@@ -108,7 +109,7 @@ namespace Scripts.Multiplayer
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana)
             {
                 print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);
-                if (monsPiece.monsPieceDataType.isCarriedByDrainer && !PhotonNetwork.IsMasterClient)
+                if (monsPiece.monsPieceDataType.isCarriedByDrainer)
                 {
                     gameObject.SetActive(false);
                 }
@@ -117,7 +118,7 @@ namespace Scripts.Multiplayer
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mystic)
             {
                 print("Mystic remote " + monsPiece.monsPieceDataType.isCarryingMana);
-                if (monsPiece.monsPieceDataType.isFainted && !PhotonNetwork.IsMasterClient)
+                if (monsPiece.monsPieceDataType.isFainted)
                 {
                     gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
                 }
@@ -125,10 +126,15 @@ namespace Scripts.Multiplayer
             }
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.demon)
             {
-                print("Mystic remote " + monsPiece.monsPieceDataType.isCarryingMana);
-                if (monsPiece.monsPieceDataType.isFainted && !PhotonNetwork.IsMasterClient)
+                print("demon remote: " + canResetPos + " Previous position: " +  monsPiece.monsPieceDataType.previousPosition + " desired pos" + monsPiece.monsPieceDataType.desiredPos + " reset pos: " + monsPiece.monsPieceDataType.resetPos);
+                if (monsPiece.monsPieceDataType.isFainted)
                 {
                     gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+                    boardInstance.monsPiece[(int)monsPiece.monsPieceDataType.resetPos.x, (int)monsPiece.monsPieceDataType.resetPos.y] = monsPiece;
+                    boardInstance.monsPiece[(int)monsPiece.monsPieceDataType.desiredPos.x, (int)monsPiece.monsPieceDataType.desiredPos.y] = monsPiece;
+
+
+                    
                 }
 
             }
@@ -142,23 +148,43 @@ namespace Scripts.Multiplayer
             {
                 monsPieceDataType.mySpecialAbilityUsed = false;
             }
+
             if (!networkWhiteTurn && monsPiece.monsPieceDataType.team == 0 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.whiteFaintGaps > 1)//for white faint players
             {
                 monsPiece.transform.localEulerAngles = Vector3.zero;
                 monsPiece.monsPieceDataType.isFainted = false;
+
+                Vector2Int previousPosition1 = monsPiece.monsPieceDataType.previousPosition;
+                boardInstance.monsPiece[(int)previousPosition1.x, (int)previousPosition1.y] = null;
+
+                monsPiece.monsPieceDataType.currentX = (int)monsPiece.monsPieceDataType.resetPos.x;
+                monsPiece.monsPieceDataType.currentY = (int)monsPiece.monsPieceDataType.resetPos.y;
+                print("remote reset after faint: " + canResetPos + " Previous position: " + monsPiece.monsPieceDataType.previousPosition + " desired pos" + monsPiece.monsPieceDataType.desiredPos + " reset pos: " + monsPiece.monsPieceDataType.resetPos);
+
             }
             else if (networkWhiteTurn && monsPiece.monsPieceDataType.team == 1 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.blackFaintGaps > 1)//for black faint players
             {
                 monsPiece.transform.localEulerAngles = Vector3.zero;
                 monsPiece.monsPieceDataType.isFainted = false;
+
+                Vector2Int previousPosition1 = monsPiece.monsPieceDataType.previousPosition;
+                boardInstance.monsPiece[(int)previousPosition1.x, (int)previousPosition1.y] = null;
+                monsPiece.monsPieceDataType.currentX = (int)monsPiece.monsPieceDataType.resetPos.x;
+                monsPiece.monsPieceDataType.currentY = (int)monsPiece.monsPieceDataType.resetPos.y;
+                print("remote reset after faint: " + canResetPos + " Previous position: " + monsPiece.monsPieceDataType.previousPosition + " desired pos" + monsPiece.monsPieceDataType.desiredPos + " reset pos: " + monsPiece.monsPieceDataType.resetPos);
+
             }
-         
 
-                boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
 
-                Vector2Int previousPosition = monsPieceDataType.previousPosition;
-                if (canResetPos)
-                    boardInstance.monsPiece[(int)previousPosition.x, (int)previousPosition.y] = null;
+
+            Vector2Int previousPosition = monsPieceDataType.previousPosition;
+            if (canResetPos)
+            {
+                boardInstance.monsPiece[(int)previousPosition.x, (int)previousPosition.y] = null;
+
+            }
+            boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
+
             print("Mons desired pos:" + monsPieceDataType.desiredPos);
           
 
@@ -188,8 +214,16 @@ namespace Scripts.Multiplayer
             {
                 transform.parent = boardInstance.PieceHolder;
                 transform.localEulerAngles = Vector3.zero;
+                
             }
-        
+            photonView.RPC(nameof(UpdatePlayerIcon), RpcTarget.All);
+
+           
+        }
+        [PunRPC]
+        private void UpdatePlayerIcon()
+        {
+            boardInstance.UpdatePlayerIcon();
         }
         public void UpdateScore(int whiteScore, int blackScore)
         {
