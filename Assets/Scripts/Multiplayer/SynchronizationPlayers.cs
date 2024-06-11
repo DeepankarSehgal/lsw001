@@ -19,6 +19,7 @@ namespace Scripts.Multiplayer
         private Vector3 networkedPosition;
         private Vector3 networkedRotation;
         bool networkWhiteTurn;
+
         private Board boardInstance => Board.instance;
         private bool startSynching = false;
 
