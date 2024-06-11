@@ -133,8 +133,12 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         }
         else
         {
-            movement.x = Input.GetAxisRaw("Horizontal");
-            movement.y = Input.GetAxisRaw("Vertical");
+            if (!PhotonChatManager.Instance.chatField.GetComponent<TMP_InputField>().isFocused)
+            {
+                movement.x = Input.GetAxisRaw("Horizontal");
+                movement.y = Input.GetAxisRaw("Vertical");
+            }
+           
         }
 
         animator.SetFloat("Horizontal", movement.x);
@@ -158,10 +162,14 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
     void FixedUpdate()
     {
-        float x = Input.GetAxis("Horizontal");
-        float y = Input.GetAxis("Vertical");
-        Vector3 moveDir = new Vector3(x, 0, y);
-        rb.velocity = moveDir * speed;
+        if (!PhotonChatManager.Instance.chatField.GetComponent<TMP_InputField>().isFocused)
+        {
+            float x = Input.GetAxis("Horizontal");
+            float y = Input.GetAxis("Vertical");
+            Vector3 moveDir = new Vector3(x, 0, y);
+            rb.velocity = moveDir * speed;
+        }
+            
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

@@ -4,9 +4,10 @@ using UnityEngine;
 using Photon.Chat;
 using ExitGames.Client.Photon;
 using TMPro;
+using Photon.Pun;
 
 
-public class PhotonChatManager : MonoBehaviour, IChatClientListener
+public class PhotonChatManager : MonoBehaviourPunCallbacks, IChatClientListener
 {
     public static PhotonChatManager Instance;
     ChatClient chatClient;
@@ -46,7 +47,7 @@ public class PhotonChatManager : MonoBehaviour, IChatClientListener
         // Attempt to reconnect after a short delay
         Debug.Log("Attempting to reconnect...");
 
-        string nickname = PlayerPrefs.GetString("Nickname");
+        string nickname = photonView.Owner.NickName;
         chatClient.Connect(appID, appVersion, new AuthenticationValues(nickname));
     }
 
@@ -60,7 +61,7 @@ public class PhotonChatManager : MonoBehaviour, IChatClientListener
         {
             Debug.Log("Attempting to reconnect...");
 
-            string nickname = PlayerPrefs.GetString("Nickname");
+            string nickname = photonView.Owner.NickName;
             chatClient.Connect(appID, appVersion, new AuthenticationValues(nickname));
         }
         else

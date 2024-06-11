@@ -86,6 +86,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         // Once character selection data is retrieved, instantiate player with the selected character
         int characterIndex = playFabManager.getCharacterIndex();
+       // int characterIndex = PlayerPrefs.GetInt("characterIndex"); //for testing
         PhotonNetwork.Instantiate(PlayerPrefabs[characterIndex].name, new Vector3(randomPositionX, randomPositionY, 0), Quaternion.identity);
         Debug.Log(PhotonNetwork.IsMasterClient);
     }
