@@ -56,7 +56,7 @@ public class PlayFabManager : MonoBehaviour
             string nickname = result.Data["Nickname"].Value;
             nicknameInputField.text = nickname;
             Nickname = nickname;
-            PlayerPrefs.SetString("Nickname", Nickname);
+            Nickname = PlayerPrefs.GetString("Nickname");
         }
         else
         {
@@ -64,7 +64,7 @@ public class PlayFabManager : MonoBehaviour
             UpdateNickname(nickname);
             nicknameInputField.text = nickname;
             Nickname = nickname;
-            PlayerPrefs.SetString("Nickname", Nickname);
+            Nickname = PlayerPrefs.GetString("Nickname");
         }
 
     }

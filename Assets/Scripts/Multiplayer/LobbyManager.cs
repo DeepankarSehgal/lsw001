@@ -24,7 +24,6 @@ namespace Scripts.Multiplayer
         {
             BindListener();
             UpdateUIDetails();
-            OnQuickMatchButtonClicked();
         }
 
         #endregion
