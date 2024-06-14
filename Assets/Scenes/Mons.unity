@@ -2977,6 +2977,7 @@ MonoBehaviour:
   - {fileID: 759660234460390750, guid: da70c8fecca0478428f51906f0e9503c, type: 3}
   childManaSuperMana:
   - {fileID: 7722477160570536614, guid: bea17c77a7d72604183aa29a2decc61a, type: 3}
+  - {fileID: 7722477160570536614, guid: 870a37efa770dc14c848ad66eae39265, type: 3}
   - {fileID: 7722477160570536614, guid: 17e2f9cfc3cd5ea4595aa2c5606f85d1, type: 3}
   selectedPiece: {fileID: 0}
   BombOrPortionObj:

@@ -38,21 +38,25 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("Connected to Internet");
         PhotonNetwork.ConnectUsingSettings();
     }
+    RoomOptions roomOptions = new RoomOptions();
 
     public override void OnConnectedToMaster()
     {
         Debug.Log(PhotonNetwork.LocalPlayer.NickName + "Connected to Server");
-        PhotonNetwork.JoinRandomRoom();
+        roomOptions.IsOpen = true;
+        roomOptions.IsVisible = true;
+        roomOptions.MaxPlayers = 0;
+        PhotonNetwork.JoinOrCreateRoom("RoomLobby", roomOptions, TypedLobby.Default);
     }
     private void CreateAndJoinRoom()
     {
         string randomRoomName = "RoomLobby";
-        RoomOptions roomOptions = new RoomOptions();
+
+        //playerCustomProperties.Add("PieceType", "White");
+        //PhotonNetwork.LocalPlayer.CustomProperties = (playerCustomProperties);
         roomOptions.IsOpen = true;
         roomOptions.IsVisible = true;
         roomOptions.MaxPlayers = 0;
-        //playerCustomProperties.Add("PieceType", "White");
-        //PhotonNetwork.LocalPlayer.CustomProperties = (playerCustomProperties);
         PhotonNetwork.CreateRoom(randomRoomName, roomOptions, TypedLobby.Default);
     }
     public override void OnJoinedLobby()

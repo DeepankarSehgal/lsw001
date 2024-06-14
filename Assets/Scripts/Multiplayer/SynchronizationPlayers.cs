@@ -88,20 +88,42 @@ namespace Scripts.Multiplayer
             if(monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.drainer)
             {
                 print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);
-                if (!PhotonNetwork.IsMasterClient)
+                if (!photonView.IsMine)
                 {
                     if (monsPiece.monsPieceDataType.isCarryingMana && transform.childCount<=0)
                     {
-                        GameObject childMana = Instantiate(boardInstance.childManaSuperMana[0], transform);
-                        childMana.transform.SetParent(transform, false);
+                        if(monsPiece.monsPieceDataType.team == 0)//white
+                        {
+                            GameObject childMana = Instantiate(boardInstance.childManaSuperMana[0], transform);
+                            childMana.transform.SetParent(transform, false);
+                        }
+                        else
+                        {
+                            GameObject childMana = Instantiate(boardInstance.childManaSuperMana[1], transform);
+                            childMana.transform.SetParent(transform, false);
+                        }
+
                     }
-                    else
+                    else if (monsPiece.monsPieceDataType.isCarryingOppMana && transform.childCount <= 0)
+                    {
+                        if (monsPiece.monsPieceDataType.team == 0)//white
+                        {
+                            GameObject childMana = Instantiate(boardInstance.childManaSuperMana[1], transform);
+                            childMana.transform.SetParent(transform, false);
+                        }
+                        else
+                        {
+                            GameObject childMana = Instantiate(boardInstance.childManaSuperMana[0], transform);
+                            childMana.transform.SetParent(transform, false);
+                        }
+
+                    }
+                    else 
                     {
                         if (transform.childCount > 0)
                         {
                             Destroy(transform.GetChild(0).gameObject);
                         }
-
                     }
                    
                 }
@@ -118,7 +140,7 @@ namespace Scripts.Multiplayer
             }
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mystic)
             {
-                print("Mystic remote " + monsPiece.monsPieceDataType.isCarryingMana);
+                print("Mystic remote " + monsPiece.monsPieceDataType.isFainted);
                 if (monsPiece.monsPieceDataType.isFainted)
                 {
                     gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);

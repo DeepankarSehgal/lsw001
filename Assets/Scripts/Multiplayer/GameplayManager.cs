@@ -61,7 +61,6 @@ namespace Scripts.Multiplayer
         public override void OnConnectedToMaster()
         {
             print($"{PhotonNetwork.LocalPlayer.NickName} is connected to the photon server!");
-            
             JoinRandomRoom();
         }
         #endregion
