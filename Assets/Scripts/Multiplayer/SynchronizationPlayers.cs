@@ -118,6 +118,12 @@ namespace Scripts.Multiplayer
                         }
 
                     }
+                    else if (monsPiece.monsPieceDataType.isCarryingSuperMana && transform.childCount <= 0)
+                    {
+                        GameObject childMana = Instantiate(boardInstance.childManaSuperMana[2], transform);
+                        childMana.transform.SetParent(transform, false);
+
+                    }
                     else 
                     {
                         if (transform.childCount > 0)
@@ -129,7 +135,7 @@ namespace Scripts.Multiplayer
                 }
               
             }
-            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana)
+            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana || monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.supermana)
             {
                 print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);
                 if (monsPiece.monsPieceDataType.isCarriedByDrainer)

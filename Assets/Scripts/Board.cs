@@ -599,9 +599,11 @@ public class Board : MonoBehaviour
                 {
                     cp.monsPieceDataType.isCarryingSuperMana = true;
                     ocp.gameObject.SetActive(false);
-
+                    ocp.monsPieceDataType.isCarriedByDrainer = true;
+                    ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     GameObject childMana = Instantiate(childManaSuperMana[2], cp.transform);
                     childMana.transform.SetParent(cp.transform, false);
+                    print("Supermana picked!");
 
                 }
                 else return false;
@@ -843,6 +845,7 @@ public class Board : MonoBehaviour
                 return true;
             }
             manaTurn = false;
+            if(previousDraggingPiece!=null)
             previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = false;
 
             //if (ocp.isFainted)
@@ -923,11 +926,12 @@ public class Board : MonoBehaviour
             }
             previousDraggingPiece = cp;
             //UpdateRemainingMove(cp.monsPieceDataType);
+            SendCustomType(cp.monsPieceDataType);
             itemChances--;
             print("else part of mana item chances coming" + itemChances);
 
             cp.monsPieceDataType.itemChances = itemChances;
-            SendCustomType(cp.monsPieceDataType);
+           
 
         }
 
