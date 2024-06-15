@@ -47,7 +47,7 @@ public class Board : MonoBehaviour
 
     public bool isWhiteTurn;
     [SerializeField] private int itemChances = 5;
-    private bool manaTurn = false;
+    public bool manaTurn = false;
 
     public TMP_Text whiteScoreText;
     public TMP_Text blackScoreText;
@@ -174,7 +174,8 @@ public class Board : MonoBehaviour
                             {
                                 if (currentlyDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana)
                                 {
-                                    manaTurn = true;
+                                    //if(!currentlyDraggingPiece.monsPieceDataType.isHitBySpirit)
+                                    //manaTurn = true;
                                     availableMoves = currentlyDraggingPiece.GetAvailableMoves(ref monsPiece, boardSize);
                                     HighLightTiles();
                                     //spawnMovesHiglighter = false;
@@ -557,11 +558,18 @@ public class Board : MonoBehaviour
 
             ocp = monsPiece[x, y];
             previousDraggingPiece = cp;
-            cp.monsPieceDataType.mySpecialAbilityUsed = true;
             Vector2Int previousPosition1 = new Vector2Int(ocp.monsPieceDataType.currentX, ocp.monsPieceDataType.currentY);
             ocp.monsPieceDataType.previousPosition = previousPosition1;
             bool isHitBySpirit = SpiritPushOtherPlayersLogic(ref cp, ref ocp);
-            if (isHitBySpirit) return true;
+            print("Opponent piece: " + cp.name + isHitBySpirit);
+            if (isHitBySpirit)
+            {
+                isHitBySpirit = false;
+                manaTurn = false;
+                return true;
+            }
+            cp.monsPieceDataType.mySpecialAbilityUsed = true;
+
             if (cp.monsPieceDataType.team == ocp.monsPieceDataType.team)
             {
                 if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
@@ -819,17 +827,23 @@ public class Board : MonoBehaviour
 
         if (cp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
         {
+            print("Mana move logic: " + cp.monsPieceDataType.monsPieceType + cp.monsPieceDataType.isHitBySpirit + manaTurn);
             if (cp.monsPieceDataType.isHitBySpirit)//spirit move logic
             {
-                cp.monsPieceDataType.isHitBySpirit = false;
-                previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = false;
+               
+                previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
                 if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
                 {
                     previousDraggingPiece = cp;
                 }
+                manaTurn = false;
+                cp.monsPieceDataType.isHitBySpirit = false;
+                print("Mana move logic 1: " + cp.monsPieceDataType.monsPieceType + cp.monsPieceDataType.isHitBySpirit + manaTurn);
+
                 return true;
             }
             manaTurn = false;
+            previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = false;
 
             //if (ocp.isFainted)
             //{
@@ -909,10 +923,12 @@ public class Board : MonoBehaviour
             }
             previousDraggingPiece = cp;
             //UpdateRemainingMove(cp.monsPieceDataType);
+            itemChances--;
+            print("else part of mana item chances coming" + itemChances);
+
+            cp.monsPieceDataType.itemChances = itemChances;
             SendCustomType(cp.monsPieceDataType);
 
-            itemChances--;
-            cp.monsPieceDataType.itemChances = itemChances;
         }
 
         if (itemChances <= 0)
@@ -960,11 +976,12 @@ public class Board : MonoBehaviour
 
     private bool SpiritPushOtherPlayersLogic(ref MonsPiece cp, ref MonsPiece ocp)
     {
-        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.spirit && ocp.monsPieceDataType.monsPieceType != MonsPieceType.bombOrPortion && !cp.monsPieceDataType.isCarryingBomb)
+        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.spirit && !cp.monsPieceDataType.mySpecialAbilityUsed && ocp.monsPieceDataType.monsPieceType != MonsPieceType.bombOrPortion && !cp.monsPieceDataType.isCarryingBomb)
         {
             //spirit logic 
             ocp.monsPieceDataType.isHitBySpirit = true;
-            cp.monsPieceDataType.mySpecialAbilityUsed = true;
+            cp.monsPieceDataType.onceAbilityUsed = true;
+            //cp.monsPieceDataType.mySpecialAbilityUsed = true;
             return true;
         }
 

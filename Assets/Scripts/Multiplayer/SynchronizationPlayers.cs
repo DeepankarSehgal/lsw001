@@ -167,7 +167,7 @@ namespace Scripts.Multiplayer
             //}
 
             MonsPieceDataType monsPieceDataType = monsPiece.monsPieceDataType;
-            if(monsPieceDataType.mySpecialAbilityUsed)
+            if(monsPieceDataType.mySpecialAbilityUsed && monsPieceDataType.monsPieceType != MonsPieceType.spirit)
             {
                 monsPieceDataType.mySpecialAbilityUsed = false;
             }
