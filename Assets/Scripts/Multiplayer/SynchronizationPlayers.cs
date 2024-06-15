@@ -15,7 +15,7 @@ namespace Scripts.Multiplayer
     public class SynchronizationPlayers : MonoBehaviour, IPunObservable
     {
 
-        public  PhotonView photonView;
+        public PhotonView photonView;
         private Vector3 networkedPosition;
         private Vector3 networkedRotation;
         bool networkWhiteTurn;
@@ -35,19 +35,19 @@ namespace Scripts.Multiplayer
         #region Unity Methods
         private void Start()
         {
-            
+
             networkedPosition = new Vector3();
             networkWhiteTurn = true;
-            if(boardInstance != null)
+            if (boardInstance != null)
             {
                 Board.instance.onUpdatePlayerTurn -= OnUpdatePlayerTurn;
                 Board.instance.onUpdatePlayerTurn += OnUpdatePlayerTurn;
                 Board.instance.onUpdatePlayerVisuals -= UpdatePlayerVisuals;
                 Board.instance.onUpdatePlayerVisuals += UpdatePlayerVisuals;
-                photonView.RPC(nameof(UpdatePlayerVisuals), RpcTarget.All,true);
+                photonView.RPC(nameof(UpdatePlayerVisuals), RpcTarget.All, true);
             }
 
-         
+
             //DontDestroyOnLoad(this);
 
             //networkedRotation = new Quaternion();
@@ -68,31 +68,31 @@ namespace Scripts.Multiplayer
 
         private void OnUpdatePlayerTurn(bool canSwapTurn)
         {
-            photonView.RPC(nameof(UpdatePlayerTurn), RpcTarget.All,canSwapTurn);
+            photonView.RPC(nameof(UpdatePlayerTurn), RpcTarget.All, canSwapTurn);
         }
 
         public void OnUpdatePlayerState(bool canResetPos)
         {
             if (monsPiece == null) return;
-                string monsData = JsonUtility.ToJson(monsPiece.monsPieceDataType);
-                photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All, monsData, canResetPos);
-                print("Remote update for " + monsPiece.monsPieceDataType.monsPieceType + " Team: " + monsPiece.monsPieceDataType.team);
+            string monsData = JsonUtility.ToJson(monsPiece.monsPieceDataType);
+            photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All, monsData, canResetPos);
+            print("Remote update for " + monsPiece.monsPieceDataType.monsPieceType + " Team: " + monsPiece.monsPieceDataType.team);
         }
-        
+
         [PunRPC]
         private void UpdatePlayerState(string monsData, bool canResetPos)
         {
             // Board.instance.UpdateRemainingMove(playerData);
-           
-                monsPiece.monsPieceDataType = JsonUtility.FromJson<MonsPieceDataType>(monsData);
-            if(monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.drainer)
+
+            monsPiece.monsPieceDataType = JsonUtility.FromJson<MonsPieceDataType>(monsData);
+            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.drainer)
             {
                 print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);
                 if (!photonView.IsMine)
                 {
-                    if (monsPiece.monsPieceDataType.isCarryingMana && transform.childCount<=0)
+                    if (monsPiece.monsPieceDataType.isCarryingMana && transform.childCount <= 0)
                     {
-                        if(monsPiece.monsPieceDataType.team == 0)//white
+                        if (monsPiece.monsPieceDataType.team == 0)//white
                         {
                             GameObject childMana = Instantiate(boardInstance.childManaSuperMana[0], transform);
                             childMana.transform.SetParent(transform, false);
@@ -124,16 +124,16 @@ namespace Scripts.Multiplayer
                         childMana.transform.SetParent(transform, false);
 
                     }
-                    else 
+                    else
                     {
                         if (transform.childCount > 0)
                         {
                             Destroy(transform.GetChild(0).gameObject);
                         }
                     }
-                   
+
                 }
-              
+
             }
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana || monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.supermana)
             {
@@ -155,7 +155,7 @@ namespace Scripts.Multiplayer
             }
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.demon)
             {
-                print("demon remote: " + canResetPos + " Previous position: " +  monsPiece.monsPieceDataType.previousPosition + " desired pos" + monsPiece.monsPieceDataType.desiredPos + " reset pos: " + monsPiece.monsPieceDataType.resetPos);
+                print("demon remote: " + canResetPos + " Previous position: " + monsPiece.monsPieceDataType.previousPosition + " desired pos" + monsPiece.monsPieceDataType.desiredPos + " reset pos: " + monsPiece.monsPieceDataType.resetPos);
                 if (monsPiece.monsPieceDataType.isFainted)
                 {
                     gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
@@ -163,7 +163,7 @@ namespace Scripts.Multiplayer
                     boardInstance.monsPiece[(int)monsPiece.monsPieceDataType.desiredPos.x, (int)monsPiece.monsPieceDataType.desiredPos.y] = monsPiece;
 
 
-                    
+
                 }
 
             }
@@ -173,7 +173,7 @@ namespace Scripts.Multiplayer
             //}
 
             MonsPieceDataType monsPieceDataType = monsPiece.monsPieceDataType;
-            if(monsPieceDataType.mySpecialAbilityUsed && monsPieceDataType.monsPieceType != MonsPieceType.spirit)
+            if (monsPieceDataType.mySpecialAbilityUsed && monsPieceDataType.monsPieceType != MonsPieceType.spirit)
             {
                 monsPieceDataType.mySpecialAbilityUsed = false;
             }
@@ -215,15 +215,15 @@ namespace Scripts.Multiplayer
             boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
 
             print("Mons desired pos:" + monsPieceDataType.desiredPos);
-          
+
 
         }
-            [PunRPC]
+        [PunRPC]
         private void UpdatePlayerTurn(bool updatePlayerTurn)
         {
             networkWhiteTurn = updatePlayerTurn;
             Board.instance.isWhiteTurn = networkWhiteTurn;
-            print("Player turn swapped "+ networkWhiteTurn);
+            print("Player turn swapped " + networkWhiteTurn);
         }
         [PunRPC]
         private void StartTheGameWhenAllPlayerAreReady()
@@ -243,11 +243,11 @@ namespace Scripts.Multiplayer
             {
                 transform.parent = boardInstance.PieceHolder;
                 transform.localEulerAngles = Vector3.zero;
-                
+
             }
             photonView.RPC(nameof(UpdatePlayerIcon), RpcTarget.All);
 
-           
+
         }
         [PunRPC]
         private void UpdatePlayerIcon()
@@ -256,7 +256,7 @@ namespace Scripts.Multiplayer
         }
         public void UpdateScore(int whiteScore, int blackScore)
         {
-         photonView.RPC(nameof(SynchScore), RpcTarget.All,whiteScore, blackScore);
+            photonView.RPC(nameof(SynchScore), RpcTarget.All, whiteScore, blackScore);
         }
         [PunRPC]
         private void SynchScore(int whiteScore, int blackScore)
@@ -265,11 +265,11 @@ namespace Scripts.Multiplayer
         }
         private void Update()
         {
-            if(!photonView.IsMine && PhotonNetwork.IsConnectedAndReady)
+            if (!photonView.IsMine && PhotonNetwork.IsConnectedAndReady)
             {
                 //transform.localPosition = Vector3.MoveTowards(transform.localPosition, networkedPosition, Time.deltaTime);
                 transform.position = networkedPosition;
-               // transform.localEulerAngles = networkedRotation;
+                // transform.localEulerAngles = networkedRotation;
 
 
             }
@@ -280,13 +280,13 @@ namespace Scripts.Multiplayer
             if (stream.IsWriting)//Owner/Local player
             {
                 stream.SendNext(transform.position);
-               // stream.SendNext(transform.localEulerAngles);
+                // stream.SendNext(transform.localEulerAngles);
             }
             else
             {
                 //the owner in the remote player area
                 networkedPosition = (Vector3)stream.ReceiveNext();
-               // networkedRotation = (Vector3)stream.ReceiveNext();
+                // networkedRotation = (Vector3)stream.ReceiveNext();
                 print("On PhotonSerializeView called!" + networkedPosition);
                 //networkedRotation =(Quaternion) stream.ReceiveNext();
             }

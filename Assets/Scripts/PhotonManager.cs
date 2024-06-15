@@ -24,7 +24,21 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         //PhotonNetwork.AutomaticallySyncScene = true;
         characterIndex = PlayerPrefs.GetInt("characterIndex", 0);
-        PhotonNetwork.ConnectUsingSettings();
+        if (!PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.ConnectUsingSettings();
+        }
+        if (PhotonNetwork.IsConnectedAndReady)
+        {
+            if (!PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.JoinOrCreateRoom("RoomLobby", roomOptions, TypedLobby.Default);
+            }
+            else
+            {
+                PhotonNetwork.JoinRoom("RoomLobby");
+            }
+        }
     }
 
     public void Connect()

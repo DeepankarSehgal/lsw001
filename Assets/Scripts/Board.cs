@@ -1,18 +1,15 @@
-using Cysharp.Threading.Tasks;
 using ExitGames.Client.Photon;
-using ExitGames.Client.Photon.StructWrapping;
 using Photon.Pun;
 using Photon.Realtime;
 using Scripts.Multiplayer;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Board : MonoBehaviour
+public class Board : MonoBehaviourPunCallbacks
 {
     public GameObject whiteCellPrefab;
     public GameObject blackCellPrefab;
@@ -60,6 +57,7 @@ public class Board : MonoBehaviour
     public GameObject BombOrPortionChoicePanel;
 
     public GameObject[] BPchoices;
+    public GameObject GameoverPanel;
 
     int choice;
 
@@ -92,10 +90,10 @@ public class Board : MonoBehaviour
     {
         isWhiteTurn = true;
         //CreateMonsBoard();
-       
-//#if UNITY_EDITOR
-//        OnJoinedRoom();
-//#endif
+
+        //#if UNITY_EDITOR
+        //        OnJoinedRoom();
+        //#endif
         //SpawnAllPiece();
         // PositionAllPiece();
         //CenterBoard();
@@ -108,7 +106,7 @@ public class Board : MonoBehaviour
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
     }
-   
+
     public void OnJoinedRoom()
     {
 
@@ -123,8 +121,8 @@ public class Board : MonoBehaviour
             Invoke(nameof(DelayCall), 3f);
             startGame = true;
             onUpdatePlayerState?.Invoke(false);
-            
-          
+
+
             //GameplayManager.startSynch?.Invoke();
         }
 
@@ -132,7 +130,7 @@ public class Board : MonoBehaviour
 
     private void DelayCall()
     {
-      
+
     }
     int tapCount = 0;
     void Update()
@@ -228,8 +226,8 @@ public class Board : MonoBehaviour
                     Vector2Int previousPosition = new Vector2Int(currentlyDraggingPiece.monsPieceDataType.currentX, currentlyDraggingPiece.monsPieceDataType.currentY);
                     currentlyDraggingPiece.monsPieceDataType.previousPosition = previousPosition;
                     if (availableMoves != null && availableMoves.Contains(hitPosition))
-                        {
-                        if (currentlyDraggingPiece.monsPieceDataType.monsPieceType!=MonsPieceType.mana && itemChances<=0)//To avoid glitch movess
+                    {
+                        if (currentlyDraggingPiece.monsPieceDataType.monsPieceType != MonsPieceType.mana && itemChances <= 0)//To avoid glitch movess
                         {
                             return;
                         }
@@ -260,7 +258,7 @@ public class Board : MonoBehaviour
                             currentlyDraggingPiece.SetPosition(previousPosition);
 
                         }
-                       
+
                         tapCount = 0;
                         //ClearHighLight();
 
@@ -421,7 +419,7 @@ public class Board : MonoBehaviour
             Camera.main.transform.localEulerAngles = new Vector3(0f, 0f, -180f);
 
             PieceHolder.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
-            
+
         }
 
 
@@ -444,11 +442,11 @@ public class Board : MonoBehaviour
         else
         {
             //Local testing..
-//#if UNITY_EDITOR
-//            mp = Instantiate(Whiteprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
-//            mp.team = team;
-//            mp.monsPieceType = type;
-//#endif
+            //#if UNITY_EDITOR
+            //            mp = Instantiate(Whiteprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
+            //            mp.team = team;
+            //            mp.monsPieceType = type;
+            //#endif
 
         }
         // Adjust spawn position for white pieces
@@ -472,11 +470,11 @@ public class Board : MonoBehaviour
         }
         else
         {
-//#if UNITY_EDITOR
-//            mp = Instantiate(Blackprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
-//            mp.team = team;
-//            mp.monsPieceType = type;
-//#endif
+            //#if UNITY_EDITOR
+            //            mp = Instantiate(Blackprefabs[(int)type - 1], transform).GetComponent<MonsPiece>();
+            //            mp.team = team;
+            //            mp.monsPieceType = type;
+            //#endif
         }
 
 
@@ -499,7 +497,7 @@ public class Board : MonoBehaviour
 
     public void PositionSinglePiece(int x, int y, bool force = false)
     {
-        
+
         monsPiece[x, y].monsPieceDataType.currentX = x;
         monsPiece[x, y].monsPieceDataType.currentY = y;
         monsPiece[x, y].SetPosition(new Vector2(x, y), force);
@@ -581,7 +579,7 @@ public class Board : MonoBehaviour
                     ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     ocp.gameObject.SetActive(false);
                     //ocp.gameObject.transform.GetComponent<Transform>().localScale = new Vector3(0.3f,0.3f,0.3f);
-                    if(cp.monsPieceDataType.team == 0) //white
+                    if (cp.monsPieceDataType.team == 0) //white
                     {
                         GameObject childMana = Instantiate(childManaSuperMana[0], cp.transform);
                         childMana.transform.SetParent(cp.transform, false);
@@ -591,10 +589,8 @@ public class Board : MonoBehaviour
                         GameObject childMana = Instantiate(childManaSuperMana[1], cp.transform);
                         childMana.transform.SetParent(cp.transform, false);
                     }
-               
-
-
                 }
+
                 else if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.supermana)//confusion
                 {
                     cp.monsPieceDataType.isCarryingSuperMana = true;
@@ -626,7 +622,7 @@ public class Board : MonoBehaviour
                     ocp.gameObject.SetActive(false);
                     ocp.monsPieceDataType.isCarriedByDrainer = true;
                     ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
-                    if(ocp.monsPieceDataType.team == 0)
+                    if (ocp.monsPieceDataType.team == 0)
                     {
                         GameObject childMana = Instantiate(childManaSuperMana[0], cp.transform);
                         childMana.transform.SetParent(cp.transform, false);
@@ -636,7 +632,7 @@ public class Board : MonoBehaviour
                         GameObject childMana = Instantiate(childManaSuperMana[1], cp.transform);
                         childMana.transform.SetParent(cp.transform, false);
                     }
-                   
+
                 }
 
                 else
@@ -665,7 +661,7 @@ public class Board : MonoBehaviour
                         if (!isMysticAttackingTheOpponentPlayer)
                         {
                             cp.SetPosition(ocp.monsPieceDataType.resetPos);
-                           
+
                         }
                         monsPiece[(int)ocp.monsPieceDataType.desiredPos.x, (int)ocp.monsPieceDataType.desiredPos.y] = null;
                         //PositionSinglePiece((int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y);
@@ -694,11 +690,11 @@ public class Board : MonoBehaviour
                         }
                         deadBlacks.Add(cp);
                         ocp.FaintForTurns(2);
-                        
+
                         if (!isMysticAttackingTheOpponentPlayer)
                         {
                             cp.SetPosition(cp.monsPieceDataType.resetPos);
-                         
+
                         }
                         //monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
                         monsPiece[(int)ocp.monsPieceDataType.desiredPos.x, (int)ocp.monsPieceDataType.desiredPos.y] = null;
@@ -737,7 +733,7 @@ public class Board : MonoBehaviour
             monsPiece[x, y] = cp;
             monsPiece[previousPosition.x, previousPosition.y] = null;
         }
-           
+
 
 
         if (!isMysticAttackingTheOpponentPlayer)
@@ -772,7 +768,7 @@ public class Board : MonoBehaviour
                     blackScore++;
                     blackScoreText.text = blackScore.ToString();
                 }
-                cp.GetComponent<SynchronizationPlayers>().UpdateScore(whiteScore,blackScore);
+                cp.GetComponent<SynchronizationPlayers>().UpdateScore(whiteScore, blackScore);
             }
 
         }
@@ -832,7 +828,7 @@ public class Board : MonoBehaviour
             print("Mana move logic: " + cp.monsPieceDataType.monsPieceType + cp.monsPieceDataType.isHitBySpirit + manaTurn);
             if (cp.monsPieceDataType.isHitBySpirit)//spirit move logic
             {
-               
+
                 previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
                 if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
                 {
@@ -845,8 +841,8 @@ public class Board : MonoBehaviour
                 return true;
             }
             manaTurn = false;
-            if(previousDraggingPiece!=null)
-            previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = false;
+            if (previousDraggingPiece != null)
+                previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = false;
 
             //if (ocp.isFainted)
             //{
@@ -887,16 +883,16 @@ public class Board : MonoBehaviour
             UpdatePlayerTurns(!isWhiteTurn);
             //isWhiteTurn = !isWhiteTurn;
 
-//#if !UNITY_EDITOR
-//            UpdatePlayerTurns(!isWhiteTurn);
-//#endif
+            //#if !UNITY_EDITOR
+            //            UpdatePlayerTurns(!isWhiteTurn);
+            //#endif
 
             //Faint reset logic 
             foreach (MonsPiece piece in monsPiece)
             {
                 if (piece != null)
                 {
-                   // piece.UpdateFaintedTurns();
+                    // piece.UpdateFaintedTurns();
                 }
             }
             //Mana score logic 
@@ -931,8 +927,6 @@ public class Board : MonoBehaviour
             print("else part of mana item chances coming" + itemChances);
 
             cp.monsPieceDataType.itemChances = itemChances;
-           
-
         }
 
         if (itemChances <= 0)
@@ -944,15 +938,17 @@ public class Board : MonoBehaviour
         {
             isGameEnd = true;
             if (whiteScore >= 5)
+            {
                 endGameText.text = "White Won !";
-            else
-                if (blackScore >= 5)
+            }
+
+            else if (blackScore >= 5)
+            {
                 endGameText.text = "Black Won !";
+            }
 
+            photonView.RPC("TurnOnGameObject", RpcTarget.All);
         }
-
-
-
         return true;
 
     }
@@ -1105,10 +1101,10 @@ public class Board : MonoBehaviour
     [PunRPC]
     public void UpdatePlayerIcon()
     {
-        if(PhotonNetwork.IsMasterClient)
-        player1Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
+        if (PhotonNetwork.IsMasterClient)
+            player1Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
         else
-        player2Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
+            player2Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
 
     }
     public void UpdateRemainingMove(MonsPieceDataType cp)
@@ -1166,7 +1162,7 @@ public class Board : MonoBehaviour
         }
 
         // onUpdatePlayerState?.Invoke(cp);
-       
+
 
     }
 
@@ -1201,6 +1197,12 @@ public class Board : MonoBehaviour
         monsPiece[(int)currentPos.x, (int)currentPos.y] = piece;
     }
 
+    [PunRPC]
+    void TurnOnGameObject()
+    {
+        GameoverPanel.SetActive(true);
+    }
+
     void OnDisable()
     {
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
@@ -1227,7 +1229,5 @@ public class CellHover : MonoBehaviour
     {
         GetComponent<SpriteRenderer>().color = originalColor;
     }
-
-
-   
+    
 }

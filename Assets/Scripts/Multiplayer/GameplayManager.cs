@@ -5,6 +5,7 @@ using UnityEngine;
 using Photon.Realtime;
 using TMPro;
 using System;
+using UnityEngine.SceneManagement;
 
 namespace Scripts.Multiplayer
 {
@@ -61,6 +62,7 @@ namespace Scripts.Multiplayer
         public override void OnConnectedToMaster()
         {
             print($"{PhotonNetwork.LocalPlayer.NickName} is connected to the photon server!");
+            
             JoinRandomRoom();
         }
         #endregion
@@ -87,6 +89,8 @@ namespace Scripts.Multiplayer
                 playerRoomInfoText.text = PhotonNetwork.NickName + "Joined the" + PhotonNetwork.CurrentRoom.Name + "the piece type is" + playerCustomProperties["PieceType"];
                 onJoinedRoom?.Invoke();
                 startGenerateBoard = true;
+                PhotonNetwork.CurrentRoom.IsVisible = false;
+                PhotonNetwork.CurrentRoom.IsOpen = false;
                 return;
                // onJoinedRoom?.Invoke();
             }

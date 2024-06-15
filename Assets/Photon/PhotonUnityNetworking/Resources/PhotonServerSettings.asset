@@ -47,6 +47,8 @@ MonoBehaviour:
   - SynchScore
   - UpdatePlayerVisuals
   - UpdatePlayerIcon
+  - UpdatePlayerWin
+  - TurnOnGameObject
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
