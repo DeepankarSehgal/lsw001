@@ -68,14 +68,14 @@ namespace Scripts.Multiplayer
 
         private void OnUpdatePlayerTurn(bool canSwapTurn)
         {
-            photonView.RPC(nameof(UpdatePlayerTurn), RpcTarget.All, canSwapTurn);
+            photonView.RPC(nameof(UpdatePlayerTurn), RpcTarget.AllBuffered, canSwapTurn);
         }
 
         public void OnUpdatePlayerState(bool canResetPos)
         {
             if (monsPiece == null) return;
             string monsData = JsonUtility.ToJson(monsPiece.monsPieceDataType);
-            photonView.RPC(nameof(UpdatePlayerState), RpcTarget.All, monsData, canResetPos);
+            photonView.RPC(nameof(UpdatePlayerState), RpcTarget.AllBuffered, monsData, canResetPos);
             print("Remote update for " + monsPiece.monsPieceDataType.monsPieceType + " Team: " + monsPiece.monsPieceDataType.team);
         }
 
@@ -88,8 +88,29 @@ namespace Scripts.Multiplayer
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.drainer)
             {
                 print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);
-                if (!photonView.IsMine)
+
+
+
+
+                if (true)
                 {
+
+                    if (monsPiece.monsPieceDataType.isCarryingSuperMana && monsPiece.monsPieceDataType.isFainted)
+                    {
+                        monsPiece.monsPieceDataType.isCarryingSuperMana = false;
+                        boardInstance.superManaRef.gameObject.SetActive(true);
+                        gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+                        boardInstance.superManaRef.monsPieceDataType.isFainted = false;
+                        boardInstance.superManaRef.monsPieceDataType.isCarriedByDrainer = false;
+                        boardInstance.monsPiece[(int)5, (int)5] = boardInstance.superManaRef;
+                        print("SuperMana board ref set : " + boardInstance.monsPiece[5, 5]);
+                        if (transform.childCount > 0)
+                        {
+                            Destroy(transform.GetChild(0).gameObject);
+                        }
+                        print("enable supermana on it: " + boardInstance.superManaRef);
+                    }
+
                     if (monsPiece.monsPieceDataType.isCarryingMana && transform.childCount <= 0)
                     {
                         if (monsPiece.monsPieceDataType.team == 0)//white
@@ -132,12 +153,19 @@ namespace Scripts.Multiplayer
                         }
                     }
 
+              
+
                 }
 
             }
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana || monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.supermana)
             {
                 print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);
+                if(monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.supermana)
+                {
+                    print("Here i can cached the superMana");
+                    boardInstance.superManaRef = monsPiece;
+                }
                 if (monsPiece.monsPieceDataType.isCarriedByDrainer)
                 {
                     gameObject.SetActive(false);

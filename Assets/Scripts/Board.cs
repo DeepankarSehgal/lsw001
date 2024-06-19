@@ -79,6 +79,8 @@ public class Board : MonoBehaviourPunCallbacks
     public Transform PieceHolder;
     public bool startGameWhenAllReady = true;
     bool startGame = false;
+
+    public MonsPiece superManaRef;
     private void Awake()
     {
         instance = this;
@@ -596,6 +598,7 @@ public class Board : MonoBehaviourPunCallbacks
                     cp.monsPieceDataType.isCarryingSuperMana = true;
                     ocp.gameObject.SetActive(false);
                     ocp.monsPieceDataType.isCarriedByDrainer = true;
+                    superManaRef = ocp;
                     ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     GameObject childMana = Instantiate(childManaSuperMana[2], cp.transform);
                     childMana.transform.SetParent(cp.transform, false);
@@ -607,6 +610,22 @@ public class Board : MonoBehaviourPunCallbacks
             else
             {
                 //when both are not in the same team
+                if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.supermana)//confusion
+                {
+                    cp.monsPieceDataType.isCarryingSuperMana = true;
+                  
+                    ocp.monsPieceDataType.isCarriedByDrainer = true;
+                    superManaRef = ocp;
+                    ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                    ocp.gameObject.SetActive(false);
+                    GameObject childMana = Instantiate(childManaSuperMana[2], cp.transform);
+                    childMana.transform.SetParent(cp.transform, false);
+                    print("Supermana picked!");
+
+                }
+
+
+
                 if ((cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer || cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.monsPieceType == MonsPieceType.spirit || cp.monsPieceDataType.monsPieceType == MonsPieceType.demon || cp.monsPieceDataType.monsPieceType == MonsPieceType.angel) && ocp.monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)
                 {
                     monsPiece[x, y] = null;
@@ -646,6 +665,19 @@ public class Board : MonoBehaviourPunCallbacks
                         ocp.SetPosition(ocp.monsPieceDataType.resetPos);
                         faintPlayers.Add(ocp);
                         ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
+
+
+                        if(ocp.monsPieceDataType.monsPieceType == MonsPieceType.drainer)
+                        {
+                            if (ocp.monsPieceDataType.isCarryingSuperMana)
+                            {
+                                superManaRef.monsPieceDataType.isFainted = false;
+                                superManaRef.monsPieceDataType.isCarriedByDrainer = false;
+                                monsPiece[5,5] = superManaRef;
+                                superManaRef.gameObject.SetActive(true);
+                                ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                            }
+                        }
                         return false;
                     }
 
