@@ -44,7 +44,7 @@ namespace Scripts.Multiplayer
                 Board.instance.onUpdatePlayerTurn += OnUpdatePlayerTurn;
                 Board.instance.onUpdatePlayerVisuals -= UpdatePlayerVisuals;
                 Board.instance.onUpdatePlayerVisuals += UpdatePlayerVisuals;
-                photonView.RPC(nameof(UpdatePlayerVisuals), RpcTarget.All, true);
+                photonView.RPC(nameof(UpdatePlayerVisuals), RpcTarget.AllViaServer, true);
             }
 
 
@@ -85,6 +85,14 @@ namespace Scripts.Multiplayer
             // Board.instance.UpdateRemainingMove(playerData);
 
             monsPiece.monsPieceDataType = JsonUtility.FromJson<MonsPieceDataType>(monsData);
+
+
+            Vector2Int previousPosition =monsPiece.monsPieceDataType.previousPosition;
+            if (canResetPos)
+            {
+                boardInstance.monsPiece[(int)previousPosition.x, (int)previousPosition.y] = null;
+
+            }
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.drainer)
             {
                 print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);
@@ -95,9 +103,11 @@ namespace Scripts.Multiplayer
                 if (true)
                 {
 
+                    //super mana reset logic on remote
                     if (monsPiece.monsPieceDataType.isCarryingSuperMana && monsPiece.monsPieceDataType.isFainted)
                     {
                         monsPiece.monsPieceDataType.isCarryingSuperMana = false;
+                        boardInstance.superManaRef.monsPieceDataType.desiredPos = new Vector3(5f, 5f, 5f);
                         boardInstance.superManaRef.gameObject.SetActive(true);
                         gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
                         boardInstance.superManaRef.monsPieceDataType.isFainted = false;
@@ -109,6 +119,50 @@ namespace Scripts.Multiplayer
                             Destroy(transform.GetChild(0).gameObject);
                         }
                         print("enable supermana on it: " + boardInstance.superManaRef);
+                    }
+                    //mana reset logic on remote
+                    if ((monsPiece.monsPieceDataType.isCarryingMana || monsPiece.monsPieceDataType.isCarryingOppMana) && monsPiece.monsPieceDataType.isFainted)
+                    {
+                        if(monsPiece.monsPieceDataType.team == 0)
+                        {
+                            monsPiece.monsPieceDataType.isCarryingMana = false;
+                            monsPiece.monsPieceDataType.isCarryingOppMana = false;
+                            boardInstance.currentManaPickedByWhiteRef.monsPieceDataType.desiredPos = new Vector3(monsPiece.monsPieceDataType.currentX, monsPiece.monsPieceDataType.currentY, 0f);
+                            boardInstance.currentManaPickedByWhiteRef.gameObject.SetActive(true);
+                            gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+                            boardInstance.currentManaPickedByWhiteRef.monsPieceDataType.isFainted = false;
+                            boardInstance.currentManaPickedByWhiteRef.monsPieceDataType.isCarriedByDrainer = false;
+                            boardInstance.monsPiece[monsPiece.monsPieceDataType.currentX, monsPiece.monsPieceDataType.currentY] = boardInstance.currentManaPickedByWhiteRef;
+                            //boardInstance.monsPiece[(int)boardInstance.currentManaRef.monsPieceDataType.desiredPos.x, (int)boardInstance.currentManaRef.monsPieceDataType.desiredPos.y] = boardInstance.currentManaRef;
+                            boardInstance.currentManaPickedByWhiteRef.monsPieceDataType.currentX = (int)boardInstance.currentManaPickedByWhiteRef.monsPieceDataType.desiredPos.x;
+                            boardInstance.currentManaPickedByWhiteRef.monsPieceDataType.currentY = (int)boardInstance.currentManaPickedByWhiteRef.monsPieceDataType.desiredPos.y;
+                            print("Mana board ref set : " + boardInstance.monsPiece[monsPiece.monsPieceDataType.currentX, monsPiece.monsPieceDataType.currentY] + " " + monsPiece.monsPieceDataType.currentX + ": " + monsPiece.monsPieceDataType.currentY);
+                            if (transform.childCount > 0)
+                            {
+                                Destroy(transform.GetChild(0).gameObject);
+                            }
+                            print("enable Mana on it: " + boardInstance.currentManaPickedByWhiteRef);
+                        }
+                        else
+                        {
+                            monsPiece.monsPieceDataType.isCarryingMana = false;
+                            monsPiece.monsPieceDataType.isCarryingOppMana = false;
+                            boardInstance.currentManaPickedByBlackRef.monsPieceDataType.desiredPos = new Vector3(monsPiece.monsPieceDataType.currentX, monsPiece.monsPieceDataType.currentY, 0f);
+                            boardInstance.currentManaPickedByBlackRef.gameObject.SetActive(true);
+                            gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+                            boardInstance.currentManaPickedByBlackRef.monsPieceDataType.isFainted = false;
+                            boardInstance.currentManaPickedByBlackRef.monsPieceDataType.isCarriedByDrainer = false;
+                            boardInstance.monsPiece[monsPiece.monsPieceDataType.currentX, monsPiece.monsPieceDataType.currentY] = boardInstance.currentManaPickedByBlackRef;
+                            //boardInstance.monsPiece[(int)boardInstance.currentManaRef.monsPieceDataType.desiredPos.x, (int)boardInstance.currentManaRef.monsPieceDataType.desiredPos.y] = boardInstance.currentManaRef;
+                            boardInstance.currentManaPickedByBlackRef.monsPieceDataType.currentX = (int)boardInstance.currentManaPickedByBlackRef.monsPieceDataType.desiredPos.x;
+                            boardInstance.currentManaPickedByBlackRef.monsPieceDataType.currentY = (int)boardInstance.currentManaPickedByBlackRef.monsPieceDataType.desiredPos.y;
+                            if (transform.childCount > 0)
+                            {
+                                Destroy(transform.GetChild(0).gameObject);
+                            }
+                            print("enable Mana on it: " + boardInstance.currentManaPickedByWhiteRef);
+                        }
+                    
                     }
 
                     if (monsPiece.monsPieceDataType.isCarryingMana && transform.childCount <= 0)
@@ -164,10 +218,23 @@ namespace Scripts.Multiplayer
                 if(monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.supermana)
                 {
                     print("Here i can cached the superMana");
+
                     boardInstance.superManaRef = monsPiece;
+                    //gameObject.SetActive(false);
                 }
+             
                 if (monsPiece.monsPieceDataType.isCarriedByDrainer)
                 {
+                    if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana)
+                    {
+                        if(monsPiece.monsPieceDataType.team==0)
+                        boardInstance.currentManaPickedByWhiteRef = monsPiece;
+                        else
+                            boardInstance.currentManaPickedByBlackRef = monsPiece;
+
+                        print("Here i can cached the Mana");
+
+                    }
                     gameObject.SetActive(false);
                 }
 
@@ -234,12 +301,6 @@ namespace Scripts.Multiplayer
 
 
 
-            Vector2Int previousPosition = monsPieceDataType.previousPosition;
-            if (canResetPos)
-            {
-                boardInstance.monsPiece[(int)previousPosition.x, (int)previousPosition.y] = null;
-
-            }
             boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
 
             print("Mons desired pos:" + monsPieceDataType.desiredPos);
@@ -273,7 +334,7 @@ namespace Scripts.Multiplayer
                 transform.localEulerAngles = Vector3.zero;
 
             }
-            photonView.RPC(nameof(UpdatePlayerIcon), RpcTarget.All);
+            photonView.RPC(nameof(UpdatePlayerIcon), RpcTarget.AllViaServer);
 
 
         }

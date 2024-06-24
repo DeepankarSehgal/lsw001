@@ -49,6 +49,10 @@ MonoBehaviour:
   - UpdatePlayerIcon
   - UpdatePlayerWin
   - TurnOnGameObject
+  - UpdateBlackIcon
+  - UpdateWhiteIcon
+  - SynchMe
+  - SynchMeInBoard
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -1,4 +1,5 @@
 using ExitGames.Client.Photon;
+using Org.BouncyCastle.Asn1.BC;
 using Photon.Pun;
 using Photon.Realtime;
 using Scripts.Multiplayer;
@@ -74,13 +75,18 @@ public class Board : MonoBehaviourPunCallbacks
 
     [SerializeField] private GameObject[] BombOrPortionObj;
     [SerializeField] private GameObject[] RemainingMovesHolder;
-    [SerializeField] private Image player1Icon;
-    [SerializeField] private Image player2Icon;
+    [SerializeField] public Image player1Icon;
+    [SerializeField] public GameObject player1IconPrefab;
+    [SerializeField] public Image player2Icon;
+    [SerializeField] public GameObject player2IconPrefab;
     public Transform PieceHolder;
     public bool startGameWhenAllReady = true;
     bool startGame = false;
 
     public MonsPiece superManaRef;
+    public MonsPiece currentManaPickedByWhiteRef;
+    public MonsPiece currentManaPickedByBlackRef;
+    public Sprite player1IconRef, player2IconRef;
     private void Awake()
     {
         instance = this;
@@ -123,7 +129,7 @@ public class Board : MonoBehaviourPunCallbacks
             Invoke(nameof(DelayCall), 3f);
             startGame = true;
             onUpdatePlayerState?.Invoke(false);
-
+            //onUpdatePlayerVisuals?.Invoke(true);
 
             //GameplayManager.startSynch?.Invoke();
         }
@@ -158,11 +164,14 @@ public class Board : MonoBehaviourPunCallbacks
                     currentHover = hitPosition;
                     cells[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
                 }
-                print("Hit position : " + hitPosition);
+                
                 if (Input.GetMouseButton(0) && currentlyDraggingPiece == null)
                 {
+                    print("Hit position : " + monsPiece[hitPosition.x, hitPosition.y]);
+
                     if (monsPiece[hitPosition.x, hitPosition.y] != null && !monsPiece[hitPosition.x, hitPosition.y].monsPieceDataType.isFainted)
                     {
+
                         if ((monsPiece[hitPosition.x, hitPosition.y].monsPieceDataType.team == 0 && (isWhiteTurn || previousDraggingPiece != null && previousDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.spirit)) || (monsPiece[hitPosition.x, hitPosition.y].monsPieceDataType.team == 1 && (!isWhiteTurn || previousDraggingPiece != null && previousDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.spirit)))
                         {
                             print("Previous piece " + previousDraggingPiece);
@@ -421,7 +430,6 @@ public class Board : MonoBehaviourPunCallbacks
         if ((string)pieceType == "Black")
         {
             Camera.main.transform.localEulerAngles = new Vector3(0f, 0f, -180f);
-
             PieceHolder.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
 
         }
@@ -582,6 +590,10 @@ public class Board : MonoBehaviourPunCallbacks
                     ocp.monsPieceDataType.isCarriedByDrainer = true;
                     ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     ocp.gameObject.SetActive(false);
+                    if(cp.monsPieceDataType.team == 0)
+                    currentManaPickedByWhiteRef = ocp;
+                    else
+                    currentManaPickedByBlackRef = ocp;
                     //ocp.gameObject.transform.GetComponent<Transform>().localScale = new Vector3(0.3f,0.3f,0.3f);
                     if (cp.monsPieceDataType.team == 0) //white
                     {
@@ -642,6 +654,10 @@ public class Board : MonoBehaviourPunCallbacks
                     cp.monsPieceDataType.isCarryingOppMana = true;
                     ocp.gameObject.SetActive(false);
                     ocp.monsPieceDataType.isCarriedByDrainer = true;
+                    if (cp.monsPieceDataType.team == 0)
+                        currentManaPickedByWhiteRef = ocp;
+                    else
+                        currentManaPickedByBlackRef = ocp;
                     ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     if (ocp.monsPieceDataType.team == 0)
                     {
@@ -991,9 +1007,37 @@ public class Board : MonoBehaviourPunCallbacks
             {
                 superManaRef.monsPieceDataType.isFainted = false;
                 superManaRef.monsPieceDataType.isCarriedByDrainer = false;
+                superManaRef.monsPieceDataType.desiredPos = new Vector3(5f, 5f, 5f);
                 monsPiece[5, 5] = superManaRef;
                 superManaRef.gameObject.SetActive(true);
                 ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+            }
+
+            if (ocp.monsPieceDataType.isCarryingMana || ocp.monsPieceDataType.isCarryingOppMana)
+            {
+                if(ocp.monsPieceDataType.team == 0)
+                {
+                    currentManaPickedByWhiteRef.monsPieceDataType.isFainted = false;
+                    currentManaPickedByWhiteRef.monsPieceDataType.isCarriedByDrainer = false;
+                    currentManaPickedByWhiteRef.monsPieceDataType.desiredPos = new Vector3(ocp.monsPieceDataType.currentX, ocp.monsPieceDataType.currentY, 0f);
+                    monsPiece[(int)currentManaPickedByWhiteRef.monsPieceDataType.desiredPos.x, (int)currentManaPickedByWhiteRef.monsPieceDataType.desiredPos.y] = currentManaPickedByWhiteRef;
+                    currentManaPickedByWhiteRef.monsPieceDataType.currentX = (int)currentManaPickedByWhiteRef.monsPieceDataType.desiredPos.x;
+                    currentManaPickedByWhiteRef.monsPieceDataType.currentY = (int)currentManaPickedByWhiteRef.monsPieceDataType.desiredPos.y;
+                    currentManaPickedByWhiteRef.gameObject.SetActive(true);
+                }
+                else
+                {
+                    currentManaPickedByBlackRef.monsPieceDataType.isFainted = false;
+                    currentManaPickedByBlackRef.monsPieceDataType.isCarriedByDrainer = false;
+                    currentManaPickedByBlackRef.monsPieceDataType.desiredPos = new Vector3(ocp.monsPieceDataType.currentX, ocp.monsPieceDataType.currentY, 0f);
+                    monsPiece[(int)currentManaPickedByBlackRef.monsPieceDataType.desiredPos.x, (int)currentManaPickedByBlackRef.monsPieceDataType.desiredPos.y] = currentManaPickedByBlackRef;
+                    currentManaPickedByBlackRef.monsPieceDataType.currentX = (int)currentManaPickedByBlackRef.monsPieceDataType.desiredPos.x;
+                    currentManaPickedByBlackRef.monsPieceDataType.currentY = (int)currentManaPickedByBlackRef.monsPieceDataType.desiredPos.y;
+                    currentManaPickedByBlackRef.gameObject.SetActive(true);
+                }
+        
+                ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                print("Current Mana");
             }
         }
     }
@@ -1145,10 +1189,46 @@ public class Board : MonoBehaviourPunCallbacks
     [PunRPC]
     public void UpdatePlayerIcon()
     {
-        if (PhotonNetwork.IsMasterClient)
-            player1Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
+        //if (PhotonNetwork.IsMasterClient)
+
+        object pieceType;
+        PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("PieceType", out pieceType);
+        print("PieceType from photon received: " + (string)pieceType);
+        if ((string)pieceType == "Black")
+        {
+
+            //UpdateBlackIcon();
+
+        }
         else
-            player2Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
+        {
+           // UpdateWhiteIcon();
+        }
+
+    }
+    [PunRPC] 
+    public void UpdateWhiteIcon()
+    {
+        //player1Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
+        if (player1Icon.transform.childCount > 0) return;
+       Image mp = PhotonNetwork.Instantiate(player1IconPrefab.gameObject.name, transform.localPosition, Quaternion.identity).GetComponent<Image>();
+        mp.sprite = GameManager.instance.selectPlayerIcon.sprite;
+        mp.transform.parent = player1Icon.transform;
+        mp.transform.localScale = Vector3.one;
+        //////player1IconRef = player1Icon;
+    }
+
+    [PunRPC]
+    public void UpdateBlackIcon()
+    {
+        if (player2Icon.transform.childCount > 0) return;
+
+        Image mp = PhotonNetwork.Instantiate(player2IconPrefab.gameObject.name, transform.localPosition, Quaternion.identity).GetComponent<Image>();
+        mp.sprite = GameManager.instance.selectPlayerIcon.sprite;
+        mp.transform.parent = player2Icon.transform;
+        mp.transform.localScale = Vector3.one;
+
+        //player2IconRef = player2Icon;
 
     }
     public void UpdateRemainingMove(MonsPieceDataType cp)
