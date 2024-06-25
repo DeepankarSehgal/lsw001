@@ -36,6 +36,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -174,14 +175,16 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e1eb49ff065174c34b146b1cba3d7e78, type: 3}
   - {fileID: 8300000, guid: 725ea3faeac7bd24296e9755d00f745e, type: 3}
   canvas: {fileID: 0}
-  CoinPrefab: {fileID: 1439126633554615118, guid: 0fd172bd5da8d4774995d688eea4733d,
-    type: 3}
+  CoinPrefab: {fileID: 1439126633554615118, guid: 0fd172bd5da8d4774995d688eea4733d, type: 3}
   coinCount: 0
   chatInputField: {fileID: 0}
   groundDist: 0
+  virtualCamera: {fileID: 0}
+  MonsCanvas: {fileID: 0}
+  otherCollided: {fileID: 0}
   groundLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 128
 --- !u!82 &691828994104540792
 AudioSource:
   m_ObjectHideFlags: 0

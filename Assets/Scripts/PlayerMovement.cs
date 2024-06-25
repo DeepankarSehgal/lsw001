@@ -56,34 +56,40 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         //playFabManager = FindObjectOfType<PlayFabManager>();
         //  playFabManager.RetrieveCoins();
     }
+    bool rayClickedToMove = false;
     void Update()
     {
-        if (PhotonChatManager.Instance.chatField.GetComponent<TMP_InputField>().isFocused)
-        {
-            return;
-        }
+        if(Input.GetMouseButtonDown(0))
+        RaycastFromMouse();
+        //if (PhotonChatManager.Instance.chatField.GetComponent<TMP_InputField>().isFocused)
+        //{
+        //    return;
+        //}
 
-        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePosition.z = 0;
-        RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
+        Ray mousePosition = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //mousePosition.z = 0;
+        RaycastHit hit;
+        bool hit1 = Physics.Raycast(mousePosition.origin, Vector3.forward,out hit, 1000f);
 
-        RaycastHit hit2;
+        if(hit.collider!=null)
+        print("RayCastHit: " + hit.collider.gameObject.name);
 
         Vector3 castpos = transform.position;
         castpos.y += 1;
-        if (Physics.Raycast(castpos, -transform.up, out hit2, Mathf.Infinity, groundLayer))
-        {
-            if (hit2.collider != null)
-            {
-                Vector3 movePos = transform.position;
-                movePos.y = hit.point.y + groundDist;
-                transform.position = movePos;
-            }
-        }
+        //if (Physics.Raycast(castpos, -transform.up, out hit2, Mathf.Infinity, groundLayer))
+        //{
+        //    if (hit2.collider != null)
+        //    {
+        //        Vector3 movePos = transform.position;
+        //        movePos.y = hit.point.y + groundDist;
+        //        transform.position = movePos;
+        //    }
+        //}
         if (Input.GetMouseButtonDown(0))
         {
-            if (hit.collider != null && hit.collider.CompareTag("Rock"))
+            if (hit.collider != null && hit.collider.CompareTag("Ground"))
             {
+                print("ground hit");
                 movingTowardsrock = true;
                 currentRock = hit.collider.gameObject; // Set currentRock to the clicked rock
                 targetPosition = currentRock.transform.position;
@@ -95,7 +101,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
             }
             else
             {
-                targetPosition = mousePosition;
+                targetPosition = hit.point;
                 isMovingToClick = true;
             }
         }
@@ -141,6 +147,11 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
            
         }
 
+
+        if (rayClickedToMove)
+        {
+            transform.localPosition = Vector3.MoveTowards(transform.localPosition, rayclickPosition, Time.deltaTime * 2f);
+        }
         animator.SetFloat("Horizontal", movement.x);
         animator.SetFloat("Vertical", movement.y);
         animator.SetFloat("Speed", movement.sqrMagnitude);
@@ -158,6 +169,22 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         //{
         //    RockCollision();
         //}  
+    }
+    Vector3 rayclickPosition;
+    void RaycastFromMouse()
+    {
+        // Create a ray from the camera to the mouse position
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        // Variable to store hit information
+        RaycastHit hit;
+
+        // Perform the raycast
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+        {
+            rayclickPosition = hit.point;
+            rayClickedToMove = true;
+        }
     }
 
     void FixedUpdate()
