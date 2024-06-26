@@ -201,7 +201,7 @@ namespace Scripts.Multiplayer
                     }
                     else
                     {
-                        if (transform.childCount > 0)
+                        if (monsPiece.monsPieceDataType.isFainted && transform.childCount > 0)
                         {
                             Destroy(transform.GetChild(0).gameObject);
                         }
