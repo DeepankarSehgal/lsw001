@@ -94,6 +94,11 @@ public class Board : MonoBehaviourPunCallbacks
         MonsPieceDataType.Register();
     }
 
+
+    private void OnDestroy()
+    {
+        instance = null;
+    }
     void Start()
     {
         isWhiteTurn = true;
@@ -106,7 +111,7 @@ public class Board : MonoBehaviourPunCallbacks
         // PositionAllPiece();
         //CenterBoard();
     }
-    private void OnEnable()
+    private new void OnEnable()
     {
         GameplayManager.onJoinedRoom -= OnJoinedRoom;
         GameplayManager.onJoinedRoom += OnJoinedRoom;
@@ -115,10 +120,10 @@ public class Board : MonoBehaviourPunCallbacks
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
     }
 
-    public void OnJoinedRoom()
+    public new void OnJoinedRoom()
     {
 
-        if (PhotonNetwork.IsConnectedAndReady || true)
+        if (PhotonNetwork.IsConnectedAndReady)
         {
             print("On Joined room of board get called!");
             CreateMonsBoard();
@@ -1327,9 +1332,10 @@ public class Board : MonoBehaviourPunCallbacks
         GameoverPanel.SetActive(true);
     }
 
-    void OnDisable()
+    new void OnDisable()
     {
         PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+        GameplayManager.onJoinedRoom -= OnJoinedRoom;
     }
 
 }
