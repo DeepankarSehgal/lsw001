@@ -86,6 +86,7 @@ public class PlayFabManager : MonoBehaviour
             }
         };
         PhotonNetwork.NickName = nickname;
+        PlayerPrefs.SetString("Nickname", nickname);
         PlayFabClientAPI.UpdateUserData(request, OnUpdateUserSuccess, OnUpdateUserFailure);
     }
 
@@ -98,61 +99,61 @@ public class PlayFabManager : MonoBehaviour
     {
         Debug.Log("PlayFab Error: " + error.GenerateErrorReport());
     }
-    public void SaveCharacterSelection(int characterIndex)
-    {
-        var request = new UpdateUserDataRequest
-        {
-            Data = new Dictionary<string, string>
-            {
-                {"CharacterIndex", characterIndex.ToString()}
-            }
-        };
-        PlayFabClientAPI.UpdateUserData(request, OnSaveCharacterSuccess, OnSaveCharacterFailure);
-    }
+    //public void SaveCharacterSelection(int characterIndex)
+    //{
+    //    var request = new UpdateUserDataRequest
+    //    {
+    //        Data = new Dictionary<string, string>
+    //        {
+    //            {"CharacterIndex", characterIndex.ToString()}
+    //        }
+    //    };
+    //    PlayFabClientAPI.UpdateUserData(request, OnSaveCharacterSuccess, OnSaveCharacterFailure);
+    //}
 
-    public void RetrieveCharacterSelection()
-    {
-        PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnRetrieveCharacterSuccess, OnRetrieveCharacterFailure);
-    }
+    //public void RetrieveCharacterSelection()
+    //{
+    //    PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnRetrieveCharacterSuccess, OnRetrieveCharacterFailure);
+    //}
 
-    private void OnSaveCharacterSuccess(UpdateUserDataResult result)
-    {
-        Debug.Log("Character selection saved successfully");
-    }
+    //private void OnSaveCharacterSuccess(UpdateUserDataResult result)
+    //{
+    //    Debug.Log("Character selection saved successfully");
+    //}
 
-    private void OnSaveCharacterFailure(PlayFabError error)
-    {
-        Debug.LogError("Failed to save character selection: " + error.GenerateErrorReport());
-    }
+    //private void OnSaveCharacterFailure(PlayFabError error)
+    //{
+    //    Debug.LogError("Failed to save character selection: " + error.GenerateErrorReport());
+    //}
 
-    private void OnRetrieveCharacterSuccess(GetUserDataResult result)
-    {
-        if (result.Data.TryGetValue("CharacterIndex", out UserDataRecord characterIndexData))
-        {
-            string characterIndexValue = characterIndexData.Value;
-            characterIndex = int.Parse(characterIndexValue);
-            Debug.Log("Character index retrieved successfully: " + characterIndex);
-            // Set the retrieved character index
-            CharSelection.instance.characterSelectionIndex = characterIndex;
-            // Update the active character based on the retrieved character index
-            PlayerPrefs.SetInt("characterIndex", characterIndex);
-            CharSelection.instance.SetActiveCharacter();
-            getCharacterIndex();
-        }
-        else
-        {
-            Debug.Log("Character index not found in user data");
-        }
+    //private void OnRetrieveCharacterSuccess(GetUserDataResult result)
+    //{
+    //    if (result.Data.TryGetValue("CharacterIndex", out UserDataRecord characterIndexData))
+    //    {
+    //        string characterIndexValue = characterIndexData.Value;
+    //        characterIndex = int.Parse(characterIndexValue);
+    //        Debug.Log("Character index retrieved successfully: " + characterIndex);
+    //        // Set the retrieved character index
+    //        CharSelection.instance.characterSelectionIndex = characterIndex;
+    //        // Update the active character based on the retrieved character index
+    //        PlayerPrefs.SetInt("characterIndex", characterIndex);
+    //        CharSelection.instance.SetActiveCharacter();
+    //        getCharacterIndex();
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("Character index not found in user data");
+    //    }
 
-        characterSelectionDataRetrieved = true;
-    }
+    //    characterSelectionDataRetrieved = true;
+    //}
 
 
 
-    private void OnRetrieveCharacterFailure(PlayFabError error)
-    {
-        Debug.LogError("Failed to retrieve character selection: " + error.GenerateErrorReport());
-    }
+    //private void OnRetrieveCharacterFailure(PlayFabError error)
+    //{
+    //    Debug.LogError("Failed to retrieve character selection: " + error.GenerateErrorReport());
+    //}
 
     public int getCharacterIndex()
     {

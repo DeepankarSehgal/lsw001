@@ -23,7 +23,7 @@ public class CharSelection : MonoBehaviour
         characterPrefabs[characterSelectionIndex].SetActive(false);
         characterSelectionIndex = (characterSelectionIndex + 1) % characterPrefabs.Length;
         characterPrefabs[characterSelectionIndex].SetActive(true);
-        PlayFabManager.instance.SaveCharacterSelection(characterSelectionIndex);
+       // PlayFabManager.instance.SaveCharacterSelection(characterSelectionIndex);
         PlayerPrefs.SetInt("characterIndex", characterSelectionIndex);
 
     }
@@ -37,7 +37,7 @@ public class CharSelection : MonoBehaviour
             characterSelectionIndex += characterPrefabs.Length;
         }
         characterPrefabs[characterSelectionIndex].SetActive(true);
-        PlayFabManager.instance.SaveCharacterSelection(characterSelectionIndex);
+      //  PlayFabManager.instance.SaveCharacterSelection(characterSelectionIndex);
         PlayerPrefs.SetInt("characterIndex", characterSelectionIndex);
     }
 

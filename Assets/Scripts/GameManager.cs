@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public TMP_InputField chatField;
     public static GameManager instance;
     [SerializeField] private CharSelection CharacterSelectionPanel;
+    public TMP_Text entername;
 
     //Cache Player icon 
     public Image selectPlayerIcon;
@@ -22,10 +23,19 @@ public class GameManager : MonoBehaviour
     }
     public void EnterWorld()
     {
-        PhotonNetwork.NickName = chatField.text;
-        selectPlayerIcon = CharacterSelectionPanel.transform.GetChild(CharacterSelectionPanel.characterSelectionIndex).GetComponent<Image>();
-        //CheckIfUserUpdatedNickname();
-        SceneManager.LoadScene(1);
+        if(chatField.text != string.Empty)
+        {
+            PhotonNetwork.NickName = chatField.text;
+            PlayerPrefs.SetString("Nickname", chatField.text);
+            selectPlayerIcon = CharacterSelectionPanel.transform.GetChild(CharacterSelectionPanel.characterSelectionIndex).GetComponent<Image>();
+            //CheckIfUserUpdatedNickname();
+            SceneManager.LoadScene(1);
+        }
+        else
+        {
+            entername.text = "Please enter name";
+        }
+        
     }
 
     public void CheckIfUserUpdatedNickname()

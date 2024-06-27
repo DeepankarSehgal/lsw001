@@ -26,8 +26,8 @@ public class SolanaManager : MonoBehaviour
 
     private void OnLogin(Account account)
     {
-        PlayFabManager.instance.AuthenticateUser(account.PublicKey);
-        PlayFabManager.PublicKey = account.PublicKey;
+      //  PlayFabManager.instance.AuthenticateUser(account.PublicKey);
+      //  PlayFabManager.PublicKey = account.PublicKey;
         ConnectPanel.SetActive(false);
         PhotonManager.instance.Connect();
         NicknamePanel.SetActive(true);

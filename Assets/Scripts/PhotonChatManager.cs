@@ -47,7 +47,7 @@ public class PhotonChatManager : MonoBehaviourPunCallbacks, IChatClientListener
         // Attempt to reconnect after a short delay
         Debug.Log("Attempting to reconnect...");
 
-        string nickname = photonView.Owner.NickName;
+        string nickname = PlayerPrefs.GetString("Nickname");
         chatClient.Connect(appID, appVersion, new AuthenticationValues(nickname));
     }
 
@@ -61,7 +61,7 @@ public class PhotonChatManager : MonoBehaviourPunCallbacks, IChatClientListener
         {
             Debug.Log("Attempting to reconnect...");
 
-            string nickname = photonView.Owner.NickName;
+            string nickname = PlayerPrefs.GetString("Nickname");
             chatClient.Connect(appID, appVersion, new AuthenticationValues(nickname));
         }
         else

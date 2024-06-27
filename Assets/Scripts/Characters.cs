@@ -8,8 +8,8 @@ public class Characters : MonoBehaviour
     private PlayFabManager playFabManager;
     void Start()
     {
-        playFabManager.RetrieveCharacterSelection();
-        int characterIndex = playFabManager.getCharacterIndex();
-        gameObject.transform.GetChild(characterIndex).gameObject.SetActive(true);
+        //playFabManager.RetrieveCharacterSelection();
+        //int characterIndex = playFabManager.getCharacterIndex();
+        //gameObject.transform.GetChild(characterIndex).gameObject.SetActive(true);
     }
 }
