@@ -4059,7 +4059,8 @@ MonoBehaviour:
   PieceHolder: {fileID: 934205298}
   startGameWhenAllReady: 1
   superManaRef: {fileID: 0}
-  currentManaRef: {fileID: 0}
+  currentManaPickedByWhiteRef: {fileID: 0}
+  currentManaPickedByBlackRef: {fileID: 0}
   player1IconRef: {fileID: 0}
   player2IconRef: {fileID: 0}
   faintPlayers: []
@@ -4755,8 +4756,8 @@ GameObject:
   - component: {fileID: 5707718044113968063}
   - component: {fileID: 4933033551363131850}
   - component: {fileID: 5451209197812237740}
-  - component: {fileID: 590763621289591112}
   - component: {fileID: 5287541187354306685}
+  - component: {fileID: 590763621289591112}
   m_Layer: 5
   m_Name: BlackPlayerIcon
   m_TagString: Untagged
