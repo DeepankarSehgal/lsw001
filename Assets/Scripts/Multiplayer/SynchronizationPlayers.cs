@@ -109,6 +109,7 @@ namespace Scripts.Multiplayer
                         monsPiece.monsPieceDataType.isCarryingSuperMana = false;
                         boardInstance.superManaRef.monsPieceDataType.desiredPos = new Vector3(5f, 5f, 5f);
                         boardInstance.superManaRef.gameObject.SetActive(true);
+                        boardInstance.superManaRef.transform.localEulerAngles = Vector3.zero;
                         gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
                         boardInstance.superManaRef.monsPieceDataType.isFainted = false;
                         boardInstance.superManaRef.monsPieceDataType.isCarriedByDrainer = false;
@@ -199,6 +200,23 @@ namespace Scripts.Multiplayer
                         childMana.transform.SetParent(transform, false);
 
                     }
+                    else if (monsPiece.monsPieceDataType.isCarryingBomb && transform.childCount <= 0)//bomb
+                    {
+                        GameObject bomb = Instantiate(boardInstance.BombOrPortionObj[0], transform);
+                        bomb.transform.SetParent(transform, false);
+
+                    }
+                    else if (monsPiece.monsPieceDataType.isCarryingBomb && transform.childCount <= 0)//potion
+                    {
+                        GameObject potion = Instantiate(boardInstance.BombOrPortionObj[1], transform);
+                        potion.transform.SetParent(transform, false);
+
+                    }
+                    else if((!monsPiece.monsPieceDataType.isCarryingSuperMana && !monsPiece.monsPieceDataType.isCarryingMana && !monsPiece.monsPieceDataType.isCarryingOppMana &&
+                        !monsPiece.monsPieceDataType.isCarryingBomb && !monsPiece.monsPieceDataType.isCarryingPortion) && transform.childCount > 0)
+                    {
+                        Destroy(transform.GetChild(0).gameObject);
+                    }
                     else
                     {
                         if (monsPiece.monsPieceDataType.isFainted && transform.childCount > 0)
@@ -262,6 +280,15 @@ namespace Scripts.Multiplayer
                 }
 
             }
+            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)
+            {
+
+                if (monsPiece.monsPieceDataType.isFainted)
+                {
+                    gameObject.SetActive(false);
+                }
+
+            }
             //if (monsPiece.monsPieceDataType != null && monsPiece.monsPieceDataType.monsPieceType == monsPiece.monsPieceDataType.monsPieceType && monsPieceDataType.team == monsPiece.monsPieceDataType.team || forceInitialize)
             //{
 
@@ -270,7 +297,7 @@ namespace Scripts.Multiplayer
             MonsPieceDataType monsPieceDataType = monsPiece.monsPieceDataType;
             if (monsPieceDataType.mySpecialAbilityUsed && monsPieceDataType.monsPieceType != MonsPieceType.spirit)
             {
-                monsPieceDataType.mySpecialAbilityUsed = false;
+                //monsPieceDataType.mySpecialAbilityUsed = false;
             }
 
             if (!networkWhiteTurn && monsPiece.monsPieceDataType.team == 0 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.whiteFaintGaps > 1)//for white faint players

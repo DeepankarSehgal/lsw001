@@ -25,7 +25,7 @@ public class Drainer : MonsPiece
 
         if (monsPieceDataType.isCarryingBomb)
         {
-            tileDistance = 3;
+            tileDistance = 2;
         }
         else
         {

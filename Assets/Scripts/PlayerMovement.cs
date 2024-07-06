@@ -175,7 +175,8 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         pointerEventData.position = Input.mousePosition;
 
         List<RaycastResult> results = new List<RaycastResult>();
-        graphicRaycaster?.Raycast(pointerEventData, results);
+        if (graphicRaycaster!= null)
+        graphicRaycaster.Raycast(pointerEventData, results);
 
         return results.Count > 0;
     }

@@ -745,6 +745,8 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 0
+  graphicRaycaster: {fileID: 0}
+  eventSystem: {fileID: 0}
 --- !u!114 &7096420325115875723
 MonoBehaviour:
   m_ObjectHideFlags: 0

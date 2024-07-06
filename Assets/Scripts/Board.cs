@@ -73,7 +73,7 @@ public class Board : MonoBehaviourPunCallbacks
 
     public MonsPiece selectedPiece;
 
-    [SerializeField] private GameObject[] BombOrPortionObj;
+    [SerializeField] public GameObject[] BombOrPortionObj;
     [SerializeField] private GameObject[] RemainingMovesHolder;
     [SerializeField] public Image player1Icon;
     [SerializeField] public GameObject player1IconPrefab;
@@ -87,6 +87,8 @@ public class Board : MonoBehaviourPunCallbacks
     public MonsPiece currentManaPickedByWhiteRef;
     public MonsPiece currentManaPickedByBlackRef;
     public Sprite player1IconRef, player2IconRef;
+
+    [SerializeField] private GameObject localMoveHolder, remoteMoveHolder;
     private void Awake()
     {
         instance = this;
@@ -125,7 +127,6 @@ public class Board : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsConnectedAndReady)
         {
-            print("On Joined room of board get called!");
             CreateMonsBoard();
             SpawnAllPiece();
             //Invoke(nameof(PositionAllPiece), 10f);
@@ -134,6 +135,21 @@ public class Board : MonoBehaviourPunCallbacks
             Invoke(nameof(DelayCall), 3f);
             startGame = true;
             onUpdatePlayerState?.Invoke(false);
+
+            object pieceType;
+            PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("PieceType", out pieceType);
+            print("On Joined room of board get called!" + (string)pieceType);
+
+            if ((string)pieceType == "Black")
+            {
+                RemainingMovesHolder[1].transform.parent = localMoveHolder.transform;
+                RemainingMovesHolder[0].transform.parent = remoteMoveHolder.transform;
+
+                RemainingMovesHolder[1].GetComponent<RectTransform>().offsetMin = Vector2.zero;
+                RemainingMovesHolder[1].GetComponent<RectTransform>().offsetMax = Vector2.zero;
+                RemainingMovesHolder[0].GetComponent<RectTransform>().offsetMin = Vector2.zero;
+                RemainingMovesHolder[0].GetComponent<RectTransform>().offsetMax = Vector2.zero;
+            }
             //onUpdatePlayerVisuals?.Invoke(true);
 
             //GameplayManager.startSynch?.Invoke();
@@ -650,8 +666,12 @@ public class Board : MonoBehaviourPunCallbacks
                     monsPiece[x, y] = null;
                     selectedPiece = cp;
                     BombOrPortionChoicePanel.SetActive(true);
+                    ocp.monsPieceDataType.isFainted = true;
+                    ocp.gameObject.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                    
                     ocp.gameObject.SetActive(false);
-                    cp.monsPieceDataType.mySpecialAbilityUsed = false;
+                    
+                    //cp.monsPieceDataType.mySpecialAbilityUsed = false;
                 }
 
                 else if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
@@ -866,6 +886,7 @@ public class Board : MonoBehaviourPunCallbacks
                     blackScoreText.text = blackScore.ToString();
                 }
                 cp.GetComponent<SynchronizationPlayers>().UpdateScore(whiteScore, blackScore);
+                cp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
 
             }
 
@@ -881,6 +902,7 @@ public class Board : MonoBehaviourPunCallbacks
             {
 
                 previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
+                previousDraggingPiece.monsPieceDataType.onceAbilityUsed = false;
                 if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
                 {
                     previousDraggingPiece = cp;
@@ -892,8 +914,8 @@ public class Board : MonoBehaviourPunCallbacks
                 return true;
             }
             manaTurn = false;
-            if (previousDraggingPiece != null)
-                previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = false;
+            //if (previousDraggingPiece != null)
+            //    previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = false;
 
             //if (ocp.isFainted)
             //{
@@ -949,10 +971,11 @@ public class Board : MonoBehaviourPunCallbacks
             //Mana score logic 
             ManaScoreLogic(cp);
             //UpdateRemainingMove(cp.monsPieceDataType);
-            SendCustomType(cp.monsPieceDataType);
+            
             previousDraggingPiece = cp;
             itemChances = 5;
             currentlyDraggingPiece.monsPieceDataType.itemChances = itemChances;
+            SendCustomType(cp.monsPieceDataType);
         }
         else
         {
@@ -973,11 +996,13 @@ public class Board : MonoBehaviourPunCallbacks
             }
             previousDraggingPiece = cp;
             //UpdateRemainingMove(cp.monsPieceDataType);
-            SendCustomType(cp.monsPieceDataType);
+        
             itemChances--;
+            cp.monsPieceDataType.itemChances = itemChances;
+            SendCustomType(cp.monsPieceDataType);
             print("else part of mana item chances coming" + itemChances);
 
-            cp.monsPieceDataType.itemChances = itemChances;
+    
         }
 
         if (itemChances <= 0)
@@ -985,7 +1010,14 @@ public class Board : MonoBehaviourPunCallbacks
             cp.monsPieceDataType.isCarryingPortion = false;
         }
 
-        if (whiteScore >= 5 || blackScore >= 5)
+        return true;
+
+    }
+    
+    private void GameWinLogic()
+    {
+
+        if (whiteScore >= 5 || blackScore >= 5) // for testing turning it to 1 by default is 5
         {
             isGameEnd = true;
             if (whiteScore >= 5)
@@ -997,12 +1029,11 @@ public class Board : MonoBehaviourPunCallbacks
             {
                 endGameText.text = "Black Won !";
             }
-
-            photonView.RPC("TurnOnGameObject", RpcTarget.All);
+            TurnOnGameObject(endGameText.text);
         }
-        return true;
-
     }
+
+
 
     private void DrainerGotKilledWhileCarryingLogic(MonsPiece ocp)
     {
@@ -1013,6 +1044,7 @@ public class Board : MonoBehaviourPunCallbacks
                 superManaRef.monsPieceDataType.isFainted = false;
                 superManaRef.monsPieceDataType.isCarriedByDrainer = false;
                 superManaRef.monsPieceDataType.desiredPos = new Vector3(5f, 5f, 5f);
+                superManaRef.gameObject.transform.localEulerAngles = Vector3.zero;
                 monsPiece[5, 5] = superManaRef;
                 superManaRef.gameObject.SetActive(true);
                 ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
@@ -1115,6 +1147,8 @@ public class Board : MonoBehaviourPunCallbacks
             this.blackScore = blackScore;
             blackScoreText.text = blackScore.ToString();
         }
+
+        GameWinLogic();
     }
     [SerializeField] private List<MonsPiece> faintPlayers = new List<MonsPiece>();
 
@@ -1211,31 +1245,6 @@ public class Board : MonoBehaviourPunCallbacks
         }
 
     }
-    [PunRPC] 
-    public void UpdateWhiteIcon()
-    {
-        //player1Icon.sprite = GameManager.instance.selectPlayerIcon.sprite;
-        if (player1Icon.transform.childCount > 0) return;
-       Image mp = PhotonNetwork.Instantiate(player1IconPrefab.gameObject.name, transform.localPosition, Quaternion.identity).GetComponent<Image>();
-        mp.sprite = GameManager.instance.selectPlayerIcon.sprite;
-        mp.transform.parent = player1Icon.transform;
-        mp.transform.localScale = Vector3.one;
-        //////player1IconRef = player1Icon;
-    }
-
-    [PunRPC]
-    public void UpdateBlackIcon()
-    {
-        if (player2Icon.transform.childCount > 0) return;
-
-        Image mp = PhotonNetwork.Instantiate(player2IconPrefab.gameObject.name, transform.localPosition, Quaternion.identity).GetComponent<Image>();
-        mp.sprite = GameManager.instance.selectPlayerIcon.sprite;
-        mp.transform.parent = player2Icon.transform;
-        mp.transform.localScale = Vector3.one;
-
-        //player2IconRef = player2Icon;
-
-    }
     public void UpdateRemainingMove(MonsPieceDataType cp)
     {
         if (cp.monsPieceType == MonsPieceType.mana)
@@ -1257,18 +1266,18 @@ public class Board : MonoBehaviourPunCallbacks
         }
         else
         {
-            print("Update remaing moves else part" + cp.mySpecialAbilityUsed);
-            if (!cp.mySpecialAbilityUsed || cp.onceAbilityUsed)
+            print("Update remaing moves else part" + cp.mySpecialAbilityUsed + cp.onceAbilityUsed);
+            if (cp.onceAbilityUsed || !cp.mySpecialAbilityUsed)
             {
-                if (cp.itemChances > 5 || cp.itemChances <= 0) return;
+                if (cp.itemChances > 5 || cp.itemChances < 0) return;
                 if (cp.team == 0)
                 {
-                    print("Item Chances index" + itemChances);
-                    RemainingMovesHolder[0].transform.GetChild(cp.itemChances - 1).gameObject.SetActive(false);
+                    print("Item Chances index" + cp.itemChances);
+                    RemainingMovesHolder[0].transform.GetChild(cp.itemChances).gameObject.SetActive(false);
                 }
                 else
                 {
-                    RemainingMovesHolder[1].transform.GetChild(cp.itemChances - 1).gameObject.SetActive(false);
+                    RemainingMovesHolder[1].transform.GetChild(cp.itemChances).gameObject.SetActive(false);
                 }
 
             }
@@ -1283,7 +1292,12 @@ public class Board : MonoBehaviourPunCallbacks
                     RemainingMovesHolder[1].transform.GetChild(5).gameObject.SetActive(false);
                 }
                 itemChances++;
-                currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                cp.itemChances = itemChances;
+                cp.onceAbilityUsed = true;
+                if(previousDraggingPiece!=null)
+                previousDraggingPiece.monsPieceDataType.onceAbilityUsed = true;
+                SendCustomType(cp);
+                //cp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                 print("Update remaing moves else part" + cp.mySpecialAbilityUsed + " " + cp.onceAbilityUsed);
 
 
@@ -1310,6 +1324,8 @@ public class Board : MonoBehaviourPunCallbacks
         {
             MonsPieceDataType receivedData = (MonsPieceDataType)photonEvent.CustomData;
             Debug.Log("Received custom data: " + receivedData.team + " PieceType: " + receivedData.monsPieceType);
+        
+
             UpdateRemainingMove(receivedData);
         }
         //if (photonEvent.Code == 1)//For updating Board respective pieces
@@ -1326,9 +1342,12 @@ public class Board : MonoBehaviourPunCallbacks
         monsPiece[(int)currentPos.x, (int)currentPos.y] = piece;
     }
 
+    [SerializeField] private TextMeshProUGUI playerWonText;
     [PunRPC]
-    void TurnOnGameObject()
+    void TurnOnGameObject(string whoWonText)
     {
+        //WON TEXT
+        playerWonText.text = whoWonText;
         GameoverPanel.SetActive(true);
     }
 

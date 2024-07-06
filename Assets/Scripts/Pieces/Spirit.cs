@@ -47,7 +47,7 @@ public class Spirit : MonsPiece
 
                     // Check if the new position is within the bounds of the board and if there's a piece present
                     print("spirit tile count: " + tileCount + "new x: " + newX + " new y: "+ newY);
-                    if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && board[newX, newY] != null /*&& Mathf.Abs(newX)>1 && Mathf.Abs(newY)>1*/)
+                    if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && board[newX, newY] != null && board[newX, newY].monsPieceDataType.monsPieceType!=MonsPieceType.bombOrPortion /*&& Mathf.Abs(newX)>1 && Mathf.Abs(newY)>1*/)
                     {
                         
                         availableMoves.Add(new Vector2Int(newX, newY));
@@ -87,7 +87,7 @@ public class Spirit : MonsPiece
                 int newY = monsPieceDataType.currentY + dy * direction;
 
                 // Check if the new position is within the bounds of the board
-                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && board[newX, newY] == null)
+                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null || (board[newX, newY]!=null && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)))
                 {
                     availableMoves.Add(new Vector2Int(newX, newY));
                 }

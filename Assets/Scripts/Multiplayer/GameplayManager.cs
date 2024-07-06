@@ -6,6 +6,7 @@ using Photon.Realtime;
 using TMPro;
 using System;
 using UnityEngine.SceneManagement;
+using ExitGames.Client.Photon;
 
 namespace Scripts.Multiplayer
 {
@@ -43,6 +44,12 @@ namespace Scripts.Multiplayer
         {
             PhotonNetwork.JoinRandomRoom(null,2);
         }
+
+
+
+
+
+    
         #endregion
 
         #region Photon Callback Methods

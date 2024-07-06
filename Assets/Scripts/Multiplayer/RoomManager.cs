@@ -31,6 +31,15 @@ public class RoomManager : MonoBehaviourPunCallbacks, IOnEventCallback
             PhotonNetwork.RaiseEvent(CustomEventCodes.CloseRoom, null, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
         }
     }
+    public void PlayAgain()
+    {
+
+        if (PhotonNetwork.InRoom)
+        {
+            //PhotonNetwork.RaiseEvent(CustomEventCodes.CloseRoom, null, RaiseEventOptions.Default, SendOptions.SendReliable);
+            PhotonNetwork.RaiseEvent(CustomEventCodes.PlayAgain, null, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
+        }
+    }
 
     public void OnEvent(EventData photonEvent)
     {
@@ -52,7 +61,27 @@ public class RoomManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 playerLeftMessage.SetActive(true);
             }
         }
+        if (photonEvent.Code == CustomEventCodes.PlayAgain)
+        {
+            object pieceType;
+            PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("PieceType", out pieceType);
+            if ((string) pieceType == "White")
+            {
+                PhotonNetwork.LoadLevel(3);
+            }
+            else
+            {
+                Invoke("DelayLoad", 3f);//need to improve
+            }
+         
+        }
     }
+
+    private void DelayLoad()
+    {
+        PhotonNetwork.LoadLevel(3);
+    }
+
 
     public override void OnLeftRoom()
     {
@@ -70,4 +99,5 @@ public class RoomManager : MonoBehaviourPunCallbacks, IOnEventCallback
 public class CustomEventCodes
 {
     public const byte CloseRoom = 8;
+    public const byte PlayAgain = 9;
 }

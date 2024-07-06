@@ -113,7 +113,7 @@ public class Demon : MonsPiece
                 int newX = x + i;
                 int newY = y + j;
 
-                if (0 <= newX && newX < 11 && 0 <= newY && newY < 11  && board[newX, newY] != null && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.angel)
+                if (0 <= newX && newX < 11 && 0 <= newY && newY < 11  && board[newX, newY] != null && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.angel && board[newX, newY].monsPieceDataType.team != monsPieceDataType.team)
                     return true;
             }
         }
