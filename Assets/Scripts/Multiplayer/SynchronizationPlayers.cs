@@ -1,4 +1,5 @@
 using ExitGames.Client.Photon;
+using MoreMountains.TopDownEngine;
 using Org.BouncyCastle.Asn1.BC;
 using Photon.Pun;
 using Photon.Realtime;
@@ -200,18 +201,7 @@ namespace Scripts.Multiplayer
                         childMana.transform.SetParent(transform, false);
 
                     }
-                    else if (monsPiece.monsPieceDataType.isCarryingBomb && transform.childCount <= 0)//bomb
-                    {
-                        GameObject bomb = Instantiate(boardInstance.BombOrPortionObj[0], transform);
-                        bomb.transform.SetParent(transform, false);
-
-                    }
-                    else if (monsPiece.monsPieceDataType.isCarryingBomb && transform.childCount <= 0)//potion
-                    {
-                        GameObject potion = Instantiate(boardInstance.BombOrPortionObj[1], transform);
-                        potion.transform.SetParent(transform, false);
-
-                    }
+           
                     else if((!monsPiece.monsPieceDataType.isCarryingSuperMana && !monsPiece.monsPieceDataType.isCarryingMana && !monsPiece.monsPieceDataType.isCarryingOppMana &&
                         !monsPiece.monsPieceDataType.isCarryingBomb && !monsPiece.monsPieceDataType.isCarryingPortion) && transform.childCount > 0)
                     {
@@ -230,6 +220,43 @@ namespace Scripts.Multiplayer
                 }
 
             }
+
+            //FOR BOMB and potion remote bomb show logic
+            if (monsPiece.monsPieceDataType.isCarryingBomb && transform.childCount <= 0)//bomb
+            {
+                GameObject bomb = Instantiate(boardInstance.BombOrPortionObj[0], transform);
+                bomb.transform.SetParent(transform, false);
+                bomb.transform.localPosition = new Vector3(0.1f, -0.22f);
+                bomb.transform.localScale = new Vector3(0.6f, 0.6f);
+                bomb.SetActive(true);
+
+            }
+            else if (monsPiece.monsPieceDataType.isCarryingBomb && transform.childCount <= 0)//potion
+            {
+                GameObject potion = Instantiate(boardInstance.BombOrPortionObj[1], transform);
+                potion.transform.SetParent(transform, false);
+                potion.transform.localPosition = new Vector3(0.1f, -0.22f);
+                potion.transform.localScale = new Vector3(0.6f, 0.6f);
+                potion.SetActive(true);
+
+
+            }
+            //FOR BOMB and potion remote bomb destroy logic
+            if (monsPiece.monsPieceDataType.monsPieceType != MonsPieceType.drainer && !monsPiece.monsPieceDataType.isCarryingBomb && transform.childCount > 0)//bomb
+            {
+                Destroy(transform.GetChild(0).gameObject);
+
+            }
+            else if (monsPiece.monsPieceDataType.monsPieceType != MonsPieceType.drainer && !monsPiece.monsPieceDataType.isCarryingBomb && transform.childCount > 0)//potion
+            {
+                Destroy(transform.GetChild(0).gameObject);
+
+            }
+
+
+
+
+
             if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana || monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.supermana)
             {
                 print("Drainer remote " + monsPiece.monsPieceDataType.isCarryingMana);

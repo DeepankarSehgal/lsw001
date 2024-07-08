@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Spirit : MonsPiece
 {
-    int tileDistance=2;
+    int tileDistance = 2;
     public bool CanCollectBomb(ref MonsPiece[,] board, int x, int y)
     {
 
@@ -30,48 +30,94 @@ public class Spirit : MonsPiece
         {
             tileDistance = 2;
         }
+
+
+       
+
+
         // Check if Spirit is in reset position
         if (!isSpiritInResetPosition && !monsPieceDataType.mySpecialAbilityUsed)
         {
-            // Check for nearby pieces within 2 spaces
-            for (int dx = -tileDistance; dx <= tileDistance; dx++)
+
+            if (monsPieceDataType.isCarryingBomb)
             {
-                for (int dy = -tileDistance; dy <= tileDistance; dy++)
+                tileDistance = 2;
+                for (int i = 0; i < 2; i++)
                 {
-                    // Skip the current position
-                    if (dx == 0 && dy == 0)
-                        continue;
 
-                    int newX = monsPieceDataType.currentX + dx;
-                    int newY = monsPieceDataType.currentY + dy;
 
-                    // Check if the new position is within the bounds of the board and if there's a piece present
-                    print("spirit tile count: " + tileCount + "new x: " + newX + " new y: "+ newY);
-                    if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && board[newX, newY] != null && board[newX, newY].monsPieceDataType.monsPieceType!=MonsPieceType.bombOrPortion /*&& Mathf.Abs(newX)>1 && Mathf.Abs(newY)>1*/)
+
+                    // Check for nearby pieces within 2 spaces
+                    for (int dx = -tileDistance; dx <= tileDistance; dx++)
                     {
-                        
-                        availableMoves.Add(new Vector2Int(newX, newY));
+                        for (int dy = -tileDistance; dy <= tileDistance; dy++)
+                        {
+                            // Skip the current position
+                            if (dx == 0 && dy == 0)
+                                continue;
+
+                            int newX = monsPieceDataType.currentX + dx;
+                            int newY = monsPieceDataType.currentY + dy;
+
+                            // Check if the new position is within the bounds of the board and if there's a piece present
+                            print("spirit tile count: " + tileCount + "new x: " + newX + " new y: " + newY);
+                            if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && board[newX, newY] != null && board[newX, newY].monsPieceDataType.monsPieceType != MonsPieceType.bombOrPortion /*&& Mathf.Abs(newX)>1 && Mathf.Abs(newY)>1*/)
+                            {
+
+                                availableMoves.Add(new Vector2Int(newX, newY));
+                            }
+                        }
+                    }
+
+
+                    tileDistance++;
+                }
+            }
+            else
+            {
+
+                // Check for nearby pieces within 2 spaces
+                for (int dx = -tileDistance; dx <= tileDistance; dx++)
+                {
+                    for (int dy = -tileDistance; dy <= tileDistance; dy++)
+                    {
+                        // Skip the current position
+                        if (dx == 0 && dy == 0)
+                            continue;
+
+                        int newX = monsPieceDataType.currentX + dx;
+                        int newY = monsPieceDataType.currentY + dy;
+
+                        // Check if the new position is within the bounds of the board and if there's a piece present
+                        print("spirit tile count: " + tileCount + "new x: " + newX + " new y: " + newY);
+                        if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && board[newX, newY] != null && board[newX, newY].monsPieceDataType.monsPieceType != MonsPieceType.bombOrPortion /*&& Mathf.Abs(newX)>1 && Mathf.Abs(newY)>1*/)
+                        {
+
+                            availableMoves.Add(new Vector2Int(newX, newY));
+                        }
                     }
                 }
             }
+
+
 
             //if(availableMoves!=null)
             //            return availableMoves; // Return the position of the nearby piece
 
             // If no nearby piece found, show normal movement
-            ShowNormalMoment(direction,tileCount, ref board);
+            ShowNormalMoment(direction, tileCount, ref board);
 
         }
         else
         {
-            ShowNormalMoment(direction,tileCount,ref board);
-     
+            ShowNormalMoment(direction, tileCount, ref board);
+
         }
 
         return availableMoves;
     }
 
-    private void ShowNormalMoment(int direction ,int tileCount, ref MonsPiece[,] board)
+    private void ShowNormalMoment(int direction, int tileCount, ref MonsPiece[,] board)
     {
 
         // Spirit is in reset position, show normal movement
@@ -87,7 +133,7 @@ public class Spirit : MonsPiece
                 int newY = monsPieceDataType.currentY + dy * direction;
 
                 // Check if the new position is within the bounds of the board
-                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null || (board[newX, newY]!=null && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)))
+                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null || (board[newX, newY] != null && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)))
                 {
                     availableMoves.Add(new Vector2Int(newX, newY));
                 }

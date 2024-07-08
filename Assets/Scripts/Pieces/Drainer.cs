@@ -31,30 +31,72 @@ public class Drainer : MonsPiece
         {
             tileDistance = 1;
         }
-        for (int dx = -tileDistance; dx <= tileDistance; dx++)
+
+
+
+        if (monsPieceDataType.isCarryingBomb)
         {
-            for (int dy = -tileDistance; dy <= tileDistance; dy++)
+            tileDistance = 1;
+            for (int i = 0; i < 2; i++)
             {
-                // Skip the case where both dx and dy are 0 (no movement)
-                if (dx == 0 && dy == 0)
-                    continue;
 
-                int newX = monsPieceDataType.currentX + dx * direction;
-                int newY = monsPieceDataType.currentY + dy * direction;
-
-
-                bool isNotCarryingAnything = (!monsPieceDataType.isCarryingMana && !monsPieceDataType.isCarryingSuperMana && !monsPieceDataType.isCarryingOppMana);
-                // Check if the new position is within bounds and empty
-                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount  && (board[newX, newY] == null 
-                                                                                        || isNotCarryingAnything &&  board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.mana 
-                                                                                        || isNotCarryingAnything && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.supermana
-                                                                                        || CanCollectBomb(ref board, newX, newY)))
+                for (int dx = -tileDistance; dx <= tileDistance; dx++)
                 {
-                    
-                    r.Add(new Vector2Int(newX, newY));
+                    for (int dy = -tileDistance; dy <= tileDistance; dy++)
+                    {
+                        // Skip the case where both dx and dy are 0 (no movement)
+                        if (dx == 0 && dy == 0)
+                            continue;
+
+                        int newX = monsPieceDataType.currentX + dx * direction;
+                        int newY = monsPieceDataType.currentY + dy * direction;
+
+
+                        bool isNotCarryingAnything = (!monsPieceDataType.isCarryingMana && !monsPieceDataType.isCarryingSuperMana && !monsPieceDataType.isCarryingOppMana);
+                        // Check if the new position is within bounds and empty
+                        if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null
+                                                                                                || isNotCarryingAnything && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.mana
+                                                                                                || isNotCarryingAnything && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.supermana
+                                                                                                || CanCollectBomb(ref board, newX, newY)))
+                        {
+
+                            r.Add(new Vector2Int(newX, newY));
+                        }
+                    }
+                }
+                tileDistance++;
+            }
+            }
+        else
+        {
+            for (int dx = -tileDistance; dx <= tileDistance; dx++)
+            {
+                for (int dy = -tileDistance; dy <= tileDistance; dy++)
+                {
+                    // Skip the case where both dx and dy are 0 (no movement)
+                    if (dx == 0 && dy == 0)
+                        continue;
+
+                    int newX = monsPieceDataType.currentX + dx * direction;
+                    int newY = monsPieceDataType.currentY + dy * direction;
+
+
+                    bool isNotCarryingAnything = (!monsPieceDataType.isCarryingMana && !monsPieceDataType.isCarryingSuperMana && !monsPieceDataType.isCarryingOppMana);
+                    // Check if the new position is within bounds and empty
+                    if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null
+                                                                                            || isNotCarryingAnything && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.mana
+                                                                                            || isNotCarryingAnything && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.supermana
+                                                                                            || CanCollectBomb(ref board, newX, newY)))
+                    {
+
+                        r.Add(new Vector2Int(newX, newY));
+                    }
                 }
             }
         }
+
+
+       
 
 
         //if (0 <= currentX + direction && currentX + direction <= tileCount && 0 <= currentY + direction && currentY + direction <= tileCount && (board[currentX + direction, currentY + direction] == null || board[currentX + direction, currentY + direction].monsPieceType == MonsPieceType.mana || CanCollectBomb(ref board,currentX+direction,currentY+direction)))

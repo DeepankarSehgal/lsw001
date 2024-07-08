@@ -43,28 +43,67 @@ public class Angel : MonsPiece
                 }
             }
         }
-        // movement with carrying bomb
-        for (int dx = -tileDistance; dx <= tileDistance; dx++)
+
+        if (monsPieceDataType.isCarryingBomb)
         {
-            for (int dy = -tileDistance; dy <= tileDistance; dy++)
+
+
+            tileDistance = 2;
+            for (int i = 0; i < 2; i++)
             {
-                // Skip the case where both dx and dy are 0 (no movement)
-                if (dx == 0 && dy == 0)
-                    continue;
-
-                int newX = monsPieceDataType.currentX + dx * direction;
-                int newY = monsPieceDataType.currentY + dy * direction;
-
-                if (newX == 5 && newY == 5)
-                    continue;
-
-                // Check if the new position is within bounds and empty
-                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (/*!isCarryingBomb && board[newX, newY] == null ||*/ /*board[newX,newY]!=null && board[newX, newY].monsPieceType==MonsPieceType.bombOrPortion || */(monsPieceDataType.isCarryingBomb && board[newX, newY]!=null && board[newX, newY].monsPieceDataType.team!=monsPieceDataType.team && board[newX, newY].monsPieceDataType.monsPieceType!=MonsPieceType.mana && board[newX, newY].monsPieceDataType.monsPieceType != MonsPieceType.supermana)))
+                // movement with carrying bomb
+                for (int dx = -tileDistance; dx <= tileDistance; dx++)
                 {
-                    r.Add(new Vector2Int(newX, newY));
+                    for (int dy = -tileDistance; dy <= tileDistance; dy++)
+                    {
+                        // Skip the case where both dx and dy are 0 (no movement)
+                        if (dx == 0 && dy == 0)
+                            continue;
+
+                        int newX = monsPieceDataType.currentX + dx * direction;
+                        int newY = monsPieceDataType.currentY + dy * direction;
+
+                        if (newX == 5 && newY == 5)
+                            continue;
+
+                        // Check if the new position is within bounds and empty
+                        if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (/*!isCarryingBomb && board[newX, newY] == null ||*/ /*board[newX,newY]!=null && board[newX, newY].monsPieceType==MonsPieceType.bombOrPortion || */(monsPieceDataType.isCarryingBomb && board[newX, newY] != null && board[newX, newY].monsPieceDataType.team != monsPieceDataType.team && board[newX, newY].monsPieceDataType.monsPieceType != MonsPieceType.mana && board[newX, newY].monsPieceDataType.monsPieceType != MonsPieceType.supermana)))
+                        {
+                            r.Add(new Vector2Int(newX, newY));
+                        }
+                    }
+                }
+                tileDistance++;
+            }
+
+     
+        }
+        else
+        {
+            // movement with carrying bomb
+            for (int dx = -tileDistance; dx <= tileDistance; dx++)
+            {
+                for (int dy = -tileDistance; dy <= tileDistance; dy++)
+                {
+                    // Skip the case where both dx and dy are 0 (no movement)
+                    if (dx == 0 && dy == 0)
+                        continue;
+
+                    int newX = monsPieceDataType.currentX + dx * direction;
+                    int newY = monsPieceDataType.currentY + dy * direction;
+
+                    if (newX == 5 && newY == 5)
+                        continue;
+
+                    // Check if the new position is within bounds and empty
+                    if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (/*!isCarryingBomb && board[newX, newY] == null ||*/ /*board[newX,newY]!=null && board[newX, newY].monsPieceType==MonsPieceType.bombOrPortion || */(monsPieceDataType.isCarryingBomb && board[newX, newY] != null && board[newX, newY].monsPieceDataType.team != monsPieceDataType.team && board[newX, newY].monsPieceDataType.monsPieceType != MonsPieceType.mana && board[newX, newY].monsPieceDataType.monsPieceType != MonsPieceType.supermana)))
+                    {
+                        r.Add(new Vector2Int(newX, newY));
+                    }
                 }
             }
         }
+
 
 
         return r;

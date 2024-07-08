@@ -279,12 +279,10 @@ public class Board : MonoBehaviourPunCallbacks
                                     print("Fainting the opponent piece by " + currentlyDraggingPiece);
 
                                     currentlyDraggingPiece.monsPieceDataType.isCarryingBomb = false;
-                                    GameObject bomb = currentlyDraggingPiece.transform.GetChild(0).gameObject;
-                                    bomb.transform.SetParent(null);
-                                    bomb.SetActive(false);
+                                    if(currentlyDraggingPiece.transform.childCount > 0)
+                                    Destroy(transform.GetChild(0).gameObject);
 
                                     FaintOpponentPiece(monsPiece[hitPosition.x, hitPosition.y]);
-                                    currentlyDraggingPiece.monsPieceDataType.isCarryingBomb = false;
                                     DrainerGotKilledWhileCarryingLogic(monsPiece[hitPosition.x, hitPosition.y]);
 
                                 }
@@ -603,7 +601,7 @@ public class Board : MonoBehaviourPunCallbacks
 
             if (cp.monsPieceDataType.team == ocp.monsPieceDataType.team)
             {
-                if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
+                if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && (!cp.monsPieceDataType.isCarryingSuperMana && !cp.monsPieceDataType.isCarryingOppMana && !cp.monsPieceDataType.isCarryingMana) && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
                 {
                     cp.monsPieceDataType.isCarryingMana = true;
                     //monsPiece[x, y] = cp;
@@ -628,7 +626,7 @@ public class Board : MonoBehaviourPunCallbacks
                     }
                 }
 
-                else if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.supermana)//confusion
+                else if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && (!cp.monsPieceDataType.isCarryingSuperMana && !cp.monsPieceDataType.isCarryingOppMana && !cp.monsPieceDataType.isCarryingMana) && ocp.monsPieceDataType.monsPieceType == MonsPieceType.supermana)//confusion
                 {
                     cp.monsPieceDataType.isCarryingSuperMana = true;
                     ocp.gameObject.SetActive(false);
@@ -645,7 +643,7 @@ public class Board : MonoBehaviourPunCallbacks
             else
             {
                 //when both are not in the same team
-                if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.supermana)//confusion
+                if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && (!cp.monsPieceDataType.isCarryingSuperMana && !cp.monsPieceDataType.isCarryingOppMana && !cp.monsPieceDataType.isCarryingMana) && ocp.monsPieceDataType.monsPieceType == MonsPieceType.supermana)//confusion
                 {
                     cp.monsPieceDataType.isCarryingSuperMana = true;
                   
@@ -674,7 +672,7 @@ public class Board : MonoBehaviourPunCallbacks
                     //cp.monsPieceDataType.mySpecialAbilityUsed = false;
                 }
 
-                else if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
+                else if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && (!cp.monsPieceDataType.isCarryingSuperMana && !cp.monsPieceDataType.isCarryingOppMana && !cp.monsPieceDataType.isCarryingMana) && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)//carrying mana when both are not in the same team
                 {
                     cp.monsPieceDataType.isCarryingOppMana = true;
                     ocp.gameObject.SetActive(false);
@@ -708,7 +706,13 @@ public class Board : MonoBehaviourPunCallbacks
                         ocp.SetPosition(ocp.monsPieceDataType.resetPos);
                         faintPlayers.Add(ocp);
                         ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
-
+                        if (cp.monsPieceDataType.isCarryingBomb)
+                        {
+                            if (currentlyDraggingPiece.transform.childCount > 0)
+                                Destroy(transform.GetChild(0).gameObject);
+                        }
+                        cp.monsPieceDataType.isCarryingBomb = false;
+                       
                         DrainerGotKilledWhileCarryingLogic(ocp);
 
 
@@ -740,9 +744,8 @@ public class Board : MonoBehaviourPunCallbacks
                         if (cp.monsPieceDataType.isCarryingBomb)
                         {
                             cp.monsPieceDataType.isCarryingBomb = false;
-                            GameObject bomb = cp.transform.GetChild(0).gameObject;
-                            bomb.transform.SetParent(null);
-                            bomb.SetActive(false);
+                            if (currentlyDraggingPiece.transform.childCount > 0)
+                                Destroy(transform.GetChild(0).gameObject);
 
                         }
                         ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
@@ -776,9 +779,8 @@ public class Board : MonoBehaviourPunCallbacks
                         if (cp.monsPieceDataType.isCarryingBomb)
                         {
                             cp.monsPieceDataType.isCarryingBomb = false;
-                            GameObject bomb = cp.transform.GetChild(0).gameObject;
-                            bomb.transform.SetParent(null);
-                            bomb.SetActive(false);
+                            if (currentlyDraggingPiece.transform.childCount > 0)
+                                Destroy(transform.GetChild(0).gameObject);
                         }
                         ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
                         DrainerGotKilledWhileCarryingLogic(ocp);
@@ -971,7 +973,8 @@ public class Board : MonoBehaviourPunCallbacks
             //Mana score logic 
             ManaScoreLogic(cp);
             //UpdateRemainingMove(cp.monsPieceDataType);
-            
+
+         
             previousDraggingPiece = cp;
             itemChances = 5;
             currentlyDraggingPiece.monsPieceDataType.itemChances = itemChances;
@@ -1201,6 +1204,7 @@ public class Board : MonoBehaviourPunCallbacks
         Bomb.transform.localPosition = new Vector3(0.1f, -0.22f);
         Bomb.transform.localScale = new Vector3(0.6f, 0.6f);
         Bomb.SetActive(true);
+        selectedPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
         BombOrPortionChoicePanel.SetActive(false);
     }
 
@@ -1213,6 +1217,7 @@ public class Board : MonoBehaviourPunCallbacks
         Bomb.transform.localPosition = new Vector3(0.1f, -0.22f);
         Bomb.transform.localScale = new Vector3(0.6f, 0.6f);
         Bomb.SetActive(true);
+        selectedPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
         BombOrPortionChoicePanel.SetActive(false);
     }
 
