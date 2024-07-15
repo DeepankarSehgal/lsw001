@@ -209,9 +209,13 @@ namespace Scripts.Multiplayer
                     }
                     else
                     {
-                        if (monsPiece.monsPieceDataType.isFainted && transform.childCount > 0)
+                        if (monsPiece.monsPieceDataType.isFainted)
                         {
+                            if(transform.childCount>0)
                             Destroy(transform.GetChild(0).gameObject);
+                            gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+
+
                         }
                     }
 

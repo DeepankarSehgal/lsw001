@@ -50,12 +50,12 @@ public class Drainer : MonsPiece
                         int newY = monsPieceDataType.currentY + dy * direction;
 
 
-                        bool isNotCarryingAnything = (!monsPieceDataType.isCarryingMana && !monsPieceDataType.isCarryingSuperMana && !monsPieceDataType.isCarryingOppMana);
+                        bool isNotCarryingAnything = (!monsPieceDataType.isCarryingMana && !monsPieceDataType.isCarryingSuperMana && !monsPieceDataType.isCarryingOppMana && !monsPieceDataType.isCarryingBomb);
                         // Check if the new position is within bounds and empty
                         if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null
                                                                                                 || isNotCarryingAnything && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.mana
                                                                                                 || isNotCarryingAnything && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.supermana
-                                                                                                || CanCollectBomb(ref board, newX, newY)))
+                                                                                                || isNotCarryingAnything && CanCollectBomb(ref board, newX, newY)))
                         {
 
                             r.Add(new Vector2Int(newX, newY));

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class Board : MonoBehaviourPunCallbacks
@@ -269,7 +270,7 @@ public class Board : MonoBehaviourPunCallbacks
                     currentlyDraggingPiece.monsPieceDataType.previousPosition = previousPosition;
                     if (availableMoves != null && availableMoves.Contains(hitPosition))
                     {
-                        if (currentlyDraggingPiece.monsPieceDataType.monsPieceType != MonsPieceType.mana && itemChances <= 0)//To avoid glitch movess
+                        if (currentlyDraggingPiece.monsPieceDataType.monsPieceType != MonsPieceType.mana && itemChances <= 0 || EventSystem.current.currentSelectedGameObject!=null)//To avoid glitch movess
                         {
                             return;
                         }
@@ -1156,6 +1157,7 @@ public class Board : MonoBehaviourPunCallbacks
 
     public void SynchScore(int whiteScore, int blackScore)
     {
+        print("RPC SYNCH CALL: " + isWhiteTurn + whiteScore + blackScore);
         if (isWhiteTurn)
         {
             this.whiteScore = whiteScore;
