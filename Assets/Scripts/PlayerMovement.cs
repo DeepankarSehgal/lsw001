@@ -66,8 +66,16 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
     void Update()
     {
+       
         if (Input.GetMouseButtonDown(0))
+        {
+            if (EventSystem.current.currentSelectedGameObject != null)
+            {
+                return;
+            }
             RaycastFromMouse();
+        }
+          
 
         if (PhotonChatManager.Instance.chatField.GetComponent<TMP_InputField>().isFocused || Input.GetKeyDown(KeyCode.Return) || IsPointerOverUIElement())
         {
@@ -161,11 +169,14 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         RaycastHit hit;
 
         // Perform the raycast
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
         {
-            rayclickPosition = hit.point;
-            rayclickPosition.y = 1;
-            rayClickedToMove = true;
+          
+                rayclickPosition = hit.point;
+                rayclickPosition.y = 1;
+                rayClickedToMove = true;
+            
+      
         }
     }
 

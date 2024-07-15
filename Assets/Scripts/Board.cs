@@ -88,7 +88,7 @@ public class Board : MonoBehaviourPunCallbacks
     public MonsPiece currentManaPickedByBlackRef;
     public Sprite player1IconRef, player2IconRef;
 
-    [SerializeField] private GameObject localMoveHolder, remoteMoveHolder;
+    [SerializeField] private GameObject localMoveHolder, remoteMoveHolder, localScoreHolder, remoteScoreHolder;
     private void Awake()
     {
         instance = this;
@@ -149,6 +149,16 @@ public class Board : MonoBehaviourPunCallbacks
                 RemainingMovesHolder[1].GetComponent<RectTransform>().offsetMax = Vector2.zero;
                 RemainingMovesHolder[0].GetComponent<RectTransform>().offsetMin = Vector2.zero;
                 RemainingMovesHolder[0].GetComponent<RectTransform>().offsetMax = Vector2.zero;
+
+
+                whiteScoreText.transform.parent = remoteScoreHolder.transform;
+                blackScoreText.transform.parent = localScoreHolder.transform;
+
+                whiteScoreText.GetComponent<RectTransform>().offsetMin = Vector2.zero;
+                whiteScoreText.GetComponent<RectTransform>().offsetMax = Vector2.zero;
+                blackScoreText.GetComponent<RectTransform>().offsetMin = Vector2.zero;
+                blackScoreText.GetComponent<RectTransform>().offsetMax = Vector2.zero;
+
             }
             //onUpdatePlayerVisuals?.Invoke(true);
 
@@ -659,7 +669,7 @@ public class Board : MonoBehaviourPunCallbacks
 
 
 
-                if ((cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer || cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.monsPieceType == MonsPieceType.spirit || cp.monsPieceDataType.monsPieceType == MonsPieceType.demon || cp.monsPieceDataType.monsPieceType == MonsPieceType.angel) && ocp.monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)
+                if ((cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer || cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.monsPieceType == MonsPieceType.spirit || cp.monsPieceDataType.monsPieceType == MonsPieceType.demon || cp.monsPieceDataType.monsPieceType == MonsPieceType.angel) && !cp.monsPieceDataType.isCarryingBomb && !cp.monsPieceDataType.isCarryingPortion && ocp.monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)
                 {
                     monsPiece[x, y] = null;
                     selectedPiece = cp;
@@ -722,7 +732,7 @@ public class Board : MonoBehaviourPunCallbacks
 
                     if (ocp.monsPieceDataType.team == 0) //white team
                     {
-                        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.isCarryingBomb)
+                        if ((cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.isCarryingBomb) && ocp.monsPieceDataType.monsPieceType != MonsPieceType.bombOrPortion)
                         {
                             isMysticAttackingTheOpponentPlayer = true;
 
@@ -755,7 +765,7 @@ public class Board : MonoBehaviourPunCallbacks
                     else
                     {
                         //black team
-                        if (cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.isCarryingBomb)
+                        if ((cp.monsPieceDataType.monsPieceType == MonsPieceType.mystic || cp.monsPieceDataType.isCarryingBomb) && ocp.monsPieceDataType.monsPieceType != MonsPieceType.bombOrPortion)
                         {
                             isMysticAttackingTheOpponentPlayer = true;
 
@@ -822,6 +832,7 @@ public class Board : MonoBehaviourPunCallbacks
         }
 
 
+        //scoring logic..
 
         if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && cp.monsPieceDataType.isCarryingMana == true)
         {
@@ -914,6 +925,11 @@ public class Board : MonoBehaviourPunCallbacks
                 print("Mana move logic 1: " + cp.monsPieceDataType.monsPieceType + cp.monsPieceDataType.isHitBySpirit + manaTurn);
 
                 return true;
+            }
+            //Reset special ability on turn end.
+            if(previousDraggingPiece!=null)
+            {
+                previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed=false;
             }
             manaTurn = false;
             //if (previousDraggingPiece != null)
@@ -1198,6 +1214,14 @@ public class Board : MonoBehaviourPunCallbacks
     public void OnButtonBombClick()
     {
         choice = 1;
+        //if (selectedPiece != null)
+        //{
+        //    bool isCarryingBomb = selectedPiece.monsPieceDataType.isCarryingBomb;
+        //    if (isCarryingBomb)
+        //    {
+        //        return;
+        //    }
+        //}
         selectedPiece.monsPieceDataType.isCarryingBomb = true;
         GameObject Bomb = Instantiate(BombOrPortionObj[0]);
         Bomb.transform.SetParent(selectedPiece.transform);

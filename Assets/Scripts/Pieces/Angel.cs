@@ -37,7 +37,7 @@ public class Angel : MonsPiece
                     continue;
 
                 // Check if the new position is within bounds and empty
-                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null || board[newX, newY] != null && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion))
+                if (0 <= newX && newX < tileCount && 0 <= newY && newY < tileCount && (board[newX, newY] == null || board[newX, newY] != null && !monsPieceDataType.isCarryingBomb && !monsPieceDataType.isCarryingPortion && board[newX, newY].monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion))
                 {
                     r.Add(new Vector2Int(newX, newY));
                 }

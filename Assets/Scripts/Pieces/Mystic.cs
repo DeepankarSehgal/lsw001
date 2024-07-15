@@ -9,7 +9,7 @@ public class Mystic : MonsPiece
     public bool CanCollectBomb(ref MonsPiece[,] board, int x, int y)
     {
 
-        if (board[x, y].monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)
+        if (!monsPieceDataType.isCarryingBomb && !monsPieceDataType.isCarryingPortion && board[x, y].monsPieceDataType.monsPieceType == MonsPieceType.bombOrPortion)
         {
             return true;
         }

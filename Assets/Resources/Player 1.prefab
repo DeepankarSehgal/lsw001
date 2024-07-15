@@ -744,7 +744,7 @@ MonoBehaviour:
   otherCollided: {fileID: 0}
   groundLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 128
   graphicRaycaster: {fileID: 0}
   eventSystem: {fileID: 0}
 --- !u!114 &7096420325115875723

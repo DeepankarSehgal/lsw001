@@ -231,7 +231,7 @@ namespace Scripts.Multiplayer
                 bomb.SetActive(true);
 
             }
-            else if (monsPiece.monsPieceDataType.isCarryingBomb && transform.childCount <= 0)//potion
+            else if (monsPiece.monsPieceDataType.isCarryingPortion && transform.childCount <= 0)//potion
             {
                 GameObject potion = Instantiate(boardInstance.BombOrPortionObj[1], transform);
                 potion.transform.SetParent(transform, false);
@@ -284,9 +284,9 @@ namespace Scripts.Multiplayer
                 }
 
             }
-            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mystic)
+            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mystic || monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.angel)
             {
-                print("Mystic remote " + monsPiece.monsPieceDataType.isFainted);
+                print("Mystic  or angel remote " + monsPiece.monsPieceDataType.isFainted);
                 if (monsPiece.monsPieceDataType.isFainted)
                 {
                     gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
