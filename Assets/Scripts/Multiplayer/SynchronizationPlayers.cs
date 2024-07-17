@@ -271,6 +271,8 @@ namespace Scripts.Multiplayer
                     boardInstance.superManaRef = monsPiece;
                     //gameObject.SetActive(false);
                 }
+
+
              
                 if (monsPiece.monsPieceDataType.isCarriedByDrainer)
                 {
@@ -320,6 +322,11 @@ namespace Scripts.Multiplayer
                 }
 
             }
+
+            if (monsPiece.monsPieceDataType.isFainted)
+            {
+                gameObject.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+            }
             //if (monsPiece.monsPieceDataType != null && monsPiece.monsPieceDataType.monsPieceType == monsPiece.monsPieceDataType.monsPieceType && monsPieceDataType.team == monsPiece.monsPieceDataType.team || forceInitialize)
             //{
 
@@ -360,7 +367,11 @@ namespace Scripts.Multiplayer
 
 
             boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = monsPiece;
-
+            if (monsPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana && monsPiece.monsPieceDataType.isScored)
+            {
+                boardInstance.monsPiece[(int)monsPieceDataType.desiredPos.x, (int)monsPieceDataType.desiredPos.y] = null;
+                gameObject.SetActive(false);
+            }
             print("Mons desired pos:" + monsPieceDataType.desiredPos);
 
 

@@ -606,6 +606,8 @@ public class Board : MonoBehaviourPunCallbacks
             {
                 isHitBySpirit = false;
                 manaTurn = false;
+             
+                
                 return true;
             }
             cp.monsPieceDataType.mySpecialAbilityUsed = true;
@@ -916,9 +918,17 @@ public class Board : MonoBehaviourPunCallbacks
             {
 
                 previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
-                previousDraggingPiece.monsPieceDataType.onceAbilityUsed = false;
+                previousDraggingPiece.monsPieceDataType.onceAbilityUsed = true;
                 if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
                 {
+                    //if (previousDraggingPiece != null && previousDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.spirit)
+                    //{
+                    //    previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
+                    //    previousDraggingPiece.monsPieceDataType.itemChances--;
+                    //    itemChances--;
+                    //    SendCustomType(previousDraggingPiece.monsPieceDataType);
+                    //    print("Is hit by spirit previous update logic: " + previousDraggingPiece.monsPieceDataType.itemChances);
+                    //}
                     previousDraggingPiece = cp;
                 }
                 manaTurn = false;
@@ -1114,6 +1124,10 @@ public class Board : MonoBehaviourPunCallbacks
                 blackScore++;
                 blackScoreText.text = blackScore.ToString();
             }
+            cp.monsPieceDataType.isScored = true;
+            cp.GetComponent<SynchronizationPlayers>().UpdateScore(whiteScore, blackScore);
+            cp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
+            // Destroy(cp.gameObject);
             cp.gameObject.SetActive(false);
 
         }
@@ -1298,7 +1312,8 @@ public class Board : MonoBehaviourPunCallbacks
         else
         {
             print("Update remaing moves else part" + cp.mySpecialAbilityUsed + cp.onceAbilityUsed);
-            if (cp.onceAbilityUsed || !cp.mySpecialAbilityUsed)
+            
+            if (cp.onceAbilityUsed || !cp.mySpecialAbilityUsed || cp.monsPieceType == MonsPieceType.drainer)
             {
                 if (cp.itemChances > 5 || cp.itemChances < 0) return;
                 if (cp.team == 0)

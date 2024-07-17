@@ -121,6 +121,7 @@ MonoBehaviour:
     itemChances: 0
     isCarryingMana: 0
     isCarriedByDrainer: 0
+    isScored: 0
     previousPosition: {x: 0, y: 0}
 --- !u!114 &9200811402317331403
 MonoBehaviour:
