@@ -209,7 +209,7 @@ public class Board : MonoBehaviourPunCallbacks
                             print("Previous piece " + previousDraggingPiece);
                             tapCount += 1;
                             currentlyDraggingPiece = monsPiece[hitPosition.x, hitPosition.y];
-                            if (currentlyDraggingPiece != null && !currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().photonView.IsMine) return;
+                            if (currentlyDraggingPiece != null && (!currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().photonView.IsMine && !currentlyDraggingPiece.monsPieceDataType.isHitBySpirit)) return;
                             //print("Previous piece 1" + currentlyDraggingPiece);
                             if (itemChances > 0)
                             {
