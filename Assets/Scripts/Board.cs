@@ -612,6 +612,11 @@ public class Board : MonoBehaviourPunCallbacks
             }
             cp.monsPieceDataType.mySpecialAbilityUsed = true;
 
+            //check when other players move with the help of spirit
+
+
+
+
             if (cp.monsPieceDataType.team == ocp.monsPieceDataType.team)
             {
                 if (cp.monsPieceDataType.monsPieceType == MonsPieceType.drainer && (!cp.monsPieceDataType.isCarryingSuperMana && !cp.monsPieceDataType.isCarryingOppMana && !cp.monsPieceDataType.isCarryingMana) && ocp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
@@ -910,33 +915,48 @@ public class Board : MonoBehaviourPunCallbacks
 
 
 
+        if (cp.monsPieceDataType.isHitBySpirit)//spirit move logic
+        {
+
+            previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
+            previousDraggingPiece.monsPieceDataType.onceAbilityUsed = true;
+            if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
+            {
+                previousDraggingPiece = cp;
+            }
+            manaTurn = false;
+            cp.monsPieceDataType.isHitBySpirit = false;
+            return true;
+        }
+
+
 
         if (cp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
         {
             print("Mana move logic: " + cp.monsPieceDataType.monsPieceType + cp.monsPieceDataType.isHitBySpirit + manaTurn);
-            if (cp.monsPieceDataType.isHitBySpirit)//spirit move logic
-            {
+            //if (cp.monsPieceDataType.isHitBySpirit)//spirit move logic
+            //{
 
-                previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
-                previousDraggingPiece.monsPieceDataType.onceAbilityUsed = true;
-                if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
-                {
-                    //if (previousDraggingPiece != null && previousDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.spirit)
-                    //{
-                    //    previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
-                    //    previousDraggingPiece.monsPieceDataType.itemChances--;
-                    //    itemChances--;
-                    //    SendCustomType(previousDraggingPiece.monsPieceDataType);
-                    //    print("Is hit by spirit previous update logic: " + previousDraggingPiece.monsPieceDataType.itemChances);
-                    //}
-                    previousDraggingPiece = cp;
-                }
-                manaTurn = false;
-                cp.monsPieceDataType.isHitBySpirit = false;
-                print("Mana move logic 1: " + cp.monsPieceDataType.monsPieceType + cp.monsPieceDataType.isHitBySpirit + manaTurn);
+            //    previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
+            //    previousDraggingPiece.monsPieceDataType.onceAbilityUsed = true;
+            //    if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
+            //    {
+            //        //if (previousDraggingPiece != null && previousDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.spirit)
+            //        //{
+            //        //    previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
+            //        //    previousDraggingPiece.monsPieceDataType.itemChances--;
+            //        //    itemChances--;
+            //        //    SendCustomType(previousDraggingPiece.monsPieceDataType);
+            //        //    print("Is hit by spirit previous update logic: " + previousDraggingPiece.monsPieceDataType.itemChances);
+            //        //}
+            //        previousDraggingPiece = cp;
+            //    }
+            //    manaTurn = false;
+            //    cp.monsPieceDataType.isHitBySpirit = false;
+            //    print("Mana move logic 1: " + cp.monsPieceDataType.monsPieceType + cp.monsPieceDataType.isHitBySpirit + manaTurn);
 
-                return true;
-            }
+            //    return true;
+            //}
             //Reset special ability on turn end.
             if(previousDraggingPiece!=null)
             {
@@ -1140,7 +1160,7 @@ public class Board : MonoBehaviourPunCallbacks
             //spirit logic 
             ocp.monsPieceDataType.isHitBySpirit = true;
             cp.monsPieceDataType.onceAbilityUsed = true;
-            //cp.monsPieceDataType.mySpecialAbilityUsed = true;
+           // cp.monsPieceDataType.mySpecialAbilityUsed = true;
             return true;
         }
 
