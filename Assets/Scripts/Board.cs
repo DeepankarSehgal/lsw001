@@ -208,6 +208,7 @@ public class Board : MonoBehaviourPunCallbacks
                         {
                             print("Previous piece " + previousDraggingPiece);
                             tapCount += 1;
+
                             currentlyDraggingPiece = monsPiece[hitPosition.x, hitPosition.y];
                             if (currentlyDraggingPiece != null && (!currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().photonView.IsMine && !currentlyDraggingPiece.monsPieceDataType.isHitBySpirit)) return;
                             //print("Previous piece 1" + currentlyDraggingPiece);
@@ -274,7 +275,10 @@ public class Board : MonoBehaviourPunCallbacks
                         {
                             return;
                         }
+
+                    
                         bool validMove = MoveTo(currentlyDraggingPiece, hitPosition.x, hitPosition.y);
+                        print("Valid move  " + validMove);
                         if (!validMove)
                         {
                             if (currentlyDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.drainer && currentlyDraggingPiece.monsPieceDataType.isCarryingBomb)
@@ -316,7 +320,11 @@ public class Board : MonoBehaviourPunCallbacks
                     //    previousDraggingPiece = currentlyDraggingPiece;
                     //    tapCount = 0;
                     //}
-
+                    if (currentlyDraggingPiece != null && currentlyDraggingPiece.monsPieceDataType.isHitBySpirit)
+                    {
+                        currentlyDraggingPiece.monsPieceDataType.isHitBySpirit = false;
+                       
+                    }
                     currentlyDraggingPiece = null;
 
 
@@ -594,6 +602,7 @@ public class Board : MonoBehaviourPunCallbacks
         MonsPiece ocp = null;
         if (monsPiece[x, y] != null)
         {
+            print("Valid inside " + monsPiece[x, y]);
             Debug.Log(monsPiece[x, y].gameObject.name + "Hitted by " + cp.name);//hit pieces player name
 
             ocp = monsPiece[x, y];
@@ -606,10 +615,11 @@ public class Board : MonoBehaviourPunCallbacks
             {
                 isHitBySpirit = false;
                 manaTurn = false;
-             
-                
+
                 return true;
             }
+
+            
             cp.monsPieceDataType.mySpecialAbilityUsed = true;
 
             //check when other players move with the help of spirit
@@ -815,6 +825,8 @@ public class Board : MonoBehaviourPunCallbacks
         }
 
 
+
+
         //onUpdatePlayerState?.Invoke();
         //resetting here at last
 
@@ -919,13 +931,18 @@ public class Board : MonoBehaviourPunCallbacks
         {
 
             previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
-            previousDraggingPiece.monsPieceDataType.onceAbilityUsed = true;
+            previousDraggingPiece.monsPieceDataType.onceAbilityUsed = false;
             if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
             {
                 previousDraggingPiece = cp;
             }
             manaTurn = false;
             cp.monsPieceDataType.isHitBySpirit = false;
+
+            itemChances--;
+            previousDraggingPiece.monsPieceDataType.itemChances = itemChances;
+            //here we will update the move too for the spirit the ability part
+            SendCustomType(previousDraggingPiece.monsPieceDataType);
             return true;
         }
 
@@ -934,29 +951,6 @@ public class Board : MonoBehaviourPunCallbacks
         if (cp.monsPieceDataType.monsPieceType == MonsPieceType.mana)
         {
             print("Mana move logic: " + cp.monsPieceDataType.monsPieceType + cp.monsPieceDataType.isHitBySpirit + manaTurn);
-            //if (cp.monsPieceDataType.isHitBySpirit)//spirit move logic
-            //{
-
-            //    previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
-            //    previousDraggingPiece.monsPieceDataType.onceAbilityUsed = true;
-            //    if (cp.monsPieceDataType.team == 1 && isWhiteTurn) //teams is black but white chance is going on and not finished 
-            //    {
-            //        //if (previousDraggingPiece != null && previousDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.spirit)
-            //        //{
-            //        //    previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = true;
-            //        //    previousDraggingPiece.monsPieceDataType.itemChances--;
-            //        //    itemChances--;
-            //        //    SendCustomType(previousDraggingPiece.monsPieceDataType);
-            //        //    print("Is hit by spirit previous update logic: " + previousDraggingPiece.monsPieceDataType.itemChances);
-            //        //}
-            //        previousDraggingPiece = cp;
-            //    }
-            //    manaTurn = false;
-            //    cp.monsPieceDataType.isHitBySpirit = false;
-            //    print("Mana move logic 1: " + cp.monsPieceDataType.monsPieceType + cp.monsPieceDataType.isHitBySpirit + manaTurn);
-
-            //    return true;
-            //}
             //Reset special ability on turn end.
             if(previousDraggingPiece!=null)
             {
@@ -1025,6 +1019,7 @@ public class Board : MonoBehaviourPunCallbacks
             previousDraggingPiece = cp;
             itemChances = 5;
             currentlyDraggingPiece.monsPieceDataType.itemChances = itemChances;
+            cp.monsPieceDataType.itemChances = itemChances;
             SendCustomType(cp.monsPieceDataType);
         }
         else
@@ -1326,6 +1321,7 @@ public class Board : MonoBehaviourPunCallbacks
                 RemainingMovesHolder[0].SetActive(true);
 
             }
+            itemChances = 5;
             ResetRemainingMovesHolder();
 
         }
