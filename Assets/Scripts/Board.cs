@@ -937,7 +937,7 @@ public class Board : MonoBehaviourPunCallbacks
                 previousDraggingPiece = cp;
             }
             manaTurn = false;
-            cp.monsPieceDataType.isHitBySpirit = false;
+            //cp.monsPieceDataType.isHitBySpirit = false;
 
             itemChances--;
             previousDraggingPiece.monsPieceDataType.itemChances = itemChances;
@@ -996,7 +996,7 @@ public class Board : MonoBehaviourPunCallbacks
 
                 }
             }
-            UpdatePlayerTurns(!isWhiteTurn);
+     
             //isWhiteTurn = !isWhiteTurn;
 
             //#if !UNITY_EDITOR
@@ -1013,9 +1013,10 @@ public class Board : MonoBehaviourPunCallbacks
             }
             //Mana score logic 
             ManaScoreLogic(cp);
+            UpdatePlayerTurns(!isWhiteTurn);
             //UpdateRemainingMove(cp.monsPieceDataType);
 
-         
+
             previousDraggingPiece = cp;
             itemChances = 5;
             currentlyDraggingPiece.monsPieceDataType.itemChances = itemChances;
@@ -1307,6 +1308,7 @@ public class Board : MonoBehaviourPunCallbacks
     }
     public void UpdateRemainingMove(MonsPieceDataType cp)
     {
+        cp.isHitBySpirit = false;
         if (cp.monsPieceType == MonsPieceType.mana)
         {
             //All remaining moves over for that current Player
@@ -1321,6 +1323,7 @@ public class Board : MonoBehaviourPunCallbacks
                 RemainingMovesHolder[0].SetActive(true);
 
             }
+            if(!cp.isHitBySpirit)
             itemChances = 5;
             ResetRemainingMovesHolder();
 
