@@ -19,6 +19,7 @@ public class Board : MonoBehaviourPunCallbacks
     public GameObject[,] cells;
 
     public MonsPiece currentlyDraggingPiece;
+    public MonsPiece lastAbilityDraggingPiece;
     public MonsPiece previousDraggingPiece;
 
     public GameObject[] Whiteprefabs;
@@ -106,6 +107,7 @@ public class Board : MonoBehaviourPunCallbacks
     {
         isWhiteTurn = true;
         //CreateMonsBoard();
+        //SendCustomTypeFaintPlayers(0);
 
         //#if UNITY_EDITOR
         //        OnJoinedRoom();
@@ -212,8 +214,13 @@ public class Board : MonoBehaviourPunCallbacks
                             currentlyDraggingPiece = monsPiece[hitPosition.x, hitPosition.y];
                             if (currentlyDraggingPiece != null && (!currentlyDraggingPiece.GetComponent<SynchronizationPlayers>().photonView.IsMine && !currentlyDraggingPiece.monsPieceDataType.isHitBySpirit)) return;
                             //print("Previous piece 1" + currentlyDraggingPiece);
-                            if (itemChances > 0)
+                            if (itemChances > 0 || (!currentlyDraggingPiece.monsPieceDataType.mySpecialAbilityUsed && currentlyDraggingPiece.monsPieceDataType.monsPieceType == lastAbilityDraggingPiece.monsPieceDataType.monsPieceType))
                             {
+                                if (itemChances > 0)
+                                {
+                                    lastAbilityDraggingPiece = monsPiece[hitPosition.x, hitPosition.y];
+
+                                }
                                 if (currentlyDraggingPiece.monsPieceDataType.monsPieceType == MonsPieceType.mana)
                                 {
                                     //if(!currentlyDraggingPiece.monsPieceDataType.isHitBySpirit)
@@ -227,7 +234,6 @@ public class Board : MonoBehaviourPunCallbacks
                                 {
                                     //FYI: here are the moves for players type..
                                     availableMoves = currentlyDraggingPiece.GetAvailableMoves(ref monsPiece, boardSize);
-
                                     HighLightTiles();
                                     // spawnMovesHiglighter = false;
 
@@ -271,7 +277,7 @@ public class Board : MonoBehaviourPunCallbacks
                     currentlyDraggingPiece.monsPieceDataType.previousPosition = previousPosition;
                     if (availableMoves != null && availableMoves.Contains(hitPosition))
                     {
-                        if (currentlyDraggingPiece.monsPieceDataType.monsPieceType != MonsPieceType.mana && itemChances <= 0 || EventSystem.current.currentSelectedGameObject!=null)//To avoid glitch movess
+                        if ((currentlyDraggingPiece.monsPieceDataType.mySpecialAbilityUsed && currentlyDraggingPiece.monsPieceDataType.monsPieceType == lastAbilityDraggingPiece.monsPieceDataType.monsPieceType) && (currentlyDraggingPiece.monsPieceDataType.monsPieceType != MonsPieceType.mana && itemChances <= 0 || EventSystem.current.currentSelectedGameObject!=null) )//To avoid glitch movess
                         {
                             return;
                         }
@@ -576,9 +582,22 @@ public class Board : MonoBehaviourPunCallbacks
             {
                 highlightColor = Color.red;
             }
-            GameObject go = Instantiate(HighlightPrefab, new Vector3(availableMoves[i].x, availableMoves[i].y, 0), Quaternion.identity);
-            go.GetComponent<SpriteRenderer>().color = highlightColor;
-            go.transform.SetParent(HighlightHolder.transform, false);
+            if (itemChances <= 0 && (!currentlyDraggingPiece.monsPieceDataType.mySpecialAbilityUsed && currentlyDraggingPiece.monsPieceDataType.monsPieceType == lastAbilityDraggingPiece.monsPieceDataType.monsPieceType))
+            {
+                if (monsPiece[availableMoves[i].x, availableMoves[i].y]!=null)
+                {
+                    GameObject go = Instantiate(HighlightPrefab, new Vector3(availableMoves[i].x, availableMoves[i].y, 0), Quaternion.identity);
+                    go.GetComponent<SpriteRenderer>().color = highlightColor;
+                    go.transform.SetParent(HighlightHolder.transform, false);
+                }
+            }
+            else
+            {
+                GameObject go = Instantiate(HighlightPrefab, new Vector3(availableMoves[i].x, availableMoves[i].y, 0), Quaternion.identity);
+                go.GetComponent<SpriteRenderer>().color = highlightColor;
+                go.transform.SetParent(HighlightHolder.transform, false);
+            }
+        
         }
 
     }
@@ -609,6 +628,9 @@ public class Board : MonoBehaviourPunCallbacks
             previousDraggingPiece = cp;
             Vector2Int previousPosition1 = new Vector2Int(ocp.monsPieceDataType.currentX, ocp.monsPieceDataType.currentY);
             ocp.monsPieceDataType.previousPosition = previousPosition1;
+            ocp.monsPieceDataType.whiteFaintGaps = 0;
+            ocp.monsPieceDataType.blackFaintGaps = 0;
+            ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
             bool isHitBySpirit = SpiritPushOtherPlayersLogic(ref cp, ref ocp);
             print("Opponent piece: " + cp.name + isHitBySpirit);
             if (isHitBySpirit)
@@ -619,7 +641,7 @@ public class Board : MonoBehaviourPunCallbacks
                 return true;
             }
 
-            
+            if(!cp.monsPieceDataType.isCarryingPortion)
             cp.monsPieceDataType.mySpecialAbilityUsed = true;
 
             //check when other players move with the help of spirit
@@ -696,7 +718,8 @@ public class Board : MonoBehaviourPunCallbacks
                     ocp.gameObject.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
                     
                     ocp.gameObject.SetActive(false);
-                    
+                    cp.monsPieceDataType.mySpecialAbilityUsed = false;
+
                     //cp.monsPieceDataType.mySpecialAbilityUsed = false;
                 }
 
@@ -728,6 +751,7 @@ public class Board : MonoBehaviourPunCallbacks
                     //demon kill 
                     if (cp.monsPieceDataType.monsPieceType == MonsPieceType.demon && ocp.monsPieceDataType.currentX != ocp.monsPieceDataType.resetPos.x && ocp.monsPieceDataType.currentY != ocp.monsPieceDataType.resetPos.y)
                     {
+                        print("Demon kill the player above!" + cp.monsPieceDataType.isCarryingBomb);
                         monsPiece[(int)ocp.monsPieceDataType.resetPos.x, (int)ocp.monsPieceDataType.resetPos.y] = ocp;
                         ocp.monsPieceDataType.isFainted = true;
                         ocp.gameObject.transform.rotation = Quaternion.Euler(0, 0, -90);
@@ -736,11 +760,14 @@ public class Board : MonoBehaviourPunCallbacks
                         ocp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(true);
                         if (cp.monsPieceDataType.isCarryingBomb)
                         {
-                            if (currentlyDraggingPiece.transform.childCount > 0)
+                            if (cp.transform.childCount > 0)
                                 Destroy(transform.GetChild(0).gameObject);
+                            print("Demon kill the player inside!" + cp.transform.childCount);
+
                         }
                         cp.monsPieceDataType.isCarryingBomb = false;
-                       
+                        cp.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+
                         DrainerGotKilledWhileCarryingLogic(ocp);
 
 
@@ -955,6 +982,19 @@ public class Board : MonoBehaviourPunCallbacks
             if(previousDraggingPiece!=null)
             {
                 previousDraggingPiece.monsPieceDataType.mySpecialAbilityUsed=false;
+                previousDraggingPiece.monsPieceDataType.onceAbilityUsed=false;
+                previousDraggingPiece.monsPieceDataType.whiteFaintGaps= 0;
+                previousDraggingPiece.monsPieceDataType.blackFaintGaps= 0;
+                previousDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+            }
+            if (lastAbilityDraggingPiece != null)
+            {
+                lastAbilityDraggingPiece.monsPieceDataType.mySpecialAbilityUsed = false;
+                lastAbilityDraggingPiece.monsPieceDataType.onceAbilityUsed = false;
+                lastAbilityDraggingPiece.monsPieceDataType.whiteFaintGaps = 0;
+                lastAbilityDraggingPiece.monsPieceDataType.blackFaintGaps = 0;
+                lastAbilityDraggingPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+
             }
             manaTurn = false;
             //if (previousDraggingPiece != null)
@@ -964,6 +1004,8 @@ public class Board : MonoBehaviourPunCallbacks
             //{
             //    cp.isFainted = false;
             //}
+
+
             //reset faint players
             if (faintPlayers != null)
             {
@@ -972,27 +1014,36 @@ public class Board : MonoBehaviourPunCallbacks
                     if (isWhiteTurn && monsPiece.monsPieceDataType.team == 1)
                     {
                         monsPiece.monsPieceDataType.blackFaintGaps++;
-                        monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                        //monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
 
                     }
                     else
                     {
                         monsPiece.monsPieceDataType.whiteFaintGaps++;
-                        monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                       // monsPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
 
                     }
                     if (!isWhiteTurn && monsPiece.monsPieceDataType.team == 0 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.whiteFaintGaps > 1)//for white faint players
                     {
                         monsPiece.transform.localEulerAngles = Vector3.zero;
-                        monsPiece.monsPieceDataType.isFainted = false;
+                        //monsPiece.monsPieceDataType.isFainted = false;
+                        monsPiece.monsPieceDataType.mySpecialAbilityUsed = false;
+                        monsPiece.monsPieceDataType.onceAbilityUsed = false;
+                       // monsPiece.monsPieceDataType.whiteFaintGaps = 0;
+                        SendCustomTypeFaintPlayers(faintPlayers.IndexOf(monsPiece));
+                        //faintPlayers.Remove(monsPiece);
                     }
                     else if (isWhiteTurn && monsPiece.monsPieceDataType.team == 1 && monsPiece.monsPieceDataType.isFainted && monsPiece.monsPieceDataType.blackFaintGaps > 1)//for black faint players
                     {
                         monsPiece.transform.localEulerAngles = Vector3.zero;
-                        monsPiece.monsPieceDataType.isFainted = false;
+                        //monsPiece.monsPieceDataType.isFainted = false;
+                        monsPiece.monsPieceDataType.mySpecialAbilityUsed = false;
+                        monsPiece.monsPieceDataType.onceAbilityUsed = false;
+                       // monsPiece.monsPieceDataType.blackFaintGaps = 0;
+                        SendCustomTypeFaintPlayers(faintPlayers.IndexOf(monsPiece));
+                        //faintPlayers.Remove(monsPiece);
+
                     }
-
-
 
                 }
             }
@@ -1201,7 +1252,7 @@ public class Board : MonoBehaviourPunCallbacks
 
         GameWinLogic();
     }
-    [SerializeField] private List<MonsPiece> faintPlayers = new List<MonsPiece>();
+    [SerializeField] public List<MonsPiece> faintPlayers = new List<MonsPiece>();
 
     private void FaintOpponentPiece(MonsPiece target)
     {
@@ -1275,6 +1326,7 @@ public class Board : MonoBehaviourPunCallbacks
         Bomb.SetActive(true);
         selectedPiece.GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
         BombOrPortionChoicePanel.SetActive(false);
+        print("Potion selected!" + Bomb.name + selectedPiece.name);
     }
 
 
@@ -1331,7 +1383,11 @@ public class Board : MonoBehaviourPunCallbacks
         else
         {
             print("Update remaing moves else part" + cp.mySpecialAbilityUsed + cp.onceAbilityUsed);
-            
+            if (cp.isCarryingPortion)
+            {
+                cp.isCarryingPortion = false;
+                return;
+            }
             if (cp.onceAbilityUsed || !cp.mySpecialAbilityUsed || cp.monsPieceType == MonsPieceType.drainer)
             {
                 if (cp.itemChances > 5 || cp.itemChances < 0) return;
@@ -1381,7 +1437,11 @@ public class Board : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.RaiseEvent(0, customData, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
     }
-
+    public void SendCustomTypeFaintPlayers(int index)
+    {
+        print("Send Custom faint data!");
+        PhotonNetwork.RaiseEvent(1, index, new RaiseEventOptions { Receivers = ReceiverGroup.All }, SendOptions.SendReliable);
+    }
     public void OnEvent(EventData photonEvent)
     {
 
@@ -1393,12 +1453,17 @@ public class Board : MonoBehaviourPunCallbacks
 
             UpdateRemainingMove(receivedData);
         }
-        //if (photonEvent.Code == 1)//For updating Board respective pieces
-        //{
-        //    MonsPieceDataType receivedData = (MonsPieceDataType)photonEvent.CustomData;
-        //    Debug.Log("Received custom data: " + receivedData.team +  " PieceType: " +  receivedData.monsPieceType);
-        //    UpdatePiecePositionRelativeToBoard(receivedData);
-        //}
+        if (photonEvent.Code == 1)//For updating Faint Players and making it synched.
+        {
+            int receivedData = (int)photonEvent.CustomData;
+            Debug.Log("Received custom data in event 1: " + receivedData);
+            if (faintPlayers != null && faintPlayers.Count>0 && receivedData < faintPlayers.Count)
+            {
+                faintPlayers[receivedData].GetComponent<SynchronizationPlayers>().OnUpdatePlayerState(false);
+                faintPlayers.RemoveAt(receivedData);
+            }
+         
+        }
     }
 
     private void UpdatePiecePositionRelativeToBoard(MonsPiece piece)

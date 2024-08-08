@@ -50,7 +50,7 @@ public class MonsPieceDataType
     public int itemChances = 5;
     public bool isCarryingMana = false;
     public bool isCarriedByDrainer = false;
-    public bool isScored = false;
+    public bool isScored = false;//sjs
 
     public Vector2Int previousPosition = Vector2Int.zero;
 
@@ -124,6 +124,11 @@ public class MonsPiece : MonoBehaviour
     //public int blackFaintGaps = 0;
     //public bool mySpecialAbilityUsed = false;
     public MonsPieceDataType monsPieceDataType;
+
+    public void ResetDataAfterFaints()
+    {
+
+    }
     private void Update()
     {
         transform.position = Vector2.Lerp(transform.position, monsPieceDataType.desiredPos, Time.deltaTime*10);
