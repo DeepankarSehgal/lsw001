@@ -1,14 +1,17 @@
 using UnityEditor;
+using UnityEngine;
 
 namespace MyCompany.Build
 {
-    public static class MyBuildScript
+    
+    public class MyBuildScript:MonoBehaviour
     {
+        [MenuItem("Build/Build Windows")]
         public static void BuildGame()
         {
             string[] scenes = { "Assets/Scenes/MainMenu.unity" };
-            string buildPath = "Builds/Windows";
-            BuildPipeline.BuildPlayer(scenes, buildPath, BuildTarget.StandaloneWindows, BuildOptions.None);
+            string buildPath = "Builds/Windows.exe";
+            BuildPipeline.BuildPlayer(scenes, buildPath, BuildTarget.StandaloneWindows64, BuildOptions.None);
         }
     }
 }
