@@ -8,7 +8,7 @@ namespace MyCompany.Build
         {
             string[] scenes = { "Assets/Scenes/MainMenu.unity" };
             string buildPath = "Builds/Windows";
-            BuildPipeline.BuildPlayer(scenes, buildPath, BuildTarget.StandaloneWindows64, BuildOptions.None);
+            BuildPipeline.BuildPlayer(scenes, buildPath, BuildTarget.StandaloneWindows, BuildOptions.None);
         }
     }
 }
