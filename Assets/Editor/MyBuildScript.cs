@@ -13,5 +13,13 @@ namespace MyCompany.Build
             string buildPath = "Builds/Windows.exe";
             BuildPipeline.BuildPlayer(scenes, buildPath, BuildTarget.StandaloneWindows64, BuildOptions.None);
         }
+
+        [MenuItem("Build/Build Android")]
+        public static void BuildGameAndroid()
+        {
+            string[] scenes = { "Assets/Scenes/MainMenu.unity" };
+            string buildPath = "Builds/teamCity.apk";
+            BuildPipeline.BuildPlayer(scenes, buildPath, BuildTarget.Android, BuildOptions.None);
+        }
     }
 }
