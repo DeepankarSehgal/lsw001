@@ -13,7 +13,7 @@ namespace MyCompany.Build
             string buildPath = "Builds/Windows.exe";
             BuildPipeline.BuildPlayer(scenes, buildPath, BuildTarget.StandaloneWindows64, BuildOptions.None);
         }
-        //Build  android message check. 1ssssssssssssds
+        //Build  android message check. 1ssssssssssssdssasa
         [MenuItem("Build/Build Android")]
         public static void BuildGameAndroid()
         {
