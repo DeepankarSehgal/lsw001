@@ -3,20 +3,20 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.core:core:1.1.0'
-    configurations {
-    all {
-        exclude group: 'androidx.core', module: 'core'
-    }
+**DEPS**
 }
-**DEPS**}
 
+android{
+namespace 'com.YungAlgo.LSW'
+
+}
 android {
+   
     ndkPath "**NDKPATH**"
 
     compileSdkVersion **APIVERSION**
     buildToolsVersion '**BUILDTOOLS**'
-
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -36,6 +36,7 @@ android {
     lintOptions {
         abortOnError false
     }
+
 
     aaptOptions {
         noCompress = **BUILTIN_NOCOMPRESS** + unityStreamingAssets.tokenize(', ')
