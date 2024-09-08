@@ -6,17 +6,13 @@ dependencies {
 **DEPS**
 }
 
-android{
-namespace 'com.YungAlgo.LSW'
-
-}
 android {
    
     ndkPath "**NDKPATH**"
 
     compileSdkVersion **APIVERSION**
     buildToolsVersion '**BUILDTOOLS**'
-    
+    namespace 'com.unity3d.player'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11

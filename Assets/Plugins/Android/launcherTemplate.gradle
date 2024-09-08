@@ -3,16 +3,13 @@ apply plugin: 'com.android.application'
 dependencies {
     implementation project(':unityLibrary')
     }
-android{
-namespace 'com.YungAlgo.LSW'
 
-}
 android {
     ndkPath "**NDKPATH**"
 
     compileSdkVersion **APIVERSION**
     buildToolsVersion '**BUILDTOOLS**'
-
+    namespace 'com.YungAlgo.LSW'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
