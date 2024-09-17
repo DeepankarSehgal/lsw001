@@ -17,6 +17,11 @@ namespace MyCompany.Build
         [MenuItem("Build/Build Android")]
         public static void BuildGameAndroid()
         {
+            // Switch to Android build target
+            if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.Android)
+            {
+                EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+            }
             print("check symbols!");
             CheckSymbols();
             CheckSymbols();

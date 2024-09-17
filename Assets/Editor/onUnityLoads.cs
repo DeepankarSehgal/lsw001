@@ -11,7 +11,13 @@ public class onUnityLoads
     {
         // Your code here
         Debug.Log("Unity has loaded, and this script is running.");
+        // Switch to Android build target
+        if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.Android)
+        {
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
+        }
         AddDefineSymbol();
+
     }
 
     public static void AddDefineSymbol()
