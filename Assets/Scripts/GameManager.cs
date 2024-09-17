@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
     [SerializeField] private CharSelection CharacterSelectionPanel;
     public TMP_Text entername;
-
+    [SerializeField] private TextMeshProUGUI testingAssemblyCode;
     //Cache Player icon 
     public Image selectPlayerIcon;
 
@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
     }
     public void EnterWorld()
     {
-        if(chatField.text != string.Empty)
+        if(chatField.text != string.Empty)//ss
         {
             PhotonNetwork.NickName = chatField.text;
             PlayerPrefs.SetString("Nickname", chatField.text);
@@ -45,4 +45,19 @@ public class GameManager : MonoBehaviour
             PlayFabManager.instance.GetNicknameFromUser();
         }
     }
+    int assemblyIncrementer = 0;
+    private void Update()
+    {
+#if UNITY_ANDROID
+        Debug.Log("UNITY_ANDROID symbol is defined.");
+        if (Input.GetMouseButton(0))
+        {
+            assemblyIncrementer++;
+            testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
+        }
+#else
+ Debug.Log("UNITY_ANDROID symbol is not defined.");
+#endif
+    }
+
 }
