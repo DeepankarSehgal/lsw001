@@ -48,15 +48,26 @@ public class GameManager : MonoBehaviour
     int assemblyIncrementer = 0;
     private void Update()
     {
-#if UNITY_ANDROID
-        Debug.Log("UNITY_ANDROID symbol is defined.");
-        if (Input.GetMouseButton(0))
+        if (Application.platform == RuntimePlatform.Android) 
         {
-            assemblyIncrementer++;
-            testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
+
+            Debug.Log("UNITY_ANDROID symbol is defined.");
+            if (Input.GetMouseButton(0))
+            {
+                assemblyIncrementer++;
+                testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
+            }
         }
+        else
+        {
+            Debug.Log("UNITY_ANDROID symbol is not defined.");
+        }
+
+
+#if UNITY_ANDROID
+     
 #else
- Debug.Log("UNITY_ANDROID symbol is not defined.");
+
 #endif
     }
 
