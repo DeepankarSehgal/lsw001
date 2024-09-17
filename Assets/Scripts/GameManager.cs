@@ -1,3 +1,4 @@
+#define UNITY_ANDROID
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
@@ -48,26 +49,12 @@ public class GameManager : MonoBehaviour
     int assemblyIncrementer = 0;
     private void Update()
     {
-        if (Application.platform == RuntimePlatform.Android) 
-        {
-
-            Debug.Log("UNITY_ANDROID symbol is defined.");
-            if (Input.GetMouseButton(0))
-            {
-                assemblyIncrementer++;
-                testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
-            }
-        }
-        else
-        {
-            Debug.Log("UNITY_ANDROID symbol is not defined.");
-        }
-
-
 #if UNITY_ANDROID
-     
-#else
-
+        if (Input.GetMouseButton(0))
+        {
+            assemblyIncrementer++;
+            testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
+        }
 #endif
     }
 
