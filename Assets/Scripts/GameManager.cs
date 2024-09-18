@@ -6,7 +6,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
 public class GameManager : MonoBehaviour
 {
 
@@ -56,6 +55,13 @@ public class GameManager : MonoBehaviour
             testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
         }
 #endif
+
+
+        if (Input.GetMouseButton(0))
+        {
+            assemblyIncrementer++;
+            testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
+        }
     }
 
 }
