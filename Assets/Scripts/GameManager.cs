@@ -1,4 +1,3 @@
-#define UNITY_ANDROID
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
@@ -49,11 +48,16 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
 
-    if (Input.GetMouseButton(0))
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
             assemblyIncrementer++;
-            testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
+            testingAssemblyCode.text = "Touch is working! with assembly code " + assemblyIncrementer;
         }
+        //if (Input.GetMouseButton(0))
+        //{
+        //    assemblyIncrementer++;
+        //    testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
+        //}
     
     }
 
