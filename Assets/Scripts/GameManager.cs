@@ -53,12 +53,14 @@ public class GameManager : MonoBehaviour
             assemblyIncrementer++;
             testingAssemblyCode.text = "Touch is working! with assembly code " + assemblyIncrementer;
         }
+        assemblyIncrementer++;
+        testingAssemblyCode.text = "Touch is working! with assembly code " + assemblyIncrementer;
         //if (Input.GetMouseButton(0))
         //{
         //    assemblyIncrementer++;
         //    testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
         //}
-    
+
     }
 
 }
