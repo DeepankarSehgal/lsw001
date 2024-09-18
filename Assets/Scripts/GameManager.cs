@@ -48,20 +48,13 @@ public class GameManager : MonoBehaviour
     int assemblyIncrementer = 0;
     private void Update()
     {
-#if UNITY_ANDROID
-        if (Input.GetMouseButton(0))
+
+    if (Input.GetMouseButton(0))
         {
             assemblyIncrementer++;
             testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
         }
-#endif
-
-
-        if (Input.GetMouseButton(0))
-        {
-            assemblyIncrementer++;
-            testingAssemblyCode.text = "Touch is working! with assembly code" + assemblyIncrementer;
-        }
+    
     }
 
 }
